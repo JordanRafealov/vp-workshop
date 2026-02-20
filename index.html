@@ -786,6 +786,60 @@ select[data-field]:focus { border-color: var(--accent); outline: none; box-shado
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
 
+/* ==================== INLINE AI COACHING ==================== */
+.inline-coach {
+  margin-top: 6px; animation: inlineSlideIn 0.25s ease;
+  position: relative;
+}
+@keyframes inlineSlideIn { from { opacity:0; transform:translateY(-4px); max-height:0; } to { opacity:1; transform:translateY(0); max-height:200px; } }
+.inline-coach-card {
+  background: var(--bg-input); border: 1px solid rgba(124,58,237,0.25);
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 6px;
+  border-left: 3px solid var(--accent);
+}
+.inline-coach-card.ai-card { border-left-color: #6366f1; }
+.inline-coach-text { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
+.inline-coach-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.inline-coach-btn {
+  font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 5px;
+  cursor: pointer; border: 1px solid var(--border); background: transparent;
+  color: var(--text-secondary); transition: all 0.15s; font-family: var(--font);
+}
+.inline-coach-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+.inline-coach-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.inline-coach-btn.primary:hover { background: var(--accent-hover); }
+.inline-coach-dismiss {
+  position: absolute; top: 6px; right: 8px; background: none; border: none;
+  color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 2px;
+  opacity: 0.5; transition: opacity 0.15s;
+}
+.inline-coach-dismiss:hover { opacity: 1; }
+.inline-coach-loading {
+  display: flex; align-items: center; gap: 6px; padding: 8px 12px;
+  background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 11px; color: var(--text-muted);
+}
+.inline-coach-loading .spinner { width: 12px; height: 12px; border: 2px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+/* AI Prefill link on empty fields */
+.ai-prefill {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; color: #6366f1; cursor: pointer;
+  margin-top: 4px; padding: 2px 0; opacity: 0.7; transition: opacity 0.15s;
+  border: none; background: none; font-family: var(--font);
+}
+.ai-prefill:hover { opacity: 1; text-decoration: underline; }
+.ai-prefill .ai-sparkle { font-size: 12px; }
+.ai-prefill-preview {
+  margin-top: 6px; padding: 10px 12px; background: var(--accent-glow);
+  border: 1px dashed rgba(124,58,237,0.3); border-radius: var(--radius-sm);
+  font-size: 12.5px; color: var(--text-secondary); line-height: 1.6;
+  animation: inlineSlideIn 0.25s ease;
+}
+.ai-prefill-preview-actions { display: flex; gap: 6px; margin-top: 8px; }
+
 /* ==================== VISUAL POLISH ==================== */
 /* Smooth input focus transition */
 textarea[data-field]:focus, textarea[data-key]:focus,
@@ -2175,6 +2229,206 @@ function getResearchSuggestions() {
   return raw.map(s => s.replace(/\{industry\}/g, industry));
 }
 
+// ==================== INLINE AI COACHING ====================
+let activeInlineCoach = null;
+let inlineCoachTimer = null;
+let inlineDismissTimer = null;
+
+function showInlineCoach(fieldEl) {
+  hideInlineCoach();
+  if (!fieldEl || !fieldEl.dataset.field) return;
+  const fieldId = fieldEl.dataset.field;
+  const fg = fieldEl.closest('.field-group');
+  if (!fg) return;
+
+  collectState();
+  const value = fieldEl.value?.trim() || '';
+  const label = fg.querySelector('label')?.textContent?.trim() || fieldId;
+
+  // Rule-based inline suggestion
+  let suggestion = null;
+  let suggestionType = 'suggest';
+
+  if (!value) {
+    // Empty field - check if we can suggest based on other data
+    suggestion = getEmptyFieldHint(fieldId, label);
+    suggestionType = 'missing';
+  } else if (value.length < 20 && fieldEl.tagName === 'TEXTAREA') {
+    suggestion = 'This could use more detail. Try adding specific examples, numbers, or timeframes to make it actionable.';
+    suggestionType = 'suggest';
+  } else if (fieldEl.tagName === 'TEXTAREA' && !value.includes('\n') && value.length > 30) {
+    const multiFields = ['dc_industry','dc_companySize','wd_problems','wd_fears','wd_personalDreams','ba_steps','sp_discoveryQuestions'];
+    if (multiFields.includes(fieldId)) {
+      suggestion = 'Try listing multiple items (one per line). More entries = more messaging angles and targeting options.';
+      suggestionType = 'suggest';
+    }
+  }
+
+  // Field-specific coaching rules
+  if (value && fieldId === 'g_guarantee' && !value.toLowerCase().includes('if')) {
+    suggestion = 'Strong guarantees use "if/then" format. Try: "If [outcome] doesn\'t happen within [timeframe], then [consequence]."';
+    suggestionType = 'suggest';
+  }
+  if (value && fieldId === 'wd_problems' && !state.wd_painCost) {
+    suggestion = 'Great problems listed. Now quantify: what does this cost them in money, time, or missed opportunities per year?';
+    suggestionType = 'question';
+  }
+  if (value && fieldId === 'ba_after' && !state.ba_timeline) {
+    suggestion = 'You defined the outcome. How fast? Adding a timeline makes it 3x more compelling.';
+    suggestionType = 'question';
+  }
+  if (value && fieldId === 'dc_industry' && !state.ri_budget) {
+    suggestion = 'You know who they are. What\'s their typical budget for a service like yours?';
+    suggestionType = 'question';
+  }
+
+  if (!suggestion) return;
+
+  const coach = document.createElement('div');
+  coach.className = 'inline-coach';
+  coach.innerHTML = `
+    <div class="inline-coach-card">
+      <button class="inline-coach-dismiss" onclick="hideInlineCoach()" title="Dismiss">&times;</button>
+      <div class="inline-coach-text">${suggestion}</div>
+      <div class="inline-coach-actions">
+        ${!value ? '<button class="inline-coach-btn primary" onclick="generatePrefill(\'' + fieldId + '\')">AI Suggest</button>' : ''}
+        <button class="inline-coach-btn" onclick="hideInlineCoach()">Got it</button>
+      </div>
+    </div>`;
+  fg.appendChild(coach);
+  activeInlineCoach = coach;
+
+  // Auto-dismiss after 15 seconds
+  inlineDismissTimer = setTimeout(hideInlineCoach, 15000);
+}
+
+function hideInlineCoach() {
+  if (activeInlineCoach) { activeInlineCoach.remove(); activeInlineCoach = null; }
+  if (inlineDismissTimer) { clearTimeout(inlineDismissTimer); inlineDismissTimer = null; }
+  // Also remove any prefill previews
+  document.querySelectorAll('.ai-prefill-preview').forEach(el => el.remove());
+}
+
+function getEmptyFieldHint(fieldId, label) {
+  const hints = {
+    'dc_geography': 'Which countries or regions are your best clients in? Where do deals close fastest?',
+    'dc_industry': 'What industries do your best clients come from? Be specific - sub-sectors matter for targeting.',
+    'wd_problems': 'This is your #1 marketing message. What keeps your ideal client up at night?',
+    'wd_fears': 'Fear drives action. What are they truly afraid will happen if they don\'t solve this?',
+    'wd_painCost': 'Put a number on the pain. What does this problem cost them per year in revenue, time, or growth?',
+    'ba_before': 'Describe their current messy state. Paint the picture so they feel it.',
+    'ba_after': 'The transformation. What does life look like after working with you?',
+    'ba_frameworkName': 'Give your process a memorable name. Makes it proprietary and harder to compare.',
+    'g_guarantee': 'This closes 30% more deals. What can you guarantee about the outcome?',
+    'g_dreamOutcome': 'If everything went perfectly, what would the client achieve?',
+    'g_mechanism': 'Why can YOU deliver this and nobody else? What\'s your unfair advantage?',
+    'ri_costOfInaction': 'Your strongest urgency lever. What happens if they do nothing for 12 months?',
+    'cp_differentiator': 'In one sentence: why should they choose you over every alternative?',
+    'sp_discoveryQuestions': 'The questions you ask on a first call that surface the real pain.',
+    'lm_painLanguage': 'Use their exact words from sales calls. Mirror their language in campaigns.',
+  };
+  return hints[fieldId] || null;
+}
+
+// AI-powered pre-fill for empty fields
+async function generatePrefill(fieldId) {
+  const fieldEl = document.querySelector('[data-field="' + fieldId + '"]');
+  if (!fieldEl) return;
+  const fg = fieldEl.closest('.field-group');
+  if (!fg) return;
+
+  hideInlineCoach();
+
+  // Show loading
+  const loader = document.createElement('div');
+  loader.className = 'inline-coach';
+  loader.innerHTML = '<div class="inline-coach-loading"><div class="spinner"></div> AI is writing a suggestion...</div>';
+  fg.appendChild(loader);
+  activeInlineCoach = loader;
+
+  const label = fg.querySelector('label')?.textContent?.trim() || fieldId;
+  collectState();
+  const context = {};
+  // Gather filled fields for context
+  ['clientName','dc_industry','dc_companySize','dc_geography','dc_jobTitles','wd_problems','wd_fears','wd_painCost',
+   'ba_before','ba_after','g_guarantee','g_mechanism','bs_product'].forEach(k => { if (state[k]) context[k] = state[k]; });
+
+  if (!appsScriptUrl) { hideInlineCoach(); showToast('Apps Script not configured', 'warning'); return; }
+
+  try {
+    const resp = await fetch(appsScriptUrl, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'ai_chat',
+        question: 'Generate a suggested answer for the field "' + label + '" (field ID: ' + fieldId + ') in a B2B value proposition workshop. Based on the context provided, write exactly what the client should put in this field. Be specific to their business. Write ONLY the answer text, no explanation or preamble. Keep it concise but thorough.',
+        context: JSON.stringify(context),
+        messages: []
+      })
+    });
+    const data = await resp.json();
+    hideInlineCoach();
+
+    if (data.response) {
+      const preview = document.createElement('div');
+      preview.className = 'ai-prefill-preview';
+      preview.innerHTML = `
+        <div style="font-size:10px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">AI Suggestion</div>
+        <div>${data.response.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
+        <div class="ai-prefill-preview-actions">
+          <button class="inline-coach-btn primary" onclick="applyPrefill('${fieldId}',this)">Use This</button>
+          <button class="inline-coach-btn" onclick="this.closest('.ai-prefill-preview').remove()">Dismiss</button>
+        </div>`;
+      preview._text = data.response;
+      fg.appendChild(preview);
+    }
+  } catch(e) { hideInlineCoach(); showToast('AI suggestion failed', 'error'); }
+}
+
+function applyPrefill(fieldId, btn) {
+  const preview = btn.closest('.ai-prefill-preview');
+  const text = preview._text || preview.querySelector('div:nth-child(2)')?.textContent || '';
+  const field = document.querySelector('[data-field="' + fieldId + '"]');
+  if (field && text) {
+    field.value = text;
+    if (field.tagName === 'TEXTAREA') autoResize(field);
+    debouncedSave();
+    showToast('Applied AI suggestion', 'success');
+  }
+  preview.remove();
+  // Remove the prefill link too
+  const pfLink = field?.closest('.field-group')?.querySelector('.ai-prefill');
+  if (pfLink) pfLink.remove();
+}
+
+// Inject "AI can suggest this" links on empty fields
+function injectPrefillLinks() {
+  const prefillableFields = [
+    'dc_geography','dc_industry','dc_companySize','dc_fundingStage','dc_jobTitles','dc_personality',
+    'dc_revenue','dc_growthSignals','dc_teamStructure',
+    'wd_businessGoals','wd_personalDreams','wd_problems','wd_fears','wd_painCost',
+    'wd_suspicions','wd_enemies','wd_trends','wd_identityStory','wd_statusSignals',
+    'ri_budget','ri_costOfInaction','ri_roiExpectation',
+    'ba_before','ba_after','ba_frameworkName','ba_frameworkSteps','ba_timeline',
+    'g_guarantee','g_mechanism','g_dreamOutcome','g_riskReversal','g_valueStack',
+    'cp_differentiator',
+    'sp_qualificationCriteria','sp_discoveryQuestions','sp_closingTechniques','sp_followUpCadence',
+    'lm_painLanguage','lm_aspirationLanguage','lm_messagingDOs','lm_messagingDONTs',
+    'hs_narrative'
+  ];
+  prefillableFields.forEach(fieldId => {
+    const field = document.querySelector('[data-field="' + fieldId + '"]');
+    if (!field) return;
+    if (field.value && field.value.trim()) return; // Already has content
+    const fg = field.closest('.field-group');
+    if (!fg || fg.querySelector('.ai-prefill')) return; // Already has link
+    const link = document.createElement('button');
+    link.className = 'ai-prefill';
+    link.innerHTML = '<span class="ai-sparkle">&#10024;</span> AI can suggest this';
+    link.onclick = (e) => { e.preventDefault(); generatePrefill(fieldId); };
+    fg.appendChild(link);
+  });
+}
+
 function showResearchSuggestions() {
   const container = document.getElementById('researchSuggestions');
   if (!container) return;
@@ -2569,15 +2823,24 @@ function init() {
   setInterval(updateTimer, 1000);
   // Init Google Drive OAuth connection
   setTimeout(initDrive, 1500);
-  // Update coach on input with debounce (rule-based = 1s, AI = 3s)
+  // Inline coaching on field blur + side panel update
   let coachTimeout = null;
   document.addEventListener('focusout', e => {
     if (e.target.matches('[data-field]')) {
-      clearTimeout(coachTimeout); clearTimeout(aiSuggestTimeout);
-      coachTimeout = setTimeout(updateCoachSuggestions, 1000);
-      aiSuggestTimeout = setTimeout(requestAISuggestions, 3000);
+      clearTimeout(coachTimeout); clearTimeout(aiSuggestTimeout); clearTimeout(inlineCoachTimer);
+      // Inline coaching appears after 0.8s
+      inlineCoachTimer = setTimeout(() => showInlineCoach(e.target), 800);
+      // Side panel updates in background
+      coachTimeout = setTimeout(updateCoachSuggestions, 1500);
+      aiSuggestTimeout = setTimeout(requestAISuggestions, 4000);
     }
   });
+  // Hide inline coach when focusing a new field
+  document.addEventListener('focusin', e => {
+    if (e.target.matches('[data-field]')) hideInlineCoach();
+  });
+  // Inject AI prefill links on empty fields
+  setTimeout(injectPrefillLinks, 500);
 }
 document.addEventListener('DOMContentLoaded',init);
 </script>
