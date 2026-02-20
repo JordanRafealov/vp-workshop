@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Value Proposition Workshop</title>
+<script>
+// Load theme BEFORE paint to prevent flash
+(function(){var t=localStorage.getItem('vpTheme');if(t==='light')document.documentElement.classList.add('light');})();
+</script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
+<style>
+/* ==================== VARIABLES ==================== */
+:root {
+  --bg-page: #06060f;
+  --bg-card: #0f0f20;
+  --bg-input: #161630;
+  --bg-sidebar: #0a0a18;
+  --bg-header: rgba(8,8,18,0.85);
+  --bg-right: #0a0a18;
+  --border: #1e1e40;
+  --border-hover: #2e2e55;
+  --text-primary: #e8e8f4;
+  --text-secondary: #9898b8;
+  --text-muted: #5a5a78;
+  --accent: #7c3aed;
+  --accent-hover: #9b5de5;
+  --accent-dim: #6429c4;
+  --accent-glow: rgba(124, 58, 237, 0.12);
+  --accent-glow-strong: rgba(124, 58, 237, 0.25);
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --banner-grad: linear-gradient(135deg, #6d28d9 0%, #a855f7 50%, #7c3aed 100%);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.15);
+  --shadow-elevated: 0 8px 32px rgba(0,0,0,0.4);
+  --sidebar-w: 230px;
+  --right-w: 300px;
+  --header-h: 56px;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --transition: 0.2s ease;
+}
+
+/* ==================== LIGHT THEME ==================== */
+:root.light {
+  --bg-page: #f4f4fa;
+  --bg-card: #ffffff;
+  --bg-input: #f0f0f8;
+  --bg-sidebar: #fafaff;
+  --bg-header: rgba(250,250,255,0.9);
+  --bg-right: #fafaff;
+  --border: #e0e0ee;
+  --border-hover: #d0d0e0;
+  --text-primary: #1a1a30;
+  --text-secondary: #55556e;
+  --text-muted: #8888a0;
+  --accent-glow: rgba(124, 58, 237, 0.08);
+  --accent-glow-strong: rgba(124, 58, 237, 0.15);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-elevated: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+/* ==================== RESET ==================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 24px); }
+
+body {
+  font-family: var(--font);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 15px; line-height: 1.65;
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ==================== HEADER ==================== */
+#topBar {
+  position: fixed; top: 0; left: 0; right: 0; height: var(--header-h);
+  background: var(--bg-header); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px 0 calc(var(--sidebar-w) + 24px);
+  z-index: 100; transition: background var(--transition), border-color var(--transition);
+}
+.header-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.header-left h1 { font-size: 15px; font-weight: 600; white-space: nowrap; letter-spacing: -0.2px; }
+.client-badge {
+  font-size: 12px; font-weight: 600; background: var(--accent-glow); color: var(--accent);
+  padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+  max-width: 140px; overflow: hidden; text-overflow: ellipsis;
+}
+.header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+.save-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
+.save-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); transition: background 0.3s; }
+.save-status.saved .save-dot { background: var(--success); }
+.save-status.saving .save-dot { background: var(--warning); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+.progress-mini { display: flex; align-items: center; gap: 6px; }
+.progress-ring { width: 28px; height: 28px; }
+.progress-ring-bg { fill: none; stroke: var(--border); stroke-width: 3; }
+.progress-ring-fill { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; transform: rotate(-90deg); transform-origin: 50% 50%; }
+.progress-pct { font-size: 11px; font-weight: 700; color: var(--accent); min-width: 28px; }
+
+.hdr-btn {
+  font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 6px;
+  border: 1px solid var(--border); background: transparent; color: var(--text-secondary);
+  cursor: pointer; transition: all var(--transition); white-space: nowrap;
+}
+.hdr-btn:hover { border-color: var(--accent); color: var(--accent); }
+.hdr-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.hdr-btn.primary:hover { background: var(--accent-hover); }
+
+/* Theme toggle */
+.theme-toggle {
+  width: 36px; height: 20px; border-radius: 10px; border: none;
+  background: var(--border); cursor: pointer; position: relative;
+  transition: background var(--transition);
+}
+.theme-toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--text-secondary); transition: all var(--transition);
+}
+:root.light .theme-toggle { background: var(--accent); }
+:root.light .theme-toggle::after { left: 18px; background: #fff; }
+
+/* ==================== SIDEBAR ==================== */
+#sidebar {
+  position: fixed; top: var(--header-h); left: 0; bottom: 0;
+  width: var(--sidebar-w); background: var(--bg-sidebar);
+  border-right: 1px solid var(--border); overflow-y: auto; z-index: 90;
+  display: flex; flex-direction: column;
+  transition: background var(--transition), border-color var(--transition);
+}
+.nav-brand {
+  padding: 16px 16px 12px; border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--accent);
+}
+.nav-group { padding: 12px 10px; flex: 1; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px; border-radius: 6px;
+  color: var(--text-secondary); font-size: 12.5px; font-weight: 450;
+  cursor: pointer; transition: all 0.15s; margin-bottom: 1px;
+  text-decoration: none;
+}
+.nav-item:hover { background: var(--accent-glow); color: var(--text-primary); }
+.nav-item.active { background: var(--accent-glow-strong); color: var(--accent); font-weight: 600; }
+
+.nav-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  border: 1.5px solid var(--text-muted); flex-shrink: 0;
+  transition: all var(--transition);
+}
+.nav-dot.partial { border-color: var(--accent); background: var(--accent-glow-strong); }
+.nav-dot.complete { border-color: var(--success); background: var(--success); }
+
+.nav-footer {
+  padding: 10px; border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.nav-footer-btn {
+  display: block; width: 100%; padding: 7px; font-size: 11px; font-weight: 500;
+  text-align: center; border-radius: 6px; border: 1px solid var(--border);
+  background: transparent; color: var(--text-muted); cursor: pointer;
+  transition: all var(--transition);
+}
+.nav-footer-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ==================== RIGHT PANEL ==================== */
+#rightPanel {
+  position: fixed; top: var(--header-h); right: 0; bottom: 0;
+  width: var(--right-w); background: var(--bg-right);
+  border-left: 1px solid var(--border); overflow-y: auto; z-index: 90;
+  padding: 20px 16px;
+  transition: background var(--transition), border-color var(--transition);
+}
+.rp-header {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--accent); margin-bottom: 16px;
+}
+.rp-live-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--success);
+  animation: pulse 2s infinite;
+}
+.rp-section { margin-bottom: 16px; }
+.rp-label {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 4px;
+}
+.rp-value {
+  font-size: 13px; color: var(--text-primary); line-height: 1.5;
+  word-break: break-word;
+}
+.rp-value.empty { color: var(--text-muted); font-style: italic; }
+.rp-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+.rp-oneliner {
+  background: var(--accent-glow); border: 1px solid rgba(124,58,237,0.2);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  font-size: 13px; line-height: 1.6; color: var(--text-primary);
+  margin-bottom: 16px;
+}
+.rp-oneliner-label {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--accent); margin-bottom: 6px;
+}
+
+/* ==================== MAIN CONTENT ==================== */
+#content {
+  margin-left: var(--sidebar-w);
+  margin-right: var(--right-w);
+  padding: calc(var(--header-h) + 28px) 36px 80px 36px;
+  transition: margin var(--transition);
+}
+
+.workshop-section {
+  margin-bottom: 32px;
+  animation: fadeUp 0.3s ease;
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.section-banner {
+  background: var(--banner-grad);
+  color: #fff; font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2.5px;
+  text-align: center; padding: 14px 20px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  position: relative; overflow: hidden;
+}
+.section-banner::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  animation: shimmer 3s infinite;
+}
+@keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+
+.section-body {
+  background: var(--bg-card);
+  border: 1px solid var(--border); border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 28px;
+  box-shadow: var(--shadow-card);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.section-intro {
+  color: var(--text-secondary); font-size: 13.5px;
+  margin-bottom: 22px; line-height: 1.7;
+}
+
+/* ==================== FORM ELEMENTS ==================== */
+.field-group { margin-bottom: 20px; }
+.field-group:last-child { margin-bottom: 0; }
+.field-group > label, .field-label {
+  display: block; font-size: 13.5px; font-weight: 600;
+  color: var(--text-primary); margin-bottom: 6px;
+}
+.field-sublabel {
+  display: block; font-size: 11.5px; color: var(--text-muted);
+  margin-top: -3px; margin-bottom: 7px; font-weight: 400;
+}
+
+textarea[data-field], textarea[data-key], input[data-field], input[data-key] {
+  width: 100%; padding: 11px 14px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-primary);
+  font-family: var(--font); font-size: 14px; line-height: 1.65;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+textarea[data-field], textarea[data-key] { min-height: 64px; resize: none; overflow: hidden; }
+textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+::placeholder { color: var(--text-muted); }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* Range */
+.slider-group { margin-bottom: 14px; }
+.slider-row { display: flex; align-items: center; gap: 12px; }
+.slider-row input[type="range"] {
+  flex: 1; height: 6px; -webkit-appearance: none; appearance: none;
+  background: var(--border); border-radius: 3px; outline: none;
+}
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent); cursor: pointer; border: 3px solid var(--bg-card);
+  box-shadow: 0 0 8px rgba(124,58,237,0.4);
+}
+.slider-value { font-size: 20px; font-weight: 800; color: var(--accent); min-width: 30px; text-align: center; }
+.slider-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+/* Triggers */
+.trigger-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.trigger-card {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px; background: var(--bg-input);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  cursor: pointer; transition: all var(--transition); font-size: 12.5px; user-select: none;
+}
+.trigger-card:hover { border-color: var(--border-hover); }
+.trigger-card:has(input:checked) { border-color: var(--accent); background: var(--accent-glow); }
+.trigger-card input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; }
+
+/* ==================== DYNAMIC LISTS ==================== */
+.dynamic-list { display: flex; flex-direction: column; gap: 10px; }
+.dynamic-item {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 16px;
+  transition: border-color var(--transition);
+}
+.dynamic-item:hover { border-color: var(--border-hover); }
+.item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.item-number {
+  font-size: 10px; font-weight: 700; color: var(--accent);
+  background: var(--accent-glow); padding: 2px 8px; border-radius: 10px;
+}
+.item-remove {
+  font-size: 10px; color: var(--danger); background: none;
+  border: 1px solid transparent; padding: 2px 8px;
+  border-radius: 4px; cursor: pointer; opacity: 0.4; transition: all var(--transition);
+}
+.item-remove:hover { opacity: 1; border-color: var(--danger); }
+.item-fields { display: flex; flex-direction: column; gap: 8px; }
+.item-fields label { font-size: 11px; color: var(--text-muted); margin-bottom: -4px; }
+.item-fields textarea { min-height: 40px; font-size: 13px; }
+.item-fields input { font-size: 13px; }
+
+.add-item-btn {
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  width: 100%; padding: 9px; background: transparent;
+  border: 1px dashed var(--border); border-radius: var(--radius-sm);
+  color: var(--text-muted); font-size: 12px; cursor: pointer; transition: all var(--transition);
+}
+.add-item-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ==================== ROLE CARDS ==================== */
+.role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.role-card {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 16px;
+  transition: border-color var(--transition);
+}
+.role-card:hover { border-color: var(--border-hover); }
+.role-card h4 { font-size: 13px; font-weight: 700; color: var(--accent-hover); margin-bottom: 2px; }
+.role-card .role-desc { font-size: 10.5px; color: var(--text-muted); margin-bottom: 10px; }
+.role-card .field-group { margin-bottom: 8px; }
+.role-card label { font-size: 11px; }
+.role-card textarea { min-height: 36px; font-size: 13px; }
+.role-card input { font-size: 13px; }
+
+/* ==================== TIPS ==================== */
+.tip-box {
+  background: var(--accent-glow); border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px 14px; margin-bottom: 18px;
+}
+.tip-toggle {
+  font-size: 12px; font-weight: 600; color: var(--accent-hover);
+  cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none;
+}
+.tip-toggle::before { content: '+'; font-size: 14px; width: 16px; text-align: center; transition: transform 0.2s; }
+.tip-box.open .tip-toggle::before { content: '-'; }
+.tip-content {
+  display: none; margin-top: 8px;
+  font-size: 12.5px; color: var(--text-secondary); line-height: 1.7;
+}
+.tip-box.open .tip-content { display: block; }
+.tip-content ul { padding-left: 16px; margin-top: 4px; }
+.tip-content li { margin-bottom: 3px; }
+
+/* ==================== HERO TABLE ==================== */
+.hero-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  border-radius: var(--radius-sm); border: 1px solid var(--border); overflow: hidden;
+}
+.hero-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.hero-table tr:last-child td { border-bottom: none; }
+.hero-table td:first-child {
+  width: 38%; background: var(--accent-glow); font-size: 12.5px;
+  font-weight: 500; color: var(--text-secondary);
+}
+.hero-table textarea {
+  min-height: 32px; background: transparent; border: 1px solid transparent;
+  padding: 2px 6px; font-size: 13px;
+}
+.hero-table textarea:focus { border-color: var(--accent); background: var(--bg-input); }
+
+/* ==================== MODALS ==================== */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65); z-index: 200;
+  justify-content: center; align-items: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+  max-width: 440px; width: 90%; box-shadow: var(--shadow-elevated);
+}
+.modal h2 { font-size: 16px; margin-bottom: 12px; }
+.modal p { font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+/* ==================== BACKUP REMINDER ==================== */
+#backupReminder {
+  display: none; position: fixed; bottom: 20px; right: calc(var(--right-w) + 16px);
+  background: var(--bg-card); border: 1px solid var(--warning);
+  border-radius: var(--radius); padding: 12px 16px;
+  box-shadow: var(--shadow-elevated); z-index: 150; max-width: 280px; font-size: 12px;
+}
+#backupReminder .reminder-actions { margin-top: 8px; display: flex; gap: 6px; }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1300px) {
+  #rightPanel { display: none; }
+  #content { margin-right: 0; }
+  #backupReminder { right: 16px; }
+}
+@media (max-width: 900px) {
+  #sidebar { display: none; }
+  #topBar { padding-left: 16px; }
+  #content { margin-left: 0; padding: calc(var(--header-h) + 16px) 14px 60px; }
+  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+  .role-grid { grid-template-columns: 1fr; }
+}
+
+/* ==================== DRIVE STATUS ==================== */
+.drive-status {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--text-muted); cursor: pointer;
+  padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border);
+  background: transparent; transition: all var(--transition);
+}
+.drive-status:hover { border-color: var(--accent); color: var(--accent); }
+.drive-status.connected { border-color: var(--success); color: var(--success); }
+.drive-status .drive-icon { font-size: 13px; }
+
+/* ==================== SESSION TIMER ==================== */
+.session-timer {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  padding: 3px 8px; border-radius: 6px; background: var(--accent-glow);
+  font-variant-numeric: tabular-nums;
+}
+.session-timer .timer-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--success);
+  animation: pulse 2s infinite;
+}
+
+/* ==================== TOAST NOTIFICATIONS ==================== */
+#toastContainer {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 300; display: flex; flex-direction: column-reverse; gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 18px;
+  box-shadow: var(--shadow-elevated); font-size: 13px;
+  color: var(--text-primary); pointer-events: auto;
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+  display: flex; align-items: center; gap: 8px; white-space: nowrap;
+}
+.toast.success { border-color: var(--success); }
+.toast.success::before { content: '\2713'; color: var(--success); font-weight: 700; }
+.toast.warning { border-color: var(--warning); }
+.toast.warning::before { content: '\26A0'; }
+.toast.error { border-color: var(--danger); }
+.toast.error::before { content: '\2717'; color: var(--danger); font-weight: 700; }
+@keyframes toastIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes toastOut { from { opacity:1; } to { opacity:0; transform:translateY(-8px); } }
+
+/* ==================== COPY BUTTON ON BANNERS ==================== */
+.section-banner { display: flex; align-items: center; justify-content: center; position: relative; }
+.copy-section-btn {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: rgba(255,255,255,0.15); border: none; color: rgba(255,255,255,0.7);
+  width: 28px; height: 28px; border-radius: 6px; cursor: pointer;
+  font-size: 13px; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: all 0.2s; z-index: 2;
+}
+.section-banner:hover .copy-section-btn { opacity: 1; }
+.copy-section-btn:hover { background: rgba(255,255,255,0.25); color: #fff; }
+.copy-section-btn.copied { background: var(--success); color: #fff; opacity: 1; }
+
+/* ==================== MESSAGING MATRIX ==================== */
+.matrix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.matrix-card {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 16px; transition: border-color var(--transition);
+}
+.matrix-card:hover { border-color: var(--border-hover); }
+.matrix-card h4 {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--accent); margin-bottom: 8px;
+}
+.matrix-card p { font-size: 13px; line-height: 1.6; color: var(--text-primary); }
+.matrix-card p.empty-hint { color: var(--text-muted); font-style: italic; font-size: 12px; }
+.matrix-card.full-width { grid-column: 1 / -1; }
+.matrix-copy-all {
+  margin-top: 14px; display: flex; justify-content: center;
+}
+
+/* ==================== SECTION GLOW ON COMPLETE ==================== */
+.workshop-section.section-complete .section-banner::before {
+  content: ''; position: absolute; inset: 0; border-radius: var(--radius) var(--radius) 0 0;
+  background: linear-gradient(135deg, rgba(34,197,94,0.15), transparent);
+  pointer-events: none;
+}
+
+/* ==================== PHASE LABELS ==================== */
+.nav-phase {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.8px; color: var(--text-muted);
+  padding: 14px 10px 4px; margin-top: 4px;
+}
+.nav-phase:first-child { margin-top: 0; padding-top: 6px; }
+
+/* ==================== AI COACH TAB ==================== */
+.rp-tabs { display: flex; gap: 0; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
+.rp-tab {
+  flex: 1; padding: 8px 4px; text-align: center; font-size: 11px; font-weight: 600;
+  color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all var(--transition); text-transform: uppercase; letter-spacing: 0.8px;
+}
+.rp-tab:hover { color: var(--text-secondary); }
+.rp-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.rp-tab-content { display: none; }
+.rp-tab-content.active { display: block; }
+
+.coach-card {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px;
+  transition: border-color var(--transition);
+}
+.coach-card:hover { border-color: var(--border-hover); }
+.coach-card-label {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 4px;
+}
+.coach-card-label.suggest { color: var(--accent); }
+.coach-card-label.missing { color: var(--warning); }
+.coach-card-label.question { color: var(--success); }
+.coach-card p { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
+.coach-empty { text-align: center; padding: 24px 12px; color: var(--text-muted); font-size: 12px; }
+.coach-api-section {
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+.coach-api-btn {
+  width: 100%; padding: 8px; font-size: 11px; font-weight: 600;
+  border-radius: 6px; border: 1px solid var(--accent); background: var(--accent-glow);
+  color: var(--accent); cursor: pointer; transition: all var(--transition);
+}
+.coach-api-btn:hover { background: var(--accent); color: #fff; }
+.coach-api-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ==================== APPS SCRIPT CONFIG ==================== */
+.config-input {
+  width: 100%; padding: 10px 12px; background: var(--bg-input);
+  border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text-primary); font-size: 13px; font-family: var(--font);
+}
+.config-input:focus { outline: none; border-color: var(--accent); }
+.config-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; }
+
+/* ==================== PRINT ==================== */
+@media print {
+  #topBar, #sidebar, #rightPanel, .tip-box, .add-item-btn, .item-remove,
+  .hdr-btn, .nav-footer, #backupReminder, #toastContainer, .copy-section-btn { display: none !important; }
+  #content { margin: 0; padding: 0; max-width: 100%; }
+  body { background: #fff; color: #111; }
+  .section-banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .section-body { border: 1px solid #ccc; }
+  textarea, input { border: 1px solid #ccc !important; background: #fafafa !important; color: #111 !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== HEADER ==================== -->
+<header id="topBar">
+  <div class="header-left">
+    <h1>Value Proposition Workshop</h1>
+    <span class="client-badge" id="clientBadge">-</span>
+  </div>
+  <div class="header-right">
+    <div class="session-timer"><span class="timer-dot"></span><span id="timerDisplay">0:00</span></div>
+    <div class="save-status" id="saveStatus"><span class="save-dot"></span><span id="saveText">Ready</span></div>
+    <div class="progress-mini">
+      <svg class="progress-ring" viewBox="0 0 32 32">
+        <circle class="progress-ring-bg" cx="16" cy="16" r="13"/>
+        <circle class="progress-ring-fill" id="progressRing" cx="16" cy="16" r="13" stroke-dasharray="81.68" stroke-dashoffset="81.68"/>
+      </svg>
+      <span class="progress-pct" id="progressValue">0%</span>
+    </div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode"></button>
+    <button class="drive-status" id="driveBtn" onclick="handleDriveConnect()" title="Connect Google Drive for auto-backup"><span class="drive-icon">&#9729;</span><span id="driveLabel">Connect Drive</span></button>
+    <button class="hdr-btn primary" onclick="exportMarkdown()">Export</button>
+  </div>
+</header>
+
+<!-- ==================== SIDEBAR ==================== -->
+<nav id="sidebar">
+  <div class="nav-brand">Dopamine Digital</div>
+  <div class="nav-group">
+    <a class="nav-item" data-nav="s0" onclick="goToSection('s0')"><span class="nav-dot"></span>Setup</a>
+    <div class="nav-phase">Who - Your ICP</div>
+    <a class="nav-item" data-nav="s1" onclick="goToSection('s1')"><span class="nav-dot"></span>Dream Client Profile</a>
+    <a class="nav-item" data-nav="s2" onclick="goToSection('s2')"><span class="nav-dot"></span>Psychographic Depth</a>
+    <a class="nav-item" data-nav="sRI" onclick="goToSection('sRI')"><span class="nav-dot"></span>Revenue Intelligence</a>
+    <a class="nav-item" data-nav="sCM" onclick="goToSection('sCM')"><span class="nav-dot"></span>Channel & Media</a>
+    <a class="nav-item" data-nav="sLM" onclick="goToSection('sLM')"><span class="nav-dot"></span>Language & Messaging</a>
+    <div class="nav-phase">Why Now - Timing</div>
+    <a class="nav-item" data-nav="s3" onclick="goToSection('s3')"><span class="nav-dot"></span>Trigger Events</a>
+    <a class="nav-item" data-nav="s4" onclick="goToSection('s4')"><span class="nav-dot"></span>Buying Committee</a>
+    <a class="nav-item" data-nav="sBB" onclick="goToSection('sBB')"><span class="nav-dot"></span>Buying Behavior</a>
+    <div class="nav-phase">What - Your Solution</div>
+    <a class="nav-item" data-nav="s6" onclick="goToSection('s6')"><span class="nav-dot"></span>Case Studies</a>
+    <a class="nav-item" data-nav="s7" onclick="goToSection('s7')"><span class="nav-dot"></span>Before / After</a>
+    <a class="nav-item" data-nav="s8" onclick="goToSection('s8')"><span class="nav-dot"></span>Features & Benefits</a>
+    <a class="nav-item" data-nav="s9" onclick="goToSection('s9')"><span class="nav-dot"></span>Guarantee & Offer</a>
+    <div class="nav-phase">How - Positioning</div>
+    <a class="nav-item" data-nav="s10" onclick="goToSection('s10')"><span class="nav-dot"></span>Competitive Position</a>
+    <a class="nav-item" data-nav="sSP" onclick="goToSection('sSP')"><span class="nav-dot"></span>Sales Process</a>
+    <a class="nav-item" data-nav="s5" onclick="goToSection('s5')"><span class="nav-dot"></span>Negative Personas</a>
+    <a class="nav-item" data-nav="sER" onclick="goToSection('sER')"><span class="nav-dot"></span>Expansion & Retention</a>
+    <div class="nav-phase">Story - Narrative</div>
+    <a class="nav-item" data-nav="s11" onclick="goToSection('s11')"><span class="nav-dot"></span>Hero Story</a>
+    <a class="nav-item" data-nav="s12" onclick="goToSection('s12')"><span class="nav-dot"></span>Objections & FAQs</a>
+    <a class="nav-item" data-nav="s13" onclick="goToSection('s13')"><span class="nav-dot"></span>Messaging Matrix</a>
+  </div>
+  <div class="nav-footer">
+    <button class="nav-footer-btn" onclick="showNewWorkshop()">+ New Workshop</button>
+    <button class="nav-footer-btn" onclick="showLoadDialog()">Load Previous</button>
+    <button class="nav-footer-btn" onclick="restoreFromDrive()">Restore from Drive</button>
+    <label class="nav-footer-btn" style="cursor:pointer">Import File<input type="file" accept=".json" style="display:none" onchange="importBackup(this.files[0])"></label>
+  </div>
+</nav>
+
+<!-- ==================== RIGHT PANEL: LIVE SUMMARY ==================== -->
+<aside id="rightPanel">
+  <div class="rp-tabs">
+    <div class="rp-tab active" onclick="switchRPTab('summary')">Summary</div>
+    <div class="rp-tab" onclick="switchRPTab('coach')">AI Coach</div>
+  </div>
+  <div id="rpSummaryTab" class="rp-tab-content active">
+    <div class="rp-header"><span class="rp-live-dot"></span> Live Summary</div>
+    <div id="liveSummary"></div>
+  </div>
+  <div id="rpCoachTab" class="rp-tab-content">
+    <div class="rp-header"><span class="rp-live-dot"></span> AI Coach</div>
+    <div id="coachSuggestions"></div>
+    <div class="coach-api-section">
+      <button class="coach-api-btn" id="coachApiBtn" onclick="requestAISuggestions()" title="Get AI-powered suggestions via Claude API">Get AI Suggestions</button>
+      <p class="config-hint" style="margin-top:6px">Requires Apps Script with Anthropic API key configured.</p>
+    </div>
+  </div>
+</aside>
+
+<!-- ==================== MAIN CONTENT ==================== -->
+<main id="content">
+
+<!-- S0: SETUP -->
+<section id="s0" class="workshop-section">
+  <div class="section-banner">Workshop Setup</div>
+  <div class="section-body">
+    <div class="field-row-3">
+      <div class="field-group"><label>Client / Company</label><input type="text" data-field="clientName" placeholder="e.g. Phellos"></div>
+      <div class="field-group"><label>Date</label><input type="date" data-field="workshopDate"></div>
+      <div class="field-group"><label>Facilitator</label><input type="text" data-field="facilitator" placeholder="e.g. Jordan"></div>
+    </div>
+    <div class="field-group"><label>Attendees</label><input type="text" data-field="attendees" placeholder="Names and roles of everyone in the session"></div>
+    <div class="field-group"><label>Session Objectives</label><textarea data-field="sessionGoals" placeholder="What do we want to accomplish today?"></textarea></div>
+  </div>
+</section>
+
+<!-- S1: DREAM CLIENT PROFILE -->
+<section id="s1" class="workshop-section">
+  <div class="section-banner">Your Dream Client Profile</div>
+  <div class="section-body">
+    <p class="section-intro">Define exactly who your ideal client is. The more precise your ICP, the more effective your campaigns and the easier your sales conversations.</p>
+    <div class="tip-box"><div class="tip-toggle" onclick="this.parentElement.classList.toggle('open')">Facilitator Guide</div><div class="tip-content"><ul><li>Push for specifics. "Tech companies" is too broad. "Series A-C SaaS in fintech, 10-50 employees" is actionable.</li><li>Ask: "If you could clone your 3 best clients, who and why?"</li><li>For each answer, probe: "What makes them better than other clients in the same category?"</li></ul></div></div>
+    <div class="field-group"><label>1. Geography</label><span class="field-sublabel">Countries, regions. Note differences in buying behavior by location.</span><textarea data-field="dc_geography" placeholder="e.g. UK, USA, Europe. Note: USA closes faster..."></textarea></div>
+    <div class="field-group"><label>2. Industry / Verticals</label><span class="field-sublabel">Be specific. List sub-sectors, not just "tech."</span><textarea data-field="dc_industry" placeholder="e.g. SaaS, Fintech, hardware-enabled tech, AI/ML startups..."></textarea></div>
+    <div class="field-group"><label>3. Company Size & Revenue</label><span class="field-sublabel">Employee count range, revenue range, and the sweet spot.</span><textarea data-field="dc_companySize" placeholder="e.g. 10-200 employees. Sweet spot: 10-30. Revenue: $500K-$20M ARR..."></textarea></div>
+    <div class="field-group"><label>4. Funding Stage / Business Maturity</label><span class="field-sublabel">Bootstrapped? Seed? Series A-C?</span><textarea data-field="dc_fundingStage" placeholder="e.g. Series A-C. First or second time founders..."></textarea></div>
+    <div class="field-group"><label>5. Job Titles / Decision Makers</label><span class="field-sublabel">Who do you sell to? Who signs? Who champions internally?</span><textarea data-field="dc_jobTitles" placeholder="e.g. CEO/Founder (smaller companies), CFO/COO (larger)..."></textarea></div>
+    <div class="field-group"><label>6. Buyer Personality & Traits</label><span class="field-sublabel">What personality traits define your best clients?</span><textarea data-field="dc_personality" placeholder="e.g. Diligent, direct communicator, humble, understands finance..."></textarea></div>
+    <div class="field-group"><label>7. Tech Stack / Tools They Use</label><span class="field-sublabel">What software or platforms do your ideal clients use?</span><textarea data-field="dc_techStack" placeholder="e.g. Xero/QuickBooks, Notion, Slack, pitch decks in Canva..."></textarea></div>
+    <div class="field-group"><label>8. Revenue Range</label><span class="field-sublabel">Annual revenue range of ideal clients.</span><textarea data-field="dc_revenue" placeholder="e.g. $500K-$20M ARR. Pre-revenue if funded. Sweet spot: $1-5M."></textarea></div>
+    <div class="field-group"><label>9. Growth Signals</label><span class="field-sublabel">Observable signs they're a good fit right now.</span><textarea data-field="dc_growthSignals" placeholder="e.g. Recently hired, posting jobs, new product launch, press mentions, funding announcement..."></textarea></div>
+    <div class="field-group"><label>10. Team Structure</label><span class="field-sublabel">Do they have internal resources that overlap or complement your service?</span><textarea data-field="dc_teamStructure" placeholder="e.g. No in-house finance team, maybe a part-time bookkeeper. No FP&A capability."></textarea></div>
+    <div class="field-group"><label>11. Your Best Current Clients</label><span class="field-sublabel">3-5 clients you would clone. For each, WHY are they great?</span><textarea data-field="dc_bestClients" placeholder="e.g. Mindsite - no BS, direct. HelloKlean - clean data..."></textarea></div>
+    <div class="field-group"><label>12. Dream Clients</label><span class="field-sublabel">If you could land any company, who and why?</span><textarea data-field="dc_dreamClients" placeholder="e.g. Canva, Remarkable, UI Path..."></textarea></div>
+  </div>
+</section>
+
+<!-- S2: WHAT DRIVES THEM -->
+<section id="s2" class="workshop-section">
+  <div class="section-banner">Psychographic Depth</div>
+  <div class="section-body">
+    <p class="section-intro">Understand the emotional landscape - goals, fears, frustrations, identity, and decision-making patterns. This becomes the foundation of all messaging.</p>
+    <div class="tip-box"><div class="tip-toggle" onclick="this.parentElement.classList.toggle('open')">Facilitator Guide</div><div class="tip-content"><ul><li>Push beyond surface. "They want to grow" is not enough. Ask: "What does growth mean specifically?"</li><li>For each problem: "What happens if this goes unsolved for 6 more months?"</li><li>The #1 pain point becomes your primary marketing message.</li></ul></div></div>
+    <div class="field-group"><label>1. Business Goals & Desires</label><span class="field-sublabel">Daily, short-term, medium-term, long-term.</span><textarea data-field="wd_businessGoals" placeholder="Long-term: Exit/IPO. Short-term: Revenue growth..."></textarea></div>
+    <div class="field-group"><label>2. Personal Dreams & Desires</label><span class="field-sublabel">Beyond business - what motivates them as a person?</span><textarea data-field="wd_personalDreams" placeholder="e.g. Be respected by peers, make family proud..."></textarea></div>
+    <div class="field-group"><label>3. Problems They Face</label><span class="field-sublabel">Every problem your service solves. Be specific about symptoms.</span><textarea data-field="wd_problems" placeholder="e.g. Can't meet investor requirements, presenting wrong data..."></textarea></div>
+    <div class="field-group"><label>Pain Severity (1 = annoyance, 10 = existential)</label><div class="slider-row"><input type="range" min="1" max="10" value="7" data-field="wd_painSeverity" oninput="this.nextElementSibling.textContent=this.value; debouncedSave();"><span class="slider-value">7</span></div><div class="slider-labels"><span>Minor</span><span>Critical</span></div></div>
+    <div class="field-group"><label>Quantify the Impact</label><span class="field-sublabel">What does this cost them? Money, time, opportunities.</span><textarea data-field="wd_painCost" placeholder="e.g. Failed fundraise = 6 months wasted, $50K legal fees..."></textarea></div>
+    <div class="field-group"><label>4. Fears</label><span class="field-sublabel">Worst-case scenarios they imagine.</span><textarea data-field="wd_fears" placeholder="e.g. Not getting funding, running out of money, going back to a job..."></textarea></div>
+    <div class="field-group"><label>5. Suspicions</label><span class="field-sublabel">What are they skeptical about?</span><textarea data-field="wd_suspicions" placeholder="e.g. Remote team accessibility, pricing confusion..."></textarea></div>
+    <div class="field-group"><label>6. Enemies</label><span class="field-sublabel">Internal (habits, mindset) and external (competitors, market).</span><textarea data-field="wd_enemies" placeholder="e.g. Complacency, 'we'll figure it out' mentality..."></textarea></div>
+    <div class="field-group"><label>7. Trends & Market Environment</label><textarea data-field="wd_trends" placeholder="e.g. Tighter VC funding, higher due diligence bar..."></textarea></div>
+    <hr class="section-divider">
+    <div class="field-group"><label>8. Identity Story</label><span class="field-sublabel">How do they see themselves? What role do they play in their own narrative?</span><textarea data-field="wd_identityStory" placeholder="e.g. They see themselves as builders/innovators disrupting an industry. They identify as visionary founders, not finance people."></textarea></div>
+    <div class="field-group"><label>9. Status Signals</label><span class="field-sublabel">What signals status and success in their world?</span><textarea data-field="wd_statusSignals" placeholder="e.g. TechCrunch features, big-name investors on cap table, speaking at SaaStr, team size milestones, ARR milestones..."></textarea></div>
+    <div class="field-group"><label>10. Communities & Peer Groups</label><span class="field-sublabel">Where do they gather? Who do they trust?</span><textarea data-field="wd_communityBehavior" placeholder="e.g. YC alumni, Founders Network, LinkedIn founder groups, Slack communities, mastermind groups..."></textarea></div>
+    <div class="field-group"><label>11. Content Consumption</label><span class="field-sublabel">What content do they consume and trust?</span><textarea data-field="wd_contentPreferences" placeholder="e.g. Read TechCrunch/Sifted, listen to 20VC podcast, follow VCs on Twitter, prefer short-form video..."></textarea></div>
+    <div class="field-group"><label>12. Decision-Making Framework</label><span class="field-sublabel">How do they evaluate and decide? Logic vs. gut? Committee vs. solo?</span><textarea data-field="wd_decisionFramework" placeholder="e.g. Founder decides solo for <$5K. Seeks advisor/peer validation for bigger commitments. Trusts referrals over cold outreach."></textarea></div>
+  </div>
+</section>
+
+<!-- sRI: REVENUE INTELLIGENCE -->
+<section id="sRI" class="workshop-section">
+  <div class="section-banner">Revenue Intelligence</div>
+  <div class="section-body">
+    <p class="section-intro">Understand the financial dynamics of your buyer - budget authority, purchase patterns, and the economics of their decision.</p>
+    <div class="field-row">
+      <div class="field-group"><label>Budget Range</label><span class="field-sublabel">What do they typically spend on services like yours?</span><textarea data-field="ri_budget" placeholder="e.g. $2K-10K/month. Annual budget authority usually $20-100K."></textarea></div>
+      <div class="field-group"><label>Purchase Cycle</label><span class="field-sublabel">How long from problem awareness to purchase?</span><textarea data-field="ri_purchaseCycle" placeholder="e.g. 2-6 weeks. Faster when fundraising is imminent."></textarea></div>
+    </div>
+    <div class="field-group"><label>Procurement Process</label><span class="field-sublabel">How do they buy? PO required? Legal review? Board approval?</span><textarea data-field="ri_procurementProcess" placeholder="e.g. Founder signs directly for <$5K. Board involvement for annual commitments."></textarea></div>
+    <div class="field-group"><label>Payment Preferences</label><textarea data-field="ri_paymentPreferences" placeholder="e.g. Monthly retainer preferred. Card or wire. Net-30 for larger companies."></textarea></div>
+    <div class="field-row">
+      <div class="field-group"><label>Expected Client LTV</label><textarea data-field="ri_lifetimeValue" placeholder="e.g. $36K-72K over 12-24 month engagement"></textarea></div>
+      <div class="field-group"><label>ROI Expectations</label><textarea data-field="ri_roiExpectation" placeholder="e.g. 5-10x ROI. Expect to see first results in 30 days."></textarea></div>
+    </div>
+    <div class="field-group"><label>Cost of Inaction</label><span class="field-sublabel">What does it cost them to NOT solve this problem?</span><textarea data-field="ri_costOfInaction" placeholder="e.g. 10-30% valuation haircut = $500K-$3M lost. 6+ month fundraising delay."></textarea></div>
+    <div class="field-group"><label>Competing Budget Priorities</label><span class="field-sublabel">What else competes for the same budget?</span><textarea data-field="ri_competingBudgets" placeholder="e.g. Sales tools, hiring, product development. Finance is often last priority."></textarea></div>
+    <div class="field-group"><label>Price Sensitivity (1 = very sensitive, 10 = price is irrelevant)</label><div class="slider-row"><input type="range" min="1" max="10" value="6" data-field="ri_priceSensitivity" oninput="this.nextElementSibling.textContent=this.value; debouncedSave();"><span class="slider-value">6</span></div><div class="slider-labels"><span>Very Sensitive</span><span>Price Irrelevant</span></div></div>
+  </div>
+</section>
+
+<!-- sCM: CHANNEL & MEDIA -->
+<section id="sCM" class="workshop-section">
+  <div class="section-banner">Channel & Media Preferences</div>
+  <div class="section-body">
+    <p class="section-intro">Where does your dream client spend their time? What do they consume? This determines your outreach strategy.</p>
+    <div class="field-group"><label>Social Platforms They Use</label><span class="field-sublabel">Where are they most active? Rank by importance.</span><textarea data-field="cm_socialPlatforms" placeholder="e.g. LinkedIn (#1 - daily), Twitter/X (#2 - weekly), maybe Instagram for personal. Rarely Facebook."></textarea></div>
+    <div class="field-group"><label>Content Formats They Prefer</label><textarea data-field="cm_contentFormats" placeholder="e.g. Short LinkedIn posts, podcast interviews, case study PDFs, short video (under 3 min)..."></textarea></div>
+    <div class="field-row">
+      <div class="field-group"><label>Events & Conferences</label><textarea data-field="cm_events" placeholder="e.g. SaaStr, Web Summit, local startup meetups, VC demo days..."></textarea></div>
+      <div class="field-group"><label>Online Communities</label><textarea data-field="cm_communities" placeholder="e.g. YC founder Slack, Indie Hackers, Reddit r/startups, private Discords..."></textarea></div>
+    </div>
+    <div class="field-row">
+      <div class="field-group"><label>Publications They Read</label><textarea data-field="cm_publications" placeholder="e.g. TechCrunch, Sifted, The Information, SaaStr blog..."></textarea></div>
+      <div class="field-group"><label>Podcasts They Listen To</label><textarea data-field="cm_podcasts" placeholder="e.g. 20VC, All-In, My First Million, How I Built This..."></textarea></div>
+    </div>
+    <div class="field-group"><label>Thought Leaders They Follow</label><textarea data-field="cm_influencers" placeholder="e.g. Jason Lemkin, Tomasz Tunguz, David Sacks, specific VCs in their space..."></textarea></div>
+    <div class="field-group"><label>How They Search for Solutions</label><span class="field-sublabel">When they have this problem, where do they look?</span><textarea data-field="cm_searchBehavior" placeholder="e.g. Ask their VC, ask other founders on Slack, Google 'fractional CFO startup', check G2/Clutch..."></textarea></div>
+    <div class="field-group"><label>Referral Sources</label><span class="field-sublabel">Who refers clients to you? Where do warm leads come from?</span><textarea data-field="cm_referralSources" placeholder="e.g. VCs, law firms (startup lawyers), accelerator program managers, other founders..."></textarea></div>
+    <div class="field-group"><label>Best Outreach Channels</label><span class="field-sublabel">What channels have the highest response rate?</span><textarea data-field="cm_outreachChannels" placeholder="e.g. Warm intro from VC = 80% response. LinkedIn DM = 15%. Cold email = 5%. Podcast invite = 60%."></textarea></div>
+  </div>
+</section>
+
+<!-- sLM: LANGUAGE & MESSAGING DNA -->
+<section id="sLM" class="workshop-section">
+  <div class="section-banner">Language & Messaging DNA</div>
+  <div class="section-body">
+    <p class="section-intro">The exact words your buyer uses determine whether your message resonates or gets ignored. Map their language patterns.</p>
+    <div class="tip-box"><div class="tip-toggle" onclick="this.parentElement.classList.toggle('open')">Facilitator Guide</div><div class="tip-content"><ul><li>Mine sales call transcripts, emails, and reviews for exact phrases.</li><li>The goal is to use THEIR words, not yours.</li><li>"Mirror language" converts 2-3x better than industry jargon.</li></ul></div></div>
+    <div class="field-group"><label>Industry Jargon / Buzzwords They Use</label><span class="field-sublabel">Exact words and phrases from their world.</span><textarea data-field="lm_jargon" placeholder="e.g. 'runway', 'burn rate', 'cap table', 'data room', 'due diligence', 'Series A ready'..."></textarea></div>
+    <div class="field-group"><label>Words / Phrases to AVOID</label><span class="field-sublabel">What turns them off? What sounds salesy or generic?</span><textarea data-field="lm_wordsAvoid" placeholder="e.g. 'synergy', 'leverage', 'best-in-class'. Avoid accounting jargon they don't understand."></textarea></div>
+    <div class="field-group"><label>Communication Tone Preference</label><textarea data-field="lm_tonePreference" placeholder="e.g. Direct and no-BS. Casual but competent. They hate corporate speak. Prefer Slack/WhatsApp over formal email."></textarea></div>
+    <div class="field-group"><label>How They Describe Their Pain</label><span class="field-sublabel">Exact quotes from sales calls, reviews, or emails.</span><textarea data-field="lm_painLanguage" placeholder='e.g. "Our numbers are a mess", "We got caught with our pants down in DD", "I have no idea if we are profitable"'></textarea></div>
+    <div class="field-group"><label>How They Describe Success</label><span class="field-sublabel">What does "winning" sound like in their words?</span><textarea data-field="lm_aspirationLanguage" placeholder='e.g. "Investor-ready", "clean books", "we closed the round", "sailed through due diligence"'></textarea></div>
+    <div class="field-group"><label>How They Voice Objections</label><span class="field-sublabel">The way they push back - their actual words.</span><textarea data-field="lm_objectionLanguage" placeholder='e.g. "We already have an accountant", "Can we just do it ourselves?", "Is this really urgent right now?"'></textarea></div>
+    <div class="field-group"><label>Proof They Trust Most</label><span class="field-sublabel">What type of evidence convinces them?</span><textarea data-field="lm_socialProofType" placeholder="e.g. Case studies from similar-stage startups. Named logos they recognize. Referrals from their VC."></textarea></div>
+    <div class="field-row">
+      <div class="field-group"><label>Messaging DOs</label><textarea data-field="lm_messagingDOs" placeholder="e.g. Lead with outcomes, use numbers, reference their stage, keep it short..."></textarea></div>
+      <div class="field-group"><label>Messaging DON'Ts</label><textarea data-field="lm_messagingDONTs" placeholder="e.g. Don't lead with features, don't use finance jargon, don't compare to accountants..."></textarea></div>
+    </div>
+  </div>
+</section>
+
+<!-- S3: TRIGGER EVENTS -->
+<section id="s3" class="workshop-section">
+  <div class="section-banner">Trigger Events</div>
+  <div class="section-body">
+    <p class="section-intro">What causes a prospect to start looking NOW? Sellers who contact first after a trigger are 5x more likely to win.</p>
+    <div class="tip-box"><div class="tip-toggle" onclick="this.parentElement.classList.toggle('open')">Facilitator Guide</div><div class="tip-content"><ul><li>Ask: "Think about your last 5 clients. What event made them reach out?"</li><li>The best triggers have built-in urgency (deadline, money running out, board meeting).</li></ul></div></div>
+    <div class="field-group"><label>Check all triggers that apply:</label></div>
+    <div class="trigger-grid">
+      <label class="trigger-card"><input type="checkbox" data-field="trig_newFunding"><span>New funding round</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_preparing"><span>Preparing to fundraise</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_boardPressure"><span>Board / investor pressure</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_runway"><span>Runway getting short</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_failedAudit"><span>Failed audit / due diligence</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_newCxo"><span>New CFO / COO hire</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_rapidGrowth"><span>Rapid growth / scaling</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_regulation"><span>Regulatory requirement</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_competitor"><span>Competitor raised / acquired</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_badQuarter"><span>Bad financial results</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_leaderChange"><span>Leadership change</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_mAndA"><span>M&A activity</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_expansion"><span>International expansion</span></label>
+      <label class="trigger-card"><input type="checkbox" data-field="trig_firedProvider"><span>Fired existing provider</span></label>
+    </div>
+    <div class="field-group" style="margin-top:18px"><label>Top 3 Triggers</label><textarea data-field="trig_top3" placeholder="1. Preparing to raise and financials are a mess\n2. Investor due diligence coming, not ready\n3. Board asking for reports they can't produce"></textarea></div>
+    <div class="field-group"><label>Custom Triggers</label><textarea data-field="trig_custom" placeholder="Any other events unique to your market..."></textarea></div>
+    <hr class="section-divider">
+    <div class="field-row">
+      <div class="field-group"><label>Seasonal Patterns</label><span class="field-sublabel">When do they buy? Q1 budgets? Year-end urgency?</span><textarea data-field="trig_seasonality" placeholder="e.g. Q4 rush before year-end. Q1 new budget cycles. Fundraising peaks in Sept-Nov, Feb-Apr."></textarea></div>
+      <div class="field-group"><label>Budget Cycles</label><span class="field-sublabel">When do budgets get approved or refreshed?</span><textarea data-field="trig_budgetCycles" placeholder="e.g. Startups: post-funding. Enterprise: Q4/Q1 planning. Rolling for monthly retainers."></textarea></div>
+    </div>
+    <div class="field-group"><label>Digital Intent Signals</label><span class="field-sublabel">Online behaviors that indicate buying intent. Useful for targeted ads and outreach timing.</span><textarea data-field="trig_digitalSignals" placeholder="e.g. Googling 'fractional CFO', downloading fundraising guides, posting about hiring finance roles, visiting competitor pages, job postings for finance roles..."></textarea></div>
+    <div class="field-group"><label>Urgency Drivers</label><span class="field-sublabel">What creates time pressure to act NOW vs. later?</span><textarea data-field="trig_urgencyDrivers" placeholder="e.g. Investor deadline in 6 weeks, board meeting next month, runway under 6 months, term sheet on the table..."></textarea></div>
+    <div class="field-group"><label>Ideal Outreach Timing</label><span class="field-sublabel">When is the best moment to reach them?</span><textarea data-field="trig_idealTiming" placeholder="e.g. 2-3 months before planned fundraise. Right after funding announcement. After failed DD."></textarea></div>
+  </div>
+</section>
+
+<!-- S4: BUYING COMMITTEE -->
+<section id="s4" class="workshop-section">
+  <div class="section-banner">Buying Committee</div>
+  <div class="section-body">
+    <p class="section-intro">The average B2B deal involves 6-10 stakeholders. Map who is involved and what each person cares about.</p>
+    <div class="tip-box"><div class="tip-toggle" onclick="this.parentElement.classList.toggle('open')">Facilitator Guide</div><div class="tip-content"><ul><li>"Walk me through the last deal you closed. Who was involved?"</li><li>For each role: "What question did they ask? What almost killed the deal?"</li></ul></div></div>
+    <div class="role-grid">
+      <div class="role-card"><h4>Decision Maker</h4><div class="role-desc">Signs the contract. Final authority.</div><div class="field-group"><label>Title</label><input type="text" data-field="bc_dm_title" placeholder="e.g. CEO, Founder"></div><div class="field-group"><label>What they care about</label><textarea data-field="bc_dm_concern" placeholder="e.g. ROI, risk, speed"></textarea></div><div class="field-group"><label>Likely objection</label><textarea data-field="bc_dm_objection" placeholder="e.g. Why can't our accountant do this?"></textarea></div></div>
+      <div class="role-card"><h4>Internal Champion</h4><div class="role-desc">Your advocate. Sells when you're not in the room.</div><div class="field-group"><label>Title</label><input type="text" data-field="bc_ch_title" placeholder="e.g. Head of Finance"></div><div class="field-group"><label>What they care about</label><textarea data-field="bc_ch_concern" placeholder="e.g. Making their life easier"></textarea></div><div class="field-group"><label>Content they need</label><textarea data-field="bc_ch_content" placeholder="e.g. Case studies, one-pager"></textarea></div></div>
+      <div class="role-card"><h4>Budget Holder</h4><div class="role-desc">Controls the money.</div><div class="field-group"><label>Title</label><input type="text" data-field="bc_bh_title" placeholder="e.g. CFO, CEO"></div><div class="field-group"><label>Approval threshold</label><textarea data-field="bc_bh_threshold" placeholder="e.g. Under $5K = no approval needed"></textarea></div><div class="field-group"><label>ROI they need</label><textarea data-field="bc_bh_roi" placeholder="e.g. Save 10+ hrs/month"></textarea></div></div>
+      <div class="role-card"><h4>Technical Evaluator</h4><div class="role-desc">Assesses fit and feasibility.</div><div class="field-group"><label>Title</label><input type="text" data-field="bc_te_title" placeholder="e.g. Head of Ops"></div><div class="field-group"><label>What they assess</label><textarea data-field="bc_te_concern" placeholder="e.g. Integration, security"></textarea></div><div class="field-group"><label>Blocker</label><textarea data-field="bc_te_blocker" placeholder="e.g. Already have an accountant"></textarea></div></div>
+      <div class="role-card"><h4>End User</h4><div class="role-desc">Interacts with your service daily.</div><div class="field-group"><label>Title</label><input type="text" data-field="bc_eu_title" placeholder="e.g. Founder, Ops Manager"></div><div class="field-group"><label>Concerns</label><textarea data-field="bc_eu_concern" placeholder="e.g. How much of my time?"></textarea></div></div>
+      <div class="role-card"><h4>Potential Blocker</h4><div class="role-desc">May slow or kill the deal.</div><div class="field-group"><label>Title</label><input type="text" data-field="bc_bl_title" placeholder="e.g. Board member, legal"></div><div class="field-group"><label>Why they block</label><textarea data-field="bc_bl_concern" placeholder="e.g. Switching costs"></textarea></div><div class="field-group"><label>How to address</label><textarea data-field="bc_bl_address" placeholder="e.g. Show scope comparison"></textarea></div></div>
+    </div>
+    <div class="field-group" style="margin-top:18px"><label>Typical Buying Process</label><span class="field-sublabel">Sales cycle length, steps, who enters when.</span><textarea data-field="bc_process" placeholder="e.g. 2-4 weeks. Discovery > Proposal > Internal discussion > Signed"></textarea></div>
+    <div class="field-group"><label>External Influencers</label><span class="field-sublabel">People outside the org who influence the decision.</span><textarea data-field="bc_influenceMap" placeholder="e.g. VCs (often recommend solutions), startup lawyers, fellow founders, advisors..."></textarea></div>
+    <div class="field-group"><label>Common Deal Killers</label><span class="field-sublabel">What most often kills deals that should have closed?</span><textarea data-field="bc_dealKillers" placeholder="e.g. Founder gets busy and ghosts. Board says wait. They try DIY first. Lost urgency after fundraise delayed."></textarea></div>
+  </div>
+</section>
+
+<!-- sBB: BUYING BEHAVIOR -->
+<section id="sBB" class="workshop-section">
+  <div class="section-banner">Buying Behavior Patterns</div>
+  <div class="section-body">
+    <p class="section-intro">How your buyers evaluate, compare, and ultimately choose. Understanding this shapes your entire sales process.</p>
+    <div class="field-group"><label>Evaluation Criteria</label><span class="field-sublabel">What factors matter most when they compare options? Rank them.</span><textarea data-field="bb_evaluationCriteria" placeholder="1. Industry expertise (do they know startups?)\n2. Speed to first deliverable\n3. Price vs. value\n4. Team personality fit\n5. References from similar companies"></textarea></div>
+    <div class="field-group"><label>How They Compare Vendors</label><span class="field-sublabel">Do they create shortlists? Use RFPs? Ask for referrals?</span><textarea data-field="bb_vendorComparison" placeholder="e.g. Usually compare 2-3 options. Ask VC for recommendation. Google search + LinkedIn. Rarely formal RFP."></textarea></div>
+    <div class="field-group"><label>Proof / Evidence Required</label><span class="field-sublabel">What do they need to see before saying yes?</span><textarea data-field="bb_proofRequired" placeholder="e.g. Case study from similar-stage startup. Named reference they can call. Sample report or deliverable."></textarea></div>
+    <div class="field-group"><label>Free Trial / Pilot Expectations</label><textarea data-field="bb_trialExpectation" placeholder="e.g. Some expect a free audit or assessment first. Others just want to see a sample report."></textarea></div>
+    <div class="field-row">
+      <div class="field-group"><label>Contract Preferences</label><textarea data-field="bb_contractPreference" placeholder="e.g. Monthly preferred. 3-month minimum OK if results shown early."></textarea></div>
+      <div class="field-group"><label>Selection Timeline</label><textarea data-field="bb_selectionTimeline" placeholder="e.g. 1-2 weeks from first call to signed. Faster if fundraise is imminent."></textarea></div>
+    </div>
+    <div class="field-group"><label>Implementation Concerns</label><span class="field-sublabel">What worries them about getting started?</span><textarea data-field="bb_implementationConcerns" placeholder="e.g. Time commitment from founder (data gathering), security of financial data, onboarding disruption..."></textarea></div>
+    <div class="field-group"><label>How They Measure Your Success</label><span class="field-sublabel">What KPIs or outcomes will they judge you on?</span><textarea data-field="bb_successMetrics" placeholder="e.g. Clean data room in 30 days. Monthly reports on time. Investor feedback on financials. Successful DD."></textarea></div>
+    <div class="field-group"><label>Switching Barriers from Current Solution</label><span class="field-sublabel">What keeps them stuck with the status quo?</span><textarea data-field="bb_switchingBarriers" placeholder="e.g. Already paying accountant. Migration effort. 'Good enough' mentality. Fear of change during fundraise."></textarea></div>
+  </div>
+</section>
+
+<!-- S6: CASE STUDIES -->
+<section id="s6" class="workshop-section">
+  <div class="section-banner">Case Study Transformations</div>
+  <div class="section-body">
+    <p class="section-intro">Focus on quantifiable results, not features. These become your proof points.</p>
+    <div class="tip-box"><div class="tip-toggle" onclick="this.parentElement.classList.toggle('open')">Tips & Examples</div><div class="tip-content"><ul><li>Quantify: revenue, time saved, % improvement.</li><li>Result, not product: "Passed Series B due diligence in 2 weeks instead of 8."</li><li>Always add a timeframe.</li></ul></div></div>
+    <div class="dynamic-list" id="caseStudiesList"></div>
+    <button class="add-item-btn" onclick="addListItem('caseStudies')">+ Add Case Study</button>
+  </div>
+</section>
+
+<!-- S7: BEFORE / AFTER -->
+<section id="s7" class="workshop-section">
+  <div class="section-banner">Before / After + Process Framework</div>
+  <div class="section-body">
+    <div class="field-group"><label>BEFORE State</label><span class="field-sublabel">Paint a vivid picture of life before you help them.</span><textarea data-field="ba_before" placeholder="e.g. Unreconciled financials, no reporting standards..."></textarea></div>
+    <hr class="section-divider">
+    <div class="field-group"><label>The Steps (Your Process)</label><textarea data-field="ba_steps" placeholder="1. Get accounting records\n2. Map into financial model\n3. Founder interviews..."></textarea></div>
+    <hr class="section-divider">
+    <div class="field-group"><label>AFTER State</label><span class="field-sublabel">Life after your transformation.</span><textarea data-field="ba_after" placeholder="e.g. Fully reconciled accounts, 5-year forecast, investor-ready dashboard..."></textarea></div>
+    <hr class="section-divider">
+    <div class="field-group"><label>Framework Name</label><span class="field-sublabel">Catchy, memorable name for your process.</span><input type="text" data-field="ba_frameworkName" placeholder="e.g. The Investor-Ready Framework"></div>
+    <div class="field-group"><label>Named Steps (max 7)</label><textarea data-field="ba_frameworkSteps" placeholder="1. DISCOVER\n2. MAP\n3. CLARIFY\n4. REPORT\n5. FORECAST\n6. LAUNCH\n7. MAINTAIN"></textarea></div>
+    <div class="field-group"><label>Framework Summary</label><textarea data-field="ba_frameworkSummary" placeholder="One clear paragraph for your website or pitch..."></textarea></div>
+    <div class="field-group"><label>Timeline</label><textarea data-field="ba_timeline" placeholder="e.g. Onboarding: 4-6 weeks. First report: Week 3..."></textarea></div>
+  </div>
+</section>
+
+<!-- S8: FEATURES -->
+<section id="s8" class="workshop-section">
+  <div class="section-banner">Features & Benefits</div>
+  <div class="section-body">
+    <p class="section-intro">Each feature maps to a process step and has a clear benefit + proof point.</p>
+    <div class="dynamic-list" id="featuresList"></div>
+    <button class="add-item-btn" onclick="addListItem('features')">+ Add Feature</button>
+  </div>
+</section>
+
+<!-- S9: GUARANTEE -->
+<section id="s9" class="workshop-section">
+  <div class="section-banner">Guarantee & Offer Stack</div>
+  <div class="section-body">
+    <p class="section-intro">A strong guarantee closes 30% more deals. Combined with a value stack, this becomes irresistible.</p>
+    <div class="tip-box"><div class="tip-toggle" onclick="this.parentElement.classList.toggle('open')">Tips</div><div class="tip-content"><ul><li>Hormozi Value Equation: Value = (Dream Outcome x Likelihood) / (Time x Effort)</li><li>Increase value by: bigger outcome, higher confidence, faster results, less effort from them.</li></ul></div></div>
+    <div class="field-group"><label>Your Guarantee</label><textarea data-field="g_guarantee" placeholder="e.g. If they fail because of us, we work for free for 3 months."></textarea></div>
+    <div class="field-group"><label>Unique Mechanism</label><span class="field-sublabel">WHY can you guarantee this?</span><textarea data-field="g_mechanism" placeholder="e.g. We are all former auditors..."></textarea></div>
+    <div class="field-group"><label>Risk Reversal</label><textarea data-field="g_riskReversal" placeholder="e.g. Month-to-month, first report in 3 weeks..."></textarea></div>
+    <div class="field-group"><label>Value Stack</label><span class="field-sublabel">Everything the client gets. Core offer + bonuses.</span><textarea data-field="g_valueStack" placeholder="Core: Monthly reporting\nBonus 1: Data room setup\nBonus 2: Investor deck review..."></textarea></div>
+    <div class="field-group"><label>Dream Outcome (one sentence)</label><textarea data-field="g_dreamOutcome" placeholder="e.g. Pass due diligence with confidence and add 30% to your valuation."></textarea></div>
+  </div>
+</section>
+
+<!-- S10: COMPETITIVE -->
+<section id="s10" class="workshop-section">
+  <div class="section-banner">Competitive Positioning</div>
+  <div class="section-body">
+    <p class="section-intro">Know who you compete against and why you win. Don't forget "Do Nothing" - often your #1 competitor.</p>
+    <div class="dynamic-list" id="competitorsList"></div>
+    <button class="add-item-btn" onclick="addListItem('competitors')">+ Add Competitor</button>
+    <div class="field-group" style="margin-top:18px"><label>Your #1 Differentiator</label><textarea data-field="cp_differentiator" placeholder="e.g. The only firm with auditor backgrounds exclusively serving tech startups."></textarea></div>
+  </div>
+</section>
+
+<!-- sSP: SALES PROCESS DESIGN -->
+<section id="sSP" class="workshop-section">
+  <div class="section-banner">Sales Process Design</div>
+  <div class="section-body">
+    <p class="section-intro">Map your ideal sales process from first touch to signed contract. This becomes your playbook.</p>
+    <div class="field-group"><label>Qualification Criteria (BANT/MEDDIC)</label><span class="field-sublabel">What must be true for a lead to be qualified?</span><textarea data-field="sp_qualificationCriteria" placeholder="Budget: >$2K/mo available\nAuthority: Founder or C-suite\nNeed: Active fundraise or DD coming\nTimeline: Within 3 months"></textarea></div>
+    <div class="field-group"><label>Key Discovery Questions</label><span class="field-sublabel">The 5-7 questions you MUST ask in every discovery call.</span><textarea data-field="sp_discoveryQuestions" placeholder="1. When are you planning to raise?\n2. What does your current finance setup look like?\n3. Have you been through DD before?\n4. What happened last time?\n5. What would investor-ready look like for you?"></textarea></div>
+    <div class="field-group"><label>Demo / Presentation Strategy</label><span class="field-sublabel">What do you show them? In what order?</span><textarea data-field="sp_demoStrategy" placeholder="e.g. Show sample report first (wow factor). Then walk through case study. Then discuss their specific situation."></textarea></div>
+    <div class="field-group"><label>Proposal Structure</label><textarea data-field="sp_proposalStructure" placeholder="e.g. 1-page scope. Before/After visual. 3 pricing tiers. Timeline. Guarantee. Case study. Start date."></textarea></div>
+    <div class="field-group"><label>Closing Strategies</label><span class="field-sublabel">What works to get them to sign?</span><textarea data-field="sp_closingTechniques" placeholder="e.g. Urgency from fundraise timeline. Limited capacity (only take 3 new clients/month). Founder referral."></textarea></div>
+    <div class="field-group"><label>Follow-Up Cadence</label><span class="field-sublabel">What happens after the call if they don't sign immediately?</span><textarea data-field="sp_followUpCadence" placeholder="Day 1: Send proposal + case study\nDay 3: Follow up email\nDay 7: Value-add content\nDay 14: Check in\nDay 30: Nurture sequence"></textarea></div>
+  </div>
+</section>
+
+<!-- S5: NEGATIVE PERSONAS -->
+<section id="s5" class="workshop-section">
+  <div class="section-banner">Negative Personas</div>
+  <div class="section-body">
+    <p class="section-intro">Bad-fit clients drain resources and damage reputation. Define your disqualifiers.</p>
+    <div class="tip-box"><div class="tip-toggle" onclick="this.parentElement.classList.toggle('open')">Facilitator Guide</div><div class="tip-content"><ul><li>"Think about your worst client experiences. What did they have in common?"</li><li>If a lead matches 2+ disqualifiers, they're out.</li></ul></div></div>
+    <div class="field-group"><label>Red Flags / Disqualifiers</label><textarea data-field="np_redFlags" placeholder="e.g. No willingness to share data, expect results in 1 week..."></textarea></div>
+    <div class="field-group"><label>Past Bad Clients</label><textarea data-field="np_badClients" placeholder="e.g. Client X - refused data, blamed us for delays..."></textarea></div>
+    <div class="field-group"><label>Industries to Avoid</label><textarea data-field="np_avoidIndustries" placeholder="e.g. Pre-revenue with no funding, companies with full-time CFO..."></textarea></div>
+    <div class="field-group"><label>Warning Phrases</label><span class="field-sublabel">What do prospects say that signals bad fit?</span><textarea data-field="np_warningPhrases" placeholder='e.g. "Can you do our taxes too?", "Our last 3 providers were terrible"'></textarea></div>
+    <hr class="section-divider">
+    <div class="field-group"><label>Time Waster Signals</label><span class="field-sublabel">How do you spot tire-kickers early?</span><textarea data-field="np_timeWasters" placeholder="e.g. Won't share financials before call. Keeps rescheduling. Asks for free work first. No timeline."></textarea></div>
+    <div class="field-group"><label>Culture Mismatches</label><textarea data-field="np_cultureMismatch" placeholder="e.g. Expect 24/7 availability. Micromanage every deliverable. Won't take advice. Blame-culture."></textarea></div>
+    <div class="field-group"><label>Flags That CAN Be Overcome</label><span class="field-sublabel">Red flags that seem bad but are actually addressable.</span><textarea data-field="np_overcomableFlags" placeholder="e.g. 'Too expensive' = often just needs ROI education. 'We have an accountant' = different service."></textarea></div>
+    <div class="field-group"><label>Who to Refer Out To</label><span class="field-sublabel">When you disqualify, who do you send them to?</span><textarea data-field="np_referOutTo" placeholder="e.g. Pre-revenue → recommend bookkeeping service. Tax issues → accounting firm. Too small → DIY template."></textarea></div>
+  </div>
+</section>
+
+<!-- sER: EXPANSION & RETENTION -->
+<section id="sER" class="workshop-section">
+  <div class="section-banner">Expansion & Retention</div>
+  <div class="section-body">
+    <p class="section-intro">Your best revenue comes from existing clients. Map upsell paths, retention risks, and referral mechanics.</p>
+    <div class="field-group"><label>Natural Upsell Paths</label><span class="field-sublabel">What do clients buy after the initial engagement?</span><textarea data-field="er_upsellPaths" placeholder="e.g. Monthly retainer after one-time setup. CFO advisory. Board deck preparation. M&A support."></textarea></div>
+    <div class="field-group"><label>Cross-Sell Opportunities</label><textarea data-field="er_crossSell" placeholder="e.g. Tax advisory referral (partner). Legal intro. Pitch deck review. Investor intro service."></textarea></div>
+    <div class="field-group"><label>Expansion Signals</label><span class="field-sublabel">What indicates a client is ready for more?</span><textarea data-field="er_expansionSignals" placeholder="e.g. New funding round closed. Entering new market. Hiring spree. Revenue doubling. Board expansion."></textarea></div>
+    <div class="field-group"><label>Retention Risk Signals</label><span class="field-sublabel">Early warning signs a client might churn.</span><textarea data-field="er_retentionRisks" placeholder="e.g. Stops responding to reports. Hired full-time CFO. Missed payments. Reduced meeting frequency."></textarea></div>
+    <div class="field-row">
+      <div class="field-group"><label>Referral Mechanism</label><textarea data-field="er_referralMechanism" placeholder="e.g. Ask after first successful DD. VC introductions. Co-branded case study."></textarea></div>
+      <div class="field-group"><label>Common Churn Reasons</label><textarea data-field="er_churnReasons" placeholder="e.g. Hired internal CFO. Ran out of money. Acquired. Felt they outgrew the service."></textarea></div>
+    </div>
+    <div class="field-group"><label>Client Advocacy</label><span class="field-sublabel">How do you turn clients into advocates?</span><textarea data-field="er_advocacyProgram" placeholder="e.g. Testimonial video after successful raise. LinkedIn recommendation. Referral bonus. Case study co-creation."></textarea></div>
+    <div class="field-group"><label>Renewal Process</label><textarea data-field="er_renewalProcess" placeholder="e.g. Month-to-month auto-renew. Quarterly review meeting. Annual price review."></textarea></div>
+  </div>
+</section>
+
+<!-- S11: HERO STORY -->
+<section id="s11" class="workshop-section">
+  <div class="section-banner">Hero Story</div>
+  <div class="section-body">
+    <p class="section-intro">Your origin story makes your company relatable and memorable.</p>
+    <table class="hero-table">
+      <tr><td>The founder was an expert in the field</td><td><textarea data-field="hs_expert" placeholder="Background..."></textarea></td></tr>
+      <tr><td>Founder encountered a problem</td><td><textarea data-field="hs_problem" placeholder="What problem?"></textarea></td></tr>
+      <tr><td>Looked everywhere, couldn't find a solution</td><td><textarea data-field="hs_searched" placeholder="What did you try?"></textarea></td></tr>
+      <tr><td>Got fed up, tried to solve it alone</td><td><textarea data-field="hs_fedUp" placeholder="Breaking point?"></textarea></td></tr>
+      <tr><td>Solution worked better than imagined</td><td><textarea data-field="hs_worked" placeholder="Results?"></textarea></td></tr>
+      <tr><td>Everyone else started asking</td><td><textarea data-field="hs_asking" placeholder="Organic demand?"></textarea></td></tr>
+      <tr><td>New mission: get solution to the market</td><td><textarea data-field="hs_mission" placeholder="Mission now?"></textarea></td></tr>
+    </table>
+    <div class="field-group" style="margin-top:18px"><label>Full Narrative</label><textarea data-field="hs_narrative" placeholder="Write the complete founder story..."></textarea></div>
+  </div>
+</section>
+
+<!-- S12: OBJECTIONS & FAQs -->
+<section id="s12" class="workshop-section">
+  <div class="section-banner">Objections & FAQs</div>
+  <div class="section-body">
+    <p class="section-intro">Every objection and FAQ becomes your sales team's playbook.</p>
+    <h3 style="font-size:14px;margin-bottom:12px;color:var(--accent-hover)">Common Objections</h3>
+    <div class="dynamic-list" id="objectionsList"></div>
+    <button class="add-item-btn" onclick="addListItem('objections')">+ Add Objection</button>
+    <hr class="section-divider" style="margin:24px 0">
+    <h3 style="font-size:14px;margin-bottom:12px;color:var(--accent-hover)">Frequently Asked Questions</h3>
+    <div class="dynamic-list" id="faqsList"></div>
+    <button class="add-item-btn" onclick="addListItem('faqs')">+ Add FAQ</button>
+  </div>
+</section>
+
+<!-- S13: MESSAGING MATRIX (Auto-Generated) -->
+<section id="s13" class="workshop-section">
+  <div class="section-banner">Messaging Matrix <span style="font-size:9px;font-weight:400;letter-spacing:0.5px;opacity:0.7;margin-left:8px">AUTO-GENERATED</span></div>
+  <div class="section-body">
+    <p class="section-intro">These messages are auto-generated from your workshop answers above. Edit any field to update them in real-time. Copy any card to use in your campaigns.</p>
+    <div class="matrix-grid" id="messagingMatrix">
+      <div class="matrix-card full-width"><h4>Loading...</h4><p class="empty-hint">Fill in sections above to generate messaging</p></div>
+    </div>
+    <div class="matrix-copy-all"><button class="hdr-btn" onclick="copyAllMessaging()">Copy All Messaging</button></div>
+  </div>
+</section>
+
+</main>
+
+<!-- ==================== MODALS ==================== -->
+<div class="modal-overlay" id="newWorkshopModal"><div class="modal"><h2>Start New Workshop</h2><p>Saves current data and creates a blank workshop.</p><div class="field-group"><label>New Client Name</label><input type="text" id="newClientInput" placeholder="e.g. Acme Corp" style="background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);padding:10px 12px;border-radius:6px;width:100%;font-size:14px;"></div><div class="modal-actions"><button class="hdr-btn" onclick="closeModal('newWorkshopModal')">Cancel</button><button class="hdr-btn primary" onclick="createNewWorkshop()">Create</button></div></div></div>
+<div class="modal-overlay" id="loadModal"><div class="modal"><h2>Load Previous Workshop</h2><div id="savedClientsList" style="margin-bottom:14px"></div><div class="modal-actions"><button class="hdr-btn" onclick="closeModal('loadModal')">Cancel</button></div></div></div>
+
+<div id="backupReminder"><strong style="color:var(--warning)">Backup Reminder</strong><p style="margin-top:4px">15+ minutes since last backup.</p><div class="reminder-actions"><button class="hdr-btn primary" onclick="backupToDrive();this.parentElement.parentElement.style.display='none'">Backup to Drive</button><button class="hdr-btn" onclick="this.parentElement.parentElement.style.display='none'">Dismiss</button></div></div>
+
+<div id="toastContainer"></div>
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+const SAVE_DEBOUNCE = 300;
+const SNAPSHOT_INTERVAL = 60000;
+const BACKUP_REMINDER_INTERVAL = 900000;
+const DB_NAME = 'vpWorkshop';
+const DB_VERSION = 1;
+const STORE_NAME = 'snapshots';
+
+let state = {};
+let saveTimeout = null;
+let currentClientKey = '';
+
+// ==================== DYNAMIC LIST DEFS ====================
+const listDefs = {
+  caseStudies: { container: 'caseStudiesList', fields: [
+    { key:'name', label:'Client Name', type:'input', placeholder:'e.g. Mobile Commons' },
+    { key:'before', label:'Before', type:'textarea', placeholder:'Their situation before you' },
+    { key:'after', label:'After (transformation)', type:'textarea', placeholder:'Result achieved. Include metrics + timeframe.' },
+    { key:'metric', label:'Key Metric', type:'input', placeholder:'e.g. Raised $5M in 4 weeks' },
+    { key:'notes', label:'Notes', type:'textarea', placeholder:'Testimonial likelihood, relationship...' }
+  ], items: [] },
+  features: { container: 'featuresList', fields: [
+    { key:'step', label:'Process Step', type:'input', placeholder:'e.g. Step 2: MAP' },
+    { key:'feature', label:'Feature', type:'input', placeholder:'e.g. Historic financial model' },
+    { key:'benefit', label:'Benefit', type:'textarea', placeholder:'Why the client cares...' },
+    { key:'proof', label:'Proof Point', type:'input', placeholder:'e.g. Used by 40+ startups' }
+  ], items: [] },
+  competitors: { container: 'competitorsList', fields: [
+    { key:'name', label:'Competitor', type:'input', placeholder:'e.g. Do Nothing / Generic Accountant' },
+    { key:'positioning', label:'Their positioning', type:'textarea', placeholder:'What do they claim?' },
+    { key:'advantage', label:'Your advantage', type:'textarea', placeholder:'Why clients choose you instead' },
+    { key:'loseWhen', label:'When you lose', type:'textarea', placeholder:'Situations where you lose' }
+  ], items: [] },
+  objections: { container: 'objectionsList', fields: [
+    { key:'objection', label:'Objection', type:'input', placeholder:'e.g. I have an accountant already' },
+    { key:'response', label:'Response', type:'textarea', placeholder:'Acknowledge, reframe, prove, ask.' }
+  ], items: [] },
+  faqs: { container: 'faqsList', fields: [
+    { key:'question', label:'Question', type:'input', placeholder:'What do prospects ask?' },
+    { key:'answer', label:'Answer', type:'textarea', placeholder:'Your best answer...' }
+  ], items: [] }
+};
+
+// ==================== PHELLOS DEFAULTS ====================
+const PHELLOS_DEFAULTS = {
+  clientName:'Phellos', workshopDate:'2026-02-20', facilitator:'Jordan', attendees:'', sessionGoals:'',
+  dc_geography:'UK, EUROPE, USA\n\nThe USA closes quicker, understands finances more and the importance.\nUK harder to sell but they ask less questions',
+  dc_industry:'SaaS, Fintech or any other subsector of tech.\nTech Logistics, gaming, QR menus, fintech, Turkish version of Crunchbase.\nAds business, operational safety tech business, health care tech, banks, AI tech.\n\nEnablement tech, how can we make it better with tech?\nTech services, software dev house, web design etc.\n\nAI tech, pure tech with another layer of AI on top.\n\nHardware enabled tech like "remarkable" as they have the hardest time with finances.\n\nSafety tech businesses.',
+  dc_companySize:'As little as 5-10 people all the way up to 200-500.\n\n10-30 employees in the sweet spot.\nTypical startup',
+  dc_fundingStage:'First time or second time founders who are either from the industry they are trying to change or people who do not want to deal with finance even if they have the experience.\n\nHow many years experience? 3-7 years',
+  dc_jobTitles:'Typically we work with the founders for smaller companies.\nCEO and founder/ CEO/ Co-Founder\n\nBut with larger ones it is not uncommon to work with CFOs or COOs though not typical.',
+  dc_personality:'Mostly Men. Men are more pre-emptive.\n\nThe ideal thing I\'m looking for is, diligent founder, someone who\'s always on it, understands the importance of finance, and a cohesive working environment. A high degree of energy, and humility.',
+  dc_revenue:'', dc_growthSignals:'', dc_teamStructure:'',
+  dc_techStack:'', dc_bestClients:'Mindsite - Because they\'re a no BS team, can be very direct.\n\nHelloKlean - Shower head that softens water\n\nBasicblock - I like working with them because\n\nThey all have clean operational data, and less complicated businesses',
+  dc_dreamClients:'Canva would be a dream.\nUI Path\nRemarkable',
+  wd_businessGoals:'Always "exit/IPO" long term\nMedium term goal is some form of profitability\nShort term goal is always "revenue growth"\n\nDaily goals are to focus on what they are good at doing (product, doing deals etc)\nReduce all the friction.',
+  wd_personalDreams:'They all want to be rich, live like Mark Zuckerberg.\nThey want to be known in their industry for what they do.\nThey want to be respected by their peers.\nGet out of their peers/family/friends shadows.\nMake their parents proud.\nMake their family proud.\nChildhood dreams and aspirations.\nReach your full potential.',
+  wd_problems:'Cant meet investor requirements.\nEverything they are presenting is wrong.\nThey know they have a problem, they just don\'t know the depth.\nThe investor requirements come through and they can\'t solve for it.\nReporting issues, they don\'t know how to report to investors.\nLow knowledge of how to run a business, bargain, question service providers.\nThey don\'t know how to run a business.\nThey do their job well but they don\'t have someone who\'s in control of their finances who understands their numbers.',
+  wd_painSeverity:'8', wd_painCost:'', wd_fears:'Not getting funding, running out of money, going back to having a "job". Feeling like a loser and a failure and losing all respect for yourself and others around you. First time founder failing and then never being able to get funding again. They think this is their only shot.',
+  wd_suspicions:'Accessibility, it\'s a remote team. Pricing is rarely an issue, but sometimes they don\'t understand what we do, and then it might be.',
+  wd_enemies:'Complacency', wd_trends:'',
+  wd_identityStory:'', wd_statusSignals:'', wd_communityBehavior:'', wd_contentPreferences:'', wd_decisionFramework:'',
+  ri_budget:'', ri_purchaseCycle:'', ri_procurementProcess:'', ri_paymentPreferences:'', ri_lifetimeValue:'', ri_roiExpectation:'', ri_costOfInaction:'', ri_competingBudgets:'', ri_priceSensitivity:'6',
+  cm_socialPlatforms:'', cm_contentFormats:'', cm_events:'', cm_communities:'', cm_publications:'', cm_podcasts:'', cm_influencers:'', cm_searchBehavior:'', cm_referralSources:'', cm_outreachChannels:'',
+  lm_jargon:'', lm_wordsAvoid:'', lm_tonePreference:'', lm_painLanguage:'', lm_aspirationLanguage:'', lm_objectionLanguage:'', lm_socialProofType:'', lm_messagingDOs:'', lm_messagingDONTs:'',
+  trig_preparing:true, trig_boardPressure:true, trig_failedAudit:true, trig_runway:true, trig_newFunding:true,
+  trig_top3:'', trig_custom:'', trig_seasonality:'', trig_budgetCycles:'', trig_digitalSignals:'', trig_urgencyDrivers:'', trig_idealTiming:'',
+  bc_influenceMap:'', bc_dealKillers:'',
+  bb_evaluationCriteria:'', bb_vendorComparison:'', bb_proofRequired:'', bb_trialExpectation:'', bb_contractPreference:'', bb_selectionTimeline:'', bb_implementationConcerns:'', bb_successMetrics:'', bb_switchingBarriers:'',
+  ba_before:'The before state is unreconciled financials, poorly constructed accounting practices, limited view on financial performance, no sophisticated financial model. No reporting standards. As a result poor financial metrics, no narrative around financials. No data room',
+  ba_steps:'1. Get the accounting records for the last 2 years.\n2. We map the accounting records and ingest it into the historic financial model.\n3. We ask the founder the questions about revenue, expenses, or anomalies, and understand their business model. (2-3 meetings)\n4. Well crunch out the first report, for them to review\n5. Move into the forecast (2-3 meetings), when they want to raise etc\n6. Data room set up, keeping the company sales ready at all times.\n7. Post onboarding\n8. Every month after that closes, we ingest that month\'s financials and review and ask questions, update forecasts and provide a report.',
+  ba_after:'The after state is fully reconciled management accounts, full 5 year forecast, IPEV, monthly and quarterly reporting, metric sets, data room, fully reconciled reporting and dashboard. As a result they are able to raise funds from investors.\n\nNote we do not touch tax.',
+  ba_frameworkName:'', ba_frameworkSteps:'', ba_frameworkSummary:'', ba_timeline:'',
+  g_guarantee:'We have never failed a financial due diligence process ever.\nYour Due diligence process will run smoothly and quickly.\nIf they fail because of me will work for them for free for 3 months.\n\nWe will add 30% extra valuation to your company or XYZ\nWe will prevent the loss of 30% valuation of your company.',
+  g_mechanism:'We are all auditors so we KNOW what they\'re looking for.',
+  g_riskReversal:'', g_valueStack:'', g_dreamOutcome:'',
+  np_timeWasters:'', np_cultureMismatch:'', np_overcomableFlags:'', np_referOutTo:'',
+  cp_differentiator:'',
+  sp_qualificationCriteria:'', sp_discoveryQuestions:'', sp_demoStrategy:'', sp_proposalStructure:'', sp_closingTechniques:'', sp_followUpCadence:'',
+  er_upsellPaths:'', er_crossSell:'', er_expansionSignals:'', er_retentionRisks:'', er_referralMechanism:'', er_churnReasons:'', er_advocacyProgram:'', er_renewalProcess:'',
+  hs_expert:'', hs_problem:'', hs_searched:'', hs_fedUp:'', hs_worked:'', hs_asking:'', hs_mission:'',
+  hs_narrative:'This started when my business partner was the CFO of a VC, having lots of trouble getting reports from startups, they all reported the wrong way. I tried to solve it and get reports.\n\nLeo was in startups and saw founders how to do financials after raising millions of dollars.\n\nOne side saw it from the fund side and I saw it from the fund side.',
+  _lists: {
+    caseStudies:[{name:'Mobile Commons',before:'',after:'',metric:'',notes:'Most likely to give case study'},{name:'Mindsite',before:'',after:'',metric:'',notes:''},{name:'Ease Global',before:'',after:'',metric:'',notes:''},{name:'Basic Block',before:'',after:'',metric:'',notes:'Most likely to give case study'},{name:'Wamo',before:'',after:'',metric:'',notes:''},{name:'Octopus',before:'',after:'',metric:'',notes:''}],
+    features:[{step:'',feature:'',benefit:'',proof:''}],
+    competitors:[{name:'Do Nothing',positioning:'',advantage:'',loseWhen:''},{name:'Generic Accountant',positioning:'',advantage:'',loseWhen:''}],
+    objections:[{objection:'I have an accountant, he can handle it right?',response:''},{objection:'How much do you help on strategy?',response:''},{objection:'I don\'t really need this.',response:''}],
+    faqs:[{question:'',answer:''}]
+  }
+};
+
+// ==================== THEME ====================
+function toggleTheme() {
+  document.documentElement.classList.toggle('light');
+  localStorage.setItem('vpTheme', document.documentElement.classList.contains('light') ? 'light' : 'dark');
+}
+
+// ==================== STORAGE ====================
+function getStorageKey(name) {
+  return 'vp_' + (name||'untitled').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+function saveToLS() {
+  try {
+    const data = collectState();
+    data._version = (data._version||0)+1;
+    data._lastSaved = new Date().toISOString();
+    const key = getStorageKey(data.clientName);
+    localStorage.setItem(key, JSON.stringify(data));
+    localStorage.setItem('vp_last_client', key);
+    currentClientKey = key;
+    updateSavedClientIndex(data.clientName, key);
+    showSaveStatus('saved');
+    return true;
+  } catch(e) { showSaveStatus('error'); return false; }
+}
+function loadFromLS(key) { try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; } }
+function updateSavedClientIndex(name, key) {
+  try { const idx=JSON.parse(localStorage.getItem('vp_client_index')||'{}'); idx[key]={name,lastSaved:new Date().toISOString()}; localStorage.setItem('vp_client_index',JSON.stringify(idx)); } catch(e) {}
+}
+function getSavedClients() { try { return JSON.parse(localStorage.getItem('vp_client_index')||'{}'); } catch(e) { return {}; } }
+
+// IndexedDB
+function openDB() { return new Promise((res,rej)=>{ const r=indexedDB.open(DB_NAME,DB_VERSION); r.onupgradeneeded=e=>e.target.result.createObjectStore(STORE_NAME); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function saveToIDB(key,data) { try { const db=await openDB(); db.transaction(STORE_NAME,'readwrite').objectStore(STORE_NAME).put(data,key); } catch(e){} }
+
+// ==================== STATE ====================
+function collectState() {
+  document.querySelectorAll('[data-field]').forEach(el=>{
+    if(el.type==='checkbox') state[el.dataset.field]=el.checked;
+    else state[el.dataset.field]=el.value;
+  });
+  state._lists={};
+  for(const id of Object.keys(listDefs)) state._lists[id]=[...listDefs[id].items];
+  return state;
+}
+
+function populateForm(data) {
+  state={...data};
+  document.querySelectorAll('[data-field]').forEach(el=>{
+    const v=data[el.dataset.field]; if(v===undefined) return;
+    if(el.type==='checkbox') el.checked=!!v;
+    else if(el.type==='range') { el.value=v; const d=el.parentElement.querySelector('.slider-value'); if(d)d.textContent=v; }
+    else { el.value=v; if(el.tagName==='TEXTAREA') autoResize(el); }
+  });
+  if(data._lists) for(const[id,items] of Object.entries(data._lists)) { if(listDefs[id]){listDefs[id].items=[...items.map(i=>({...i}))]; renderDynamicList(id);} }
+  updateClientBadge(); updateProgress(); updateLiveSummary(); updateMessagingMatrix();
+}
+
+function debouncedSave() {
+  showSaveStatus('saving');
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(()=>{ saveToLS(); updateProgress(); updateLiveSummary(); updateMessagingMatrix(); }, SAVE_DEBOUNCE);
+}
+
+// ==================== DYNAMIC LISTS ====================
+function renderDynamicList(id) {
+  const def=listDefs[id]; const c=document.getElementById(def.container); if(!c) return;
+  c.innerHTML = def.items.map((item,i)=>{
+    const fh = def.fields.map(f=>{
+      const v=(item[f.key]||'').replace(/"/g,'&quot;');
+      if(f.type==='textarea') return `<div class="field-group"><label>${f.label}</label><textarea data-key="${f.key}" data-list="${id}" data-index="${i}" placeholder="${f.placeholder||''}" oninput="updateListItem('${id}',${i},'${f.key}',this.value);autoResize(this);debouncedSave();">${item[f.key]||''}</textarea></div>`;
+      return `<div class="field-group"><label>${f.label}</label><input type="text" data-key="${f.key}" data-list="${id}" data-index="${i}" placeholder="${f.placeholder||''}" value="${v}" oninput="updateListItem('${id}',${i},'${f.key}',this.value);debouncedSave();"></div>`;
+    }).join('');
+    return `<div class="dynamic-item"><div class="item-header"><span class="item-number">#${i+1}</span><button class="item-remove" onclick="removeListItem('${id}',${i})">Remove</button></div><div class="item-fields">${fh}</div></div>`;
+  }).join('');
+  c.querySelectorAll('textarea').forEach(autoResize);
+}
+function addListItem(id) { const def=listDefs[id]; const n={}; def.fields.forEach(f=>n[f.key]=''); def.items.push(n); renderDynamicList(id); debouncedSave(); const c=document.getElementById(def.container); if(c.lastElementChild) c.lastElementChild.scrollIntoView({behavior:'smooth',block:'center'}); }
+function removeListItem(id,i) { listDefs[id].items.splice(i,1); renderDynamicList(id); debouncedSave(); }
+function updateListItem(id,i,key,val) { if(listDefs[id].items[i]) listDefs[id].items[i][key]=val; }
+
+// ==================== UI ====================
+function autoResize(el) { if(!el||el.tagName!=='TEXTAREA') return; el.style.height='auto'; el.style.height=Math.max(el.scrollHeight,40)+'px'; }
+
+function showSaveStatus(s) {
+  const el=document.getElementById('saveStatus'); const t=document.getElementById('saveText');
+  el.className='save-status '+s;
+  if(s==='saving') t.textContent='Saving...';
+  else if(s==='saved') t.textContent='Saved '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  else if(s==='error') t.textContent='Failed!';
+}
+
+function updateClientBadge() {
+  const n=state.clientName||document.querySelector('[data-field="clientName"]')?.value||'-';
+  document.getElementById('clientBadge').textContent=n;
+  document.title='VP Workshop - '+n;
+}
+
+function updateProgress() {
+  const sections=document.querySelectorAll('.workshop-section');
+  let totalF=0, totalFilled=0;
+  sections.forEach(sec=>{
+    const fields=sec.querySelectorAll('textarea[data-field],input[type="text"][data-field],input[type="date"][data-field]');
+    const listFields=sec.querySelectorAll('textarea[data-key],input[data-key]');
+    let filled=0, total=fields.length+listFields.length;
+    fields.forEach(f=>{ if(f.value&&f.value.trim()) filled++; });
+    listFields.forEach(f=>{ if(f.value&&f.value.trim()) filled++; });
+    totalF+=total; totalFilled+=filled;
+    const dot=document.querySelector(`[data-nav="${sec.id}"] .nav-dot`);
+    if(dot) { if(total===0||filled===0) dot.className='nav-dot'; else if(filled>=total*0.6) dot.className='nav-dot complete'; else dot.className='nav-dot partial'; }
+  });
+  const pct=totalF>0?Math.round((totalFilled/totalF)*100):0;
+  document.getElementById('progressValue').textContent=pct+'%';
+  const circ=document.getElementById('progressRing');
+  const circumference=81.68;
+  circ.style.strokeDashoffset=circumference-(pct/100)*circumference;
+}
+
+// ==================== LIVE SUMMARY ====================
+function updateLiveSummary() {
+  collectState();
+  const s=state;
+  const trunc=(str,len)=>{ if(!str) return ''; const l=str.split('\n')[0]; return l.length>len?l.substring(0,len)+'...':l; };
+  const filled=(v)=>v&&v.trim();
+
+  const client=s.clientName||'...';
+  const industry=trunc(s.dc_industry,60)||'Not yet defined';
+  const geo=trunc(s.dc_geography,40)||'...';
+  const size=trunc(s.dc_companySize,50)||'...';
+  const pain=trunc(s.wd_problems,80)||'Not yet defined';
+  const severity=s.wd_painSeverity||'?';
+  const fear=trunc(s.wd_fears,80)||'...';
+  const before=trunc(s.ba_before,80)||'...';
+  const after=trunc(s.ba_after,80)||'...';
+  const framework=s.ba_frameworkName||'';
+  const guarantee=trunc(s.g_guarantee,80)||'Not yet defined';
+  const mechanism=trunc(s.g_mechanism,80)||'...';
+  const dreamOutcome=s.g_dreamOutcome||'';
+  const differentiator=trunc(s.cp_differentiator,80)||'';
+
+  // Auto-generate one-liner
+  let oneliner='';
+  if(filled(s.dc_industry)&&filled(s.wd_problems)) {
+    const who=trunc(s.dc_industry,40);
+    const painShort=trunc(s.wd_problems,50);
+    const outcomeShort=trunc(s.g_dreamOutcome||s.ba_after,50);
+    oneliner=`We help ${who} who struggle with ${painShort.toLowerCase()} ${outcomeShort?'to '+outcomeShort.toLowerCase():'achieve their goals'}${s.g_mechanism?' through '+trunc(s.g_mechanism,40).toLowerCase():''}.`;
+  }
+
+  document.getElementById('liveSummary').innerHTML=`
+    ${oneliner?`<div class="rp-oneliner"><div class="rp-oneliner-label">Auto-Generated Value Prop</div>${oneliner}</div>`:''}
+    <div class="rp-section"><div class="rp-label">Target ICP</div><div class="rp-value${filled(s.dc_industry)?'':' empty'}">${industry}</div></div>
+    <div class="rp-section"><div class="rp-label">Geography</div><div class="rp-value${filled(s.dc_geography)?'':' empty'}">${geo}</div></div>
+    <div class="rp-section"><div class="rp-label">Company Size</div><div class="rp-value${filled(s.dc_companySize)?'':' empty'}">${size}</div></div>
+    <hr class="rp-divider">
+    <div class="rp-section"><div class="rp-label">#1 Pain (Severity: ${severity}/10)</div><div class="rp-value${filled(s.wd_problems)?'':' empty'}">${pain}</div></div>
+    <div class="rp-section"><div class="rp-label">Deepest Fear</div><div class="rp-value${filled(s.wd_fears)?'':' empty'}">${fear}</div></div>
+    <hr class="rp-divider">
+    <div class="rp-section"><div class="rp-label">Before</div><div class="rp-value${filled(s.ba_before)?'':' empty'}">${before}</div></div>
+    <div class="rp-section"><div class="rp-label">After</div><div class="rp-value${filled(s.ba_after)?'':' empty'}">${after}</div></div>
+    ${framework?`<div class="rp-section"><div class="rp-label">Framework</div><div class="rp-value">${framework}</div></div>`:''}
+    <hr class="rp-divider">
+    <div class="rp-section"><div class="rp-label">Guarantee</div><div class="rp-value${filled(s.g_guarantee)?'':' empty'}">${guarantee}</div></div>
+    <div class="rp-section"><div class="rp-label">Unique Mechanism</div><div class="rp-value${filled(s.g_mechanism)?'':' empty'}">${mechanism}</div></div>
+    ${differentiator?`<div class="rp-section"><div class="rp-label">Differentiator</div><div class="rp-value">${differentiator}</div></div>`:''}
+    ${dreamOutcome?`<div class="rp-section"><div class="rp-label">Dream Outcome</div><div class="rp-value">${dreamOutcome}</div></div>`:''}
+  `;
+}
+
+// ==================== TOAST NOTIFICATIONS ====================
+function showToast(msg, type='success') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+// ==================== SESSION TIMER ====================
+let sessionStartTime = Date.now();
+function updateTimer() {
+  const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+  const h = Math.floor(elapsed / 3600);
+  const m = Math.floor((elapsed % 3600) / 60);
+  const s = elapsed % 60;
+  const display = document.getElementById('timerDisplay');
+  if (display) display.textContent = h > 0 ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
+}
+
+// ==================== COPY SECTION ====================
+function copySection(sectionId) {
+  const sec = document.getElementById(sectionId);
+  if (!sec) return;
+  const fields = sec.querySelectorAll('textarea[data-field],input[type="text"][data-field],input[type="date"][data-field]');
+  const listFields = sec.querySelectorAll('textarea[data-key],input[data-key]');
+  const banner = sec.querySelector('.section-banner');
+  const title = banner ? banner.textContent.replace('Copy','').trim() : sectionId;
+  let text = '## ' + title + '\n\n';
+  fields.forEach(f => {
+    const label = f.closest('.field-group')?.querySelector('label')?.textContent || f.dataset.field;
+    if (f.value && f.value.trim()) text += '**' + label + ':** ' + f.value.trim() + '\n\n';
+  });
+  // hero table
+  sec.querySelectorAll('.hero-table tr').forEach(row => {
+    const prompt = row.cells[0]?.textContent?.trim();
+    const val = row.querySelector('textarea')?.value?.trim();
+    if (prompt && val) text += '**' + prompt + ':** ' + val + '\n\n';
+  });
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Section copied to clipboard');
+    const btn = sec.querySelector('.copy-section-btn');
+    if (btn) { btn.classList.add('copied'); btn.innerHTML = '\u2713'; setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '\u2398'; }, 1500); }
+  });
+}
+
+function injectCopyButtons() {
+  document.querySelectorAll('.section-banner').forEach(banner => {
+    const sec = banner.closest('.workshop-section');
+    if (!sec || sec.id === 's13') return;
+    const btn = document.createElement('button');
+    btn.className = 'copy-section-btn';
+    btn.innerHTML = '\u2398';
+    btn.title = 'Copy section to clipboard';
+    btn.onclick = (e) => { e.stopPropagation(); copySection(sec.id); };
+    banner.appendChild(btn);
+  });
+}
+
+// ==================== MESSAGING MATRIX ====================
+function updateMessagingMatrix() {
+  collectState();
+  const s = state;
+  const filled = v => v && v.trim();
+  const first = v => (v||'').split('\n')[0].trim();
+  const grid = document.getElementById('messagingMatrix');
+  if (!grid) return;
+
+  const industry = first(s.dc_industry);
+  const pain = first(s.wd_problems);
+  const after = first(s.ba_after);
+  const guarantee = first(s.g_guarantee);
+  const mechanism = first(s.g_mechanism);
+  const framework = s.ba_frameworkName || '';
+  const dreamOutcome = first(s.g_dreamOutcome);
+  const differentiator = first(s.cp_differentiator);
+  const fear = first(s.wd_fears);
+
+  if (!filled(s.dc_industry) && !filled(s.wd_problems)) {
+    grid.innerHTML = '<div class="matrix-card full-width"><h4>Waiting for Data</h4><p class="empty-hint">Fill in Dream Client Profile and What Drives Them to generate messaging.</p></div>';
+    return;
+  }
+
+  const who = industry || 'your target clients';
+  const painLC = pain ? pain.toLowerCase() : 'their core challenges';
+  const outcome = dreamOutcome || after || 'achieve their goals';
+  const mech = mechanism || '';
+
+  const positioning = `We help ${who} who struggle with ${painLC} to ${outcome.toLowerCase()}${mech ? ' through ' + mech.toLowerCase() : ''}.`;
+  const elevator = `Most ${who} face a critical problem: ${painLC}. ${fear ? 'They fear ' + fear.toLowerCase() + '. ' : ''}${s.clientName || 'We'} solve${s.clientName ? 's' : ''} this${framework ? ' with the ' + framework : ''} - delivering ${outcome.toLowerCase()}. ${guarantee ? 'We back it up: ' + guarantee.toLowerCase() + '.' : ''}`;
+
+  const subjects = [];
+  if (filled(s.wd_problems)) subjects.push(`Are ${painLC} costing you more than you think?`);
+  if (filled(s.ba_after)) subjects.push(`How to go from ${first(s.ba_before).substring(0,30).toLowerCase()}... to ${first(s.ba_after).substring(0,30).toLowerCase()}`);
+  if (filled(s.g_guarantee)) subjects.push(`${first(s.g_guarantee)}`);
+  if (subjects.length === 0) subjects.push('Fill in more sections to generate subject lines');
+
+  const hooks = [];
+  if (filled(s.wd_fears)) hooks.push(`Stop worrying about ${fear.toLowerCase()}. Here is the fix.`);
+  if (filled(s.g_dreamOutcome)) hooks.push(`What if you could ${dreamOutcome.toLowerCase()} in the next 90 days?`);
+  if (filled(s.cp_differentiator)) hooks.push(`Unlike generic solutions, ${differentiator.toLowerCase()}`);
+  if (hooks.length === 0) hooks.push('Fill in Guarantee and Competitive sections for ad hooks');
+
+  const linkedIn = filled(s.dc_industry) ? `Helping ${who} ${dreamOutcome ? dreamOutcome.toLowerCase() : 'solve ' + painLC}${mech ? ' | ' + mech : ''}` : 'Fill in sections above';
+  const hero = filled(s.ba_before) && filled(s.ba_after) ? `From ${first(s.ba_before).toLowerCase()} to ${first(s.ba_after).toLowerCase()}.` : 'Fill in Before/After section';
+
+  grid.innerHTML = `
+    <div class="matrix-card full-width"><h4>Positioning Statement</h4><p>${positioning}</p></div>
+    <div class="matrix-card full-width"><h4>Elevator Pitch (30 sec)</h4><p>${elevator}</p></div>
+    <div class="matrix-card"><h4>Website Hero Headline</h4><p>${hero}</p></div>
+    <div class="matrix-card"><h4>LinkedIn Headline</h4><p>${linkedIn}</p></div>
+    <div class="matrix-card full-width"><h4>Email Subject Lines</h4>${subjects.map(s=>'<p>'+s+'</p>').join('')}</div>
+    <div class="matrix-card full-width"><h4>Ad Copy Hooks</h4>${hooks.map(h=>'<p>'+h+'</p>').join('')}</div>
+  `;
+}
+
+function copyAllMessaging() {
+  const cards = document.querySelectorAll('#messagingMatrix .matrix-card');
+  let text = '# Messaging Matrix\n\n';
+  cards.forEach(c => {
+    const title = c.querySelector('h4')?.textContent || '';
+    const paras = Array.from(c.querySelectorAll('p')).map(p => p.textContent).join('\n');
+    text += '## ' + title + '\n' + paras + '\n\n';
+  });
+  navigator.clipboard.writeText(text).then(() => showToast('All messaging copied'));
+}
+
+// ==================== RIGHT PANEL TABS ====================
+function switchRPTab(tab) {
+  document.querySelectorAll('.rp-tab').forEach(t => t.classList.toggle('active', t.textContent.trim().toLowerCase() === tab));
+  document.getElementById('rpSummaryTab').classList.toggle('active', tab === 'summary');
+  document.getElementById('rpCoachTab').classList.toggle('active', tab === 'coach');
+  if (tab === 'coach') updateCoachSuggestions();
+}
+
+// ==================== AI COACHING ENGINE (Rule-Based) ====================
+function updateCoachSuggestions() {
+  collectState();
+  const s = state;
+  const filled = v => v && v.trim() && v.trim().length > 3;
+  const short = v => v && v.trim() && v.trim().length < 25;
+  const suggestions = [];
+
+  // Critical empty fields
+  const criticalFields = [
+    ['dc_industry', 'Dream Client Profile', 'Industry/Verticals - this drives your entire targeting'],
+    ['dc_companySize', 'Dream Client Profile', 'Company Size - needed for campaign filtering'],
+    ['wd_problems', 'Psychographic Depth', 'Problems - this becomes your #1 marketing message'],
+    ['wd_fears', 'Psychographic Depth', 'Fears - fear-based messaging converts highest'],
+    ['ba_before', 'Before/After', 'Before State - needed for contrast messaging'],
+    ['ba_after', 'Before/After', 'After State - this is what you sell'],
+    ['g_guarantee', 'Guarantee', 'Guarantee - closes 30% more deals'],
+    ['g_mechanism', 'Guarantee', 'Unique Mechanism - why YOU can deliver this'],
+    ['ri_costOfInaction', 'Revenue Intelligence', 'Cost of Inaction - your strongest urgency lever'],
+    ['lm_painLanguage', 'Language DNA', 'Pain Language - use their exact words in campaigns'],
+  ];
+  criticalFields.forEach(([key, section, hint]) => {
+    if (!filled(s[key])) suggestions.push({ type: 'missing', section, text: hint });
+  });
+
+  // Vague/short answers
+  if (filled(s.dc_industry) && short(s.dc_industry)) suggestions.push({ type: 'suggest', section: 'Dream Client Profile', text: 'Industry answer is brief. Add sub-sectors, company types, and revenue ranges for sharper targeting.' });
+  if (filled(s.wd_problems) && !s.wd_problems.includes('\n')) suggestions.push({ type: 'suggest', section: 'Psychographic Depth', text: 'List multiple problems (one per line). The more problems you capture, the more messaging angles you have.' });
+  if (filled(s.g_guarantee) && !s.g_guarantee.toLowerCase().includes('if')) suggestions.push({ type: 'suggest', section: 'Guarantee', text: 'Strong guarantees use "if/then" format: "If X doesn\'t happen, then Y." Try restructuring yours.' });
+
+  // Missing quantification
+  if (filled(s.wd_problems) && !filled(s.wd_painCost)) suggestions.push({ type: 'question', section: 'Psychographic Depth', text: 'You listed problems but haven\'t quantified the cost. What does this problem cost them in money, time, or opportunities?' });
+  if (filled(s.ba_after) && !filled(s.ba_timeline)) suggestions.push({ type: 'question', section: 'Before/After', text: 'You defined the After state but no timeline. How fast can clients expect to see results?' });
+
+  // Incomplete patterns
+  if (filled(s.ba_before) && !filled(s.ba_after)) suggestions.push({ type: 'missing', section: 'Before/After', text: 'Before state is filled but After is empty. Complete the transformation picture.' });
+  if (filled(s.ba_steps) && !filled(s.ba_frameworkName)) suggestions.push({ type: 'suggest', section: 'Before/After', text: 'You have process steps but no framework name. Give it a catchy, memorable name clients will remember.' });
+  if (filled(s.dc_industry) && !filled(s.cm_outreachChannels)) suggestions.push({ type: 'question', section: 'Channel & Media', text: 'You know your ICP but haven\'t mapped outreach channels. Where do these people hang out online?' });
+  if (filled(s.dc_bestClients) && !filled(s.sp_discoveryQuestions)) suggestions.push({ type: 'suggest', section: 'Sales Process', text: 'You have great client examples. Now document the discovery questions that surface these kinds of clients.' });
+
+  // Case study check
+  const cases = s._lists?.caseStudies || [];
+  const casesMissingMetrics = cases.filter(c => c.name && !c.metric);
+  if (casesMissingMetrics.length > 0) suggestions.push({ type: 'suggest', section: 'Case Studies', text: `${casesMissingMetrics.length} case study(s) missing key metrics. Quantify: revenue impact, time saved, % improvement.` });
+
+  // Render
+  const container = document.getElementById('coachSuggestions');
+  if (!container) return;
+  if (suggestions.length === 0) {
+    container.innerHTML = '<div class="coach-empty">Looking good! All critical fields have content. Keep adding detail to improve your messaging.</div>';
+    return;
+  }
+  container.innerHTML = suggestions.map(s => `
+    <div class="coach-card">
+      <div class="coach-card-label ${s.type}">${s.type === 'missing' ? 'Missing' : s.type === 'suggest' ? 'Suggestion' : 'Question'} - ${s.section}</div>
+      <p>${s.text}</p>
+    </div>
+  `).join('');
+}
+
+// ==================== AI SUGGESTIONS (via Apps Script + Claude API) ====================
+let appsScriptUrl = localStorage.getItem('vp_apps_script_url') || '';
+
+async function requestAISuggestions() {
+  if (!appsScriptUrl) { showToast('Set Apps Script URL in settings for AI coaching', 'warning'); return; }
+  const btn = document.getElementById('coachApiBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Thinking...'; }
+  collectState();
+  const secs = document.querySelectorAll('.workshop-section');
+  let activeSec = 's0', activeLabel = 'Setup';
+  secs.forEach(s => { if (s.getBoundingClientRect().top <= 200) { activeSec = s.id; activeLabel = s.querySelector('.section-banner')?.textContent?.trim() || activeSec; } });
+  const sectionData = {};
+  const sec = document.getElementById(activeSec);
+  if (sec) sec.querySelectorAll('[data-field]').forEach(el => { if (el.value) sectionData[el.dataset.field] = el.type === 'checkbox' ? el.checked : el.value; });
+  try {
+    const resp = await fetch(appsScriptUrl, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'ai_suggest', sectionData, sectionName: activeLabel, allData: state })
+    });
+    const data = await resp.json();
+    if (data.error === 'no_api_key') { showToast('Add ANTHROPIC_API_KEY in your Apps Script properties', 'warning'); }
+    else if (data.error) { showToast('AI error: ' + data.error, 'error'); }
+    else {
+      const container = document.getElementById('coachSuggestions');
+      let html = '';
+      if (data.suggestions) data.suggestions.forEach(s => { html += `<div class="coach-card"><div class="coach-card-label suggest">AI Suggestion</div><p>${s}</p></div>`; });
+      if (data.question) html += `<div class="coach-card"><div class="coach-card-label question">AI Question</div><p>${data.question}</p></div>`;
+      if (html) container.innerHTML = html + container.innerHTML;
+      showToast('AI suggestions added', 'success');
+    }
+  } catch(e) { showToast('Could not reach AI coaching endpoint', 'error'); }
+  if (btn) { btn.disabled = false; btn.textContent = 'Get AI Suggestions'; }
+}
+
+// ==================== GOOGLE DRIVE BACKUP (OAuth) ====================
+const DRIVE_CLIENT_ID = '234360608816-ui7o8ut0tpmidl8nmogalkji6pkpshbd.apps.googleusercontent.com';
+const DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file';
+let driveToken = null;
+let driveTokenClient = null;
+let driveFileIds = {};
+let driveAutoBackupTimer = null;
+
+function initDrive() {
+  if (typeof google === 'undefined' || !google.accounts) { setTimeout(initDrive, 500); return; }
+  try {
+    driveTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: DRIVE_CLIENT_ID,
+      scope: DRIVE_SCOPES,
+      callback: onDriveToken,
+    });
+    if (localStorage.getItem('vp_drive_connected') === 'true') {
+      driveTokenClient.requestAccessToken({ prompt: '' });
+    }
+  } catch(e) { console.log('Drive init:', e.message); }
+}
+
+function handleDriveConnect() {
+  if (driveToken) { backupToDrive(); return; }
+  if (!driveTokenClient) { showToast('Google is loading, try again in a moment', 'warning'); return; }
+  driveTokenClient.requestAccessToken({ prompt: 'consent' });
+}
+
+function onDriveToken(resp) {
+  if (resp.error) { console.error('Drive auth error:', resp); return; }
+  driveToken = resp.access_token;
+  localStorage.setItem('vp_drive_connected', 'true');
+  const btn = document.getElementById('driveBtn');
+  if (btn) { btn.classList.add('connected'); document.getElementById('driveLabel').textContent = 'Drive Connected'; }
+  showToast('Google Drive connected - auto-backup every 5 min', 'success');
+  setTimeout(() => { if (driveTokenClient) driveTokenClient.requestAccessToken({ prompt: '' }); }, (resp.expires_in - 120) * 1000);
+  startDriveAutoBackup();
+}
+
+function startDriveAutoBackup() {
+  if (driveAutoBackupTimer) clearInterval(driveAutoBackupTimer);
+  driveAutoBackupTimer = setInterval(backupToDrive, 300000);
+}
+
+async function findDriveFile(fileName) {
+  if (driveFileIds[fileName]) return driveFileIds[fileName];
+  try {
+    const resp = await fetch('https://www.googleapis.com/drive/v3/files?q=name%3D%27' + encodeURIComponent(fileName) + '%27%20and%20trashed%3Dfalse&fields=files(id,name)&spaces=drive', {
+      headers: { 'Authorization': 'Bearer ' + driveToken }
+    });
+    const data = await resp.json();
+    if (data.files && data.files.length > 0) { driveFileIds[fileName] = data.files[0].id; return data.files[0].id; }
+  } catch(e) {}
+  return null;
+}
+
+async function backupToDrive() {
+  if (!driveToken) { downloadBackup(); return; }
+  collectState();
+  const content = JSON.stringify(state, null, 2);
+  const clientSlug = (state.clientName || 'untitled').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const fileName = 'vp-workshop-' + clientSlug + '.json';
+  try {
+    const existingId = await findDriveFile(fileName);
+    if (existingId) {
+      await fetch('https://www.googleapis.com/upload/drive/v3/files/' + existingId + '?uploadType=media', {
+        method: 'PATCH', headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'application/json' }, body: content
+      });
+    } else {
+      const boundary = '---vpworkshop';
+      const body = '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify({name:fileName,mimeType:'application/json'}) + '\r\n--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' + content + '\r\n--' + boundary + '--';
+      const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+        method: 'POST', headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'multipart/related; boundary=' + boundary }, body: body
+      });
+      const result = await resp.json();
+      if (result.id) driveFileIds[fileName] = result.id;
+    }
+    showToast('Backed up to Google Drive', 'success');
+    localStorage.setItem('vp_lastDriveBackup', new Date().toISOString());
+  } catch(e) { showToast('Drive backup failed - saved locally', 'warning'); console.error(e); }
+}
+
+async function restoreFromDrive() {
+  if (!driveToken) { showToast('Connect Google Drive first', 'warning'); return; }
+  const clientSlug = (state.clientName || 'untitled').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const fileName = 'vp-workshop-' + clientSlug + '.json';
+  try {
+    const fileId = await findDriveFile(fileName);
+    if (!fileId) { showToast('No Drive backup found for ' + (state.clientName||'this client'), 'warning'); return; }
+    const resp = await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', { headers: { 'Authorization': 'Bearer ' + driveToken } });
+    const data = await resp.json();
+    populateForm(data);
+    saveToLS();
+    showToast('Restored from Google Drive', 'success');
+  } catch(e) { showToast('Could not restore from Drive', 'error'); console.error(e); }
+}
+
+// ==================== NAVIGATION ====================
+function goToSection(id) { document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); }
+function updateActiveNav() {
+  const secs=document.querySelectorAll('.workshop-section'); let active='s0';
+  secs.forEach(s=>{ if(s.getBoundingClientRect().top<=120) active=s.id; });
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.nav===active));
+}
+
+// ==================== EXPORT ====================
+function exportMarkdown() {
+  collectState();
+  let md=`# Value Proposition Workshop - ${state.clientName||'Untitled'}\nDate: ${state.workshopDate||'-'} | Facilitator: ${state.facilitator||'-'}\n\n`;
+  const fields=[['Dream Client Profile',[['Geography','dc_geography'],['Industry','dc_industry'],['Size','dc_companySize'],['Stage','dc_fundingStage'],['Titles','dc_jobTitles'],['Personality','dc_personality'],['Tech','dc_techStack'],['Best Clients','dc_bestClients'],['Dream Clients','dc_dreamClients']]],['What Drives Them',[['Goals','wd_businessGoals'],['Dreams','wd_personalDreams'],['Problems','wd_problems'],['Fears','wd_fears'],['Suspicions','wd_suspicions'],['Enemies','wd_enemies'],['Trends','wd_trends']]],['Before / After',[['Before','ba_before'],['Steps','ba_steps'],['After','ba_after'],['Framework','ba_frameworkName'],['Named Steps','ba_frameworkSteps'],['Summary','ba_frameworkSummary']]],['Guarantee',[['Guarantee','g_guarantee'],['Mechanism','g_mechanism'],['Risk Reversal','g_riskReversal'],['Value Stack','g_valueStack'],['Dream Outcome','g_dreamOutcome']]],['Hero Story',[['Narrative','hs_narrative']]]];
+  fields.forEach(([h,fs])=>{ md+=`## ${h}\n\n`; fs.forEach(([l,k])=>md+=`### ${l}\n${state[k]||'(empty)'}\n\n`); });
+  if(state._lists?.caseStudies?.length) { md+='## Case Studies\n\n'; state._lists.caseStudies.forEach((c,i)=>{ if(c.name) md+=`${i+1}. **${c.name}** - ${c.after||'-'} (${c.metric||'-'})\n`; }); md+='\n'; }
+  if(state._lists?.objections?.length) { md+='## Objections\n\n'; state._lists.objections.forEach(o=>{ if(o.objection) md+=`**${o.objection}**\n${o.response||'-'}\n\n`; }); }
+  navigator.clipboard.writeText(md).then(()=>showToast('Exported to clipboard as Markdown')).catch(()=>{downloadFile(md,`vp-${(state.clientName||'export').toLowerCase()}.md`,'text/markdown');showToast('Downloaded as Markdown file');});
+}
+function downloadBackup() { collectState(); downloadFile(JSON.stringify(state,null,2),`vp-backup-${(state.clientName||'x').toLowerCase().replace(/[^a-z0-9]+/g,'-')}-${Date.now()}.json`,'application/json'); }
+function downloadFile(c,f,t) { const b=new Blob([c],{type:t}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u;a.download=f;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u); }
+function importBackup(file) { if(!file)return; const r=new FileReader(); r.onload=e=>{ try{const d=JSON.parse(e.target.result);if(!d.clientName){showToast('Invalid backup file','error');return;}populateForm(d);saveToLS();showToast('Imported: '+d.clientName);closeModal('loadModal');}catch(err){showToast('Parse error: '+err.message,'error');}}; r.readAsText(file); }
+
+// ==================== MODALS ====================
+function showNewWorkshop() { document.getElementById('newWorkshopModal').classList.add('open'); document.getElementById('newClientInput').focus(); }
+function showLoadDialog() {
+  const clients=getSavedClients(); const c=document.getElementById('savedClientsList');
+  const entries=Object.entries(clients);
+  c.innerHTML=entries.length===0?'<p style="color:var(--text-muted)">No saved workshops.</p>':entries.map(([k,info])=>`<button class="nav-footer-btn" style="text-align:left;margin-bottom:4px;padding:10px" onclick="loadClient('${k}')">${info.name} <span style="color:var(--text-muted);font-size:10px;margin-left:6px">${info.lastSaved?new Date(info.lastSaved).toLocaleDateString():''}</span></button>`).join('');
+  document.getElementById('loadModal').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function createNewWorkshop() {
+  const name=document.getElementById('newClientInput').value.trim(); if(!name){showToast('Enter a client name','warning');return;}
+  saveToLS();
+  state={clientName:name,workshopDate:new Date().toISOString().split('T')[0],_lists:{caseStudies:[{name:'',before:'',after:'',metric:'',notes:''}],features:[{step:'',feature:'',benefit:'',proof:''}],competitors:[{name:'',positioning:'',advantage:'',loseWhen:''}],objections:[{objection:'',response:''}],faqs:[{question:'',answer:''}]}};
+  for(const[id,items] of Object.entries(state._lists)) if(listDefs[id]) listDefs[id].items=[...items];
+  document.querySelectorAll('[data-field]').forEach(el=>{if(el.type==='checkbox')el.checked=false;else if(el.type==='range'){el.value=5;const d=el.parentElement.querySelector('.slider-value');if(d)d.textContent='5';}else el.value='';});
+  document.querySelector('[data-field="clientName"]').value=name;
+  document.querySelector('[data-field="workshopDate"]').value=state.workshopDate;
+  for(const id of Object.keys(listDefs)) renderDynamicList(id);
+  saveToLS(); updateClientBadge(); updateProgress(); updateLiveSummary();
+  closeModal('newWorkshopModal'); goToSection('s0');
+}
+function loadClient(key) { saveToLS(); const d=loadFromLS(key); if(d){populateForm(d);currentClientKey=key;localStorage.setItem('vp_last_client',key);} closeModal('loadModal'); }
+
+// ==================== INIT ====================
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='s'){e.preventDefault();collectState();saveToLS();}});
+
+function init() {
+  const lastKey=localStorage.getItem('vp_last_client');
+  let data=lastKey?loadFromLS(lastKey):null;
+  if(data) {
+    if(data._lists) for(const[id,items] of Object.entries(data._lists)) if(listDefs[id]) listDefs[id].items=items.map(i=>({...i}));
+    for(const id of Object.keys(listDefs)) renderDynamicList(id);
+    populateForm(data); currentClientKey=lastKey;
+  } else {
+    if(PHELLOS_DEFAULTS._lists) for(const[id,items] of Object.entries(PHELLOS_DEFAULTS._lists)) if(listDefs[id]) listDefs[id].items=items.map(i=>({...i}));
+    for(const id of Object.keys(listDefs)) renderDynamicList(id);
+    populateForm(PHELLOS_DEFAULTS); saveToLS();
+  }
+  document.addEventListener('input',e=>{if(e.target.matches('[data-field]')){if(e.target.tagName==='TEXTAREA')autoResize(e.target);if(e.target.dataset.field==='clientName')updateClientBadge();debouncedSave();}});
+  document.addEventListener('change',e=>{if(e.target.matches('[data-field]')&&e.target.type==='checkbox')debouncedSave();});
+  window.addEventListener('scroll',updateActiveNav,{passive:true}); updateActiveNav();
+  document.querySelectorAll('textarea').forEach(autoResize);
+  setInterval(()=>{const d=collectState();saveToIDB(getStorageKey(d.clientName),d);},SNAPSHOT_INTERVAL);
+  setInterval(()=>{document.getElementById('backupReminder').style.display='block';},BACKUP_REMINDER_INTERVAL);
+  window.addEventListener('beforeunload',()=>{collectState();saveToLS();});
+  if(navigator.storage&&navigator.storage.persist) navigator.storage.persist();
+  document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+  updateProgress(); updateLiveSummary(); updateMessagingMatrix();
+  injectCopyButtons();
+  setInterval(updateTimer, 1000);
+  // Init Google Drive OAuth connection
+  setTimeout(initDrive, 1500);
+  // Update coach on input with debounce
+  let coachTimeout = null;
+  document.addEventListener('focusout', e => { if (e.target.matches('[data-field]')) { clearTimeout(coachTimeout); coachTimeout = setTimeout(updateCoachSuggestions, 1000); } });
+}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
