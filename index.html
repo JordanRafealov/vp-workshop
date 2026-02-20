@@ -577,6 +577,88 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
 .config-input:focus { outline: none; border-color: var(--accent); }
 .config-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; }
 
+
+/* ==================== ACCORDION (ACQ-style collapsible) ==================== */
+.accordion { margin-top: 20px; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.accordion-header {
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  background: var(--bg-input); cursor: pointer; user-select: none;
+  transition: background var(--transition);
+}
+.accordion-header:hover { background: var(--accent-glow); }
+.accordion-title { font-size: 13.5px; font-weight: 600; flex: 1; }
+.accordion-count {
+  font-size: 11px; color: var(--text-muted); background: var(--bg-page);
+  padding: 2px 8px; border-radius: 10px; font-weight: 500;
+}
+.accordion-arrow {
+  font-size: 12px; color: var(--text-muted); transition: transform 0.2s;
+}
+.accordion.open .accordion-arrow { transform: rotate(90deg); }
+.accordion-body {
+  max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
+  background: var(--bg-card);
+}
+.accordion.open .accordion-body { max-height: 4000px; }
+.accordion-body-inner { padding: 16px; }
+
+/* ==================== FIELD GRID (2-col) ==================== */
+.field-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px;
+}
+.field-grid .field-group { margin-bottom: 0; }
+.field-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px 20px; }
+@media (max-width: 900px) { .field-grid, .field-grid-3 { grid-template-columns: 1fr; } }
+
+/* ==================== SELECT/DROPDOWN ==================== */
+select[data-field] {
+  width: 100%; padding: 10px 12px; border-radius: var(--radius-sm);
+  background: var(--bg-input); border: 1px solid var(--border);
+  color: var(--text-primary); font-size: 14px; font-family: var(--font);
+  cursor: pointer; transition: border-color var(--transition);
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239898b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+}
+select[data-field]:hover { border-color: var(--border-hover); }
+select[data-field]:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px var(--accent-glow); }
+:root.light select[data-field] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2355556e' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+}
+
+/* ==================== AI CHAT ==================== */
+.coach-chat { display: flex; flex-direction: column; height: 100%; }
+.coach-messages {
+  flex: 1; overflow-y: auto; padding: 10px 0; display: flex;
+  flex-direction: column; gap: 8px; max-height: 300px;
+}
+.chat-bubble {
+  padding: 8px 12px; border-radius: 10px; font-size: 12.5px;
+  line-height: 1.5; max-width: 90%; word-wrap: break-word;
+}
+.chat-bubble.user {
+  background: var(--accent); color: #fff; align-self: flex-end;
+  border-bottom-right-radius: 3px;
+}
+.chat-bubble.ai {
+  background: var(--bg-input); color: var(--text-primary); align-self: flex-start;
+  border-bottom-left-radius: 3px; border: 1px solid var(--border);
+}
+.chat-bubble.ai.loading { opacity: 0.7; font-style: italic; }
+.coach-input-row {
+  display: flex; gap: 6px; padding-top: 8px; border-top: 1px solid var(--border); margin-top: 8px;
+}
+.coach-input-row input {
+  flex: 1; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg-input); color: var(--text-primary); font-size: 12.5px; font-family: var(--font);
+}
+.coach-input-row input:focus { border-color: var(--accent); outline: none; }
+.coach-input-row button {
+  padding: 8px 12px; border-radius: 6px; border: none;
+  background: var(--accent); color: #fff; font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+}
+.coach-input-row button:hover { background: var(--accent-hover); }
 /* ==================== PRINT ==================== */
 @media print {
   #topBar, #sidebar, #rightPanel, .tip-box, .add-item-btn, .item-remove,
@@ -618,6 +700,7 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
   <div class="nav-brand">Dopamine Digital</div>
   <div class="nav-group">
     <a class="nav-item" data-nav="s0" onclick="goToSection('s0')"><span class="nav-dot"></span>Setup</a>
+    <a class="nav-item" data-nav="sBS" onclick="goToSection('sBS')"><span class="nav-dot"></span>Business Snapshot</a>
     <div class="nav-phase">Who - Your ICP</div>
     <a class="nav-item" data-nav="s1" onclick="goToSection('s1')"><span class="nav-dot"></span>Dream Client Profile</a>
     <a class="nav-item" data-nav="s2" onclick="goToSection('s2')"><span class="nav-dot"></span>Psychographic Depth</a>
@@ -664,9 +747,13 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
   <div id="rpCoachTab" class="rp-tab-content">
     <div class="rp-header"><span class="rp-live-dot"></span> AI Coach</div>
     <div id="coachSuggestions"></div>
-    <div class="coach-api-section">
-      <button class="coach-api-btn" id="coachApiBtn" onclick="requestAISuggestions()" title="Get AI-powered suggestions via Claude API">Get AI Suggestions</button>
-      <p class="config-hint" style="margin-top:6px">Requires Apps Script with Anthropic API key configured.</p>
+    <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px">
+      <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">Ask the AI Coach</div>
+      <div id="coachChatMessages" class="coach-messages"></div>
+      <div class="coach-input-row">
+        <input type="text" id="coachChatInput" placeholder="Ask a question about this section..." onkeydown="handleChatKeydown(event)">
+        <button onclick="sendCoachChat()">Send</button>
+      </div>
     </div>
   </div>
 </aside>
@@ -685,6 +772,196 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
     </div>
     <div class="field-group"><label>Attendees</label><input type="text" data-field="attendees" placeholder="Names and roles of everyone in the session"></div>
     <div class="field-group"><label>Session Objectives</label><textarea data-field="sessionGoals" placeholder="What do we want to accomplish today?"></textarea></div>
+  </div>
+</section>
+
+
+<!-- SBS: BUSINESS SNAPSHOT (ACQ AI-inspired) -->
+<section id="sBS" class="workshop-section">
+  <div class="section-banner">Business Snapshot</div>
+  <div class="section-body">
+    <p class="section-intro">Quick diagnostic of the business. These numbers help us benchmark, identify constraints, and feed AI with the full picture. Fill what you know - skip what you don't.</p>
+    <div class="field-grid">
+      <div class="field-group"><label>Website</label><input type="text" data-field="bs_website" placeholder="https://example.com"></div>
+      <div class="field-group"><label>Primary Product / Service</label><input type="text" data-field="bs_product" placeholder="e.g. Fractional CFO for startups"></div>
+      <div class="field-group"><label>Annual Revenue</label><input type="text" data-field="bs_annualRevenue" placeholder="e.g. $2,000,000"></div>
+      <div class="field-group"><label>Number of Employees</label><input type="text" data-field="bs_employees" placeholder="e.g. 12"></div>
+      <div class="field-group"><label>New Customers / Month</label><input type="text" data-field="bs_newCustomersMonth" placeholder="e.g. 4"></div>
+      <div class="field-group"><label>Average Deal Size</label><input type="text" data-field="bs_avgDealSize" placeholder="e.g. $3,000/mo"></div>
+      <div class="field-group">
+        <label>Primary Selling Mechanism</label>
+        <select data-field="bs_sellingMechanism"><option value="">Select...</option><option>Sales Team (Outbound)</option><option>Inbound / Self-Serve</option><option>Founder-Led Sales</option><option>Partnerships / Channel</option><option>Community-Led</option><option>Product-Led Growth</option><option>Hybrid</option></select>
+      </div>
+      <div class="field-group">
+        <label>Primary Delivery Type</label>
+        <select data-field="bs_deliveryType"><option value="">Select...</option><option>Done-For-You (Service)</option><option>Done-With-You (Coaching)</option><option>DIY / Self-Serve</option><option>SaaS / Software</option><option>Physical Product</option><option>Hybrid</option></select>
+      </div>
+      <div class="field-group">
+        <label>Primary Lead Source</label>
+        <select data-field="bs_leadSource"><option value="">Select...</option><option>Inbound Marketing / Content</option><option>Outbound Sales / Cold</option><option>Referrals / Word of Mouth</option><option>Paid Ads</option><option>SEO / Organic</option><option>Partnerships</option><option>Events / Speaking</option><option>Community / Social</option></select>
+      </div>
+      <div class="field-group">
+        <label>Primary Advertising Mode</label>
+        <select data-field="bs_advertisingMode"><option value="">Select...</option><option>Paid Search (Google)</option><option>Paid Social (Meta/LinkedIn)</option><option>Organic Content</option><option>Email Marketing</option><option>Cold Outreach</option><option>Events / Conferences</option><option>PR / Media</option><option>None Currently</option></select>
+      </div>
+      <div class="field-group"><label>Biggest Growth Constraint</label><input type="text" data-field="bs_growthConstraint" placeholder="e.g. Lead quality, sales capacity, delivery bandwidth"></div>
+      <div class="field-group">
+        <label>Current Tech Sophistication</label>
+        <select data-field="bs_techStatus"><option value="">Select...</option><option>Basic (Spreadsheets, manual)</option><option>Developing (Some tools, no integrations)</option><option>Moderate (CRM + key tools connected)</option><option>Advanced (Full stack, automated workflows)</option><option>Enterprise (Custom systems, data team)</option></select>
+      </div>
+    </div>
+
+    <div class="accordion" id="accSalesMetrics">
+      <div class="accordion-header" onclick="toggleAccordion('accSalesMetrics')">
+        <span class="accordion-title">Sales & Pipeline Metrics</span>
+        <span class="accordion-count">12 fields</span>
+        <span class="accordion-arrow">&#9656;</span>
+      </div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <div class="field-grid">
+          <div class="field-group"><label>Sales Cycle Length (days)</label><input type="text" data-field="bs_salesCycle" placeholder="e.g. 21"></div>
+          <div class="field-group"><label>Close Rate (%)</label><input type="text" data-field="bs_closeRate" placeholder="e.g. 30"></div>
+          <div class="field-group"><label>Qualified Leads / Month</label><input type="text" data-field="bs_qualifiedLeads" placeholder="e.g. 40"></div>
+          <div class="field-group"><label>Sales Team Size</label><input type="text" data-field="bs_salesTeamSize" placeholder="e.g. 3"></div>
+          <div class="field-group"><label>Monthly Marketing Spend</label><input type="text" data-field="bs_monthlySpend" placeholder="e.g. $5,000"></div>
+          <div class="field-group"><label>Total Pipeline Value</label><input type="text" data-field="bs_pipelineValue" placeholder="e.g. $250,000"></div>
+          <div class="field-group"><label>Monthly Leads / Visitors</label><input type="text" data-field="bs_monthlyLeads" placeholder="e.g. 2,000"></div>
+          <div class="field-group"><label>Conversion Rate (%)</label><input type="text" data-field="bs_conversionRate" placeholder="e.g. 2"></div>
+          <div class="field-group"><label>Lead-to-Customer Rate (%)</label><input type="text" data-field="bs_leadToCustomer" placeholder="e.g. 15"></div>
+          <div class="field-group"><label>Follow-up SLA</label><input type="text" data-field="bs_followUpSLA" placeholder="e.g. Reply within 24 hours"></div>
+          <div class="field-group"><label>Competitors</label><textarea data-field="bs_competitors" placeholder="Top 3-5 competitors and what they do differently"></textarea></div>
+          <div class="field-group"><label>Messaging Angles</label><textarea data-field="bs_messagingAngles" placeholder="Current main messages / positioning themes"></textarea></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="accordion" id="accCustomerEcon">
+      <div class="accordion-header" onclick="toggleAccordion('accCustomerEcon')">
+        <span class="accordion-title">Customer Economics</span>
+        <span class="accordion-count">7 fields</span>
+        <span class="accordion-arrow">&#9656;</span>
+      </div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <div class="field-grid">
+          <div class="field-group"><label>Total Customers</label><input type="text" data-field="bs_totalCustomers" placeholder="e.g. 120"></div>
+          <div class="field-group"><label>Average Order Value</label><input type="text" data-field="bs_aov" placeholder="e.g. $3,000"></div>
+          <div class="field-group"><label>Customer Acquisition Cost</label><input type="text" data-field="bs_cac" placeholder="e.g. $500"></div>
+          <div class="field-group"><label>Customer Lifetime Value</label><input type="text" data-field="bs_ltv" placeholder="e.g. $18,000"></div>
+          <div class="field-group"><label>Monthly Churn Rate (%)</label><input type="text" data-field="bs_churnRate" placeholder="e.g. 4"></div>
+          <div class="field-group"><label>NPS Score</label><input type="text" data-field="bs_nps" placeholder="e.g. 55"></div>
+          <div class="field-group"><label>Customer Segments</label><textarea data-field="bs_customerSegments" placeholder="Different types of customers you serve"></textarea></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="accordion" id="accFinancials">
+      <div class="accordion-header" onclick="toggleAccordion('accFinancials')">
+        <span class="accordion-title">Financials</span>
+        <span class="accordion-count">8 fields</span>
+        <span class="accordion-arrow">&#9656;</span>
+      </div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <div class="field-grid">
+          <div class="field-group"><label>Monthly Revenue</label><input type="text" data-field="bs_monthlyRevenue" placeholder="e.g. $100,000"></div>
+          <div class="field-group"><label>Gross Margin (%)</label><input type="text" data-field="bs_grossMargin" placeholder="e.g. 60"></div>
+          <div class="field-group"><label>Net Margin (%)</label><input type="text" data-field="bs_netMargin" placeholder="e.g. 15"></div>
+          <div class="field-group"><label>MRR Growth Rate (%)</label><input type="text" data-field="bs_mrrGrowth" placeholder="e.g. 10"></div>
+          <div class="field-group"><label>Monthly Burn Rate</label><input type="text" data-field="bs_burnRate" placeholder="e.g. $50,000"></div>
+          <div class="field-group"><label>Runway (months)</label><input type="text" data-field="bs_runway" placeholder="e.g. 12"></div>
+          <div class="field-group"><label>Current Yearly Profit</label><input type="text" data-field="bs_yearlyProfit" placeholder="e.g. $250,000"></div>
+          <div class="field-group"><label>Product / Service Lines</label><textarea data-field="bs_productLines" placeholder="List all products or service tiers"></textarea></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="accordion" id="accGrowth">
+      <div class="accordion-header" onclick="toggleAccordion('accGrowth')">
+        <span class="accordion-title">Growth & Planning</span>
+        <span class="accordion-count">7 fields</span>
+        <span class="accordion-arrow">&#9656;</span>
+      </div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <div class="field-grid">
+          <div class="field-group"><label>12-Month Revenue Goal</label><input type="text" data-field="bs_revenueGoal" placeholder="e.g. $5,000,000"></div>
+          <div class="field-group"><label>Main Growth Channel</label><input type="text" data-field="bs_mainGrowthChannel" placeholder="e.g. Paid search, content, partnerships"></div>
+          <div class="field-group"><label>Growth Strategy</label><textarea data-field="bs_growthStrategy" placeholder="e.g. Increase LTV via add-ons, expand to new markets"></textarea></div>
+          <div class="field-group"><label>Growth Constraints</label><textarea data-field="bs_growthConstraints" placeholder="e.g. Hiring, tech, capital, market awareness"></textarea></div>
+          <div class="field-group"><label>Funding Needed</label><input type="text" data-field="bs_fundingNeeded" placeholder="e.g. $1,000,000"></div>
+          <div class="field-group"><label>Exit Timeline</label><input type="text" data-field="bs_exitTimeline" placeholder="e.g. Q4 2028"></div>
+          <div class="field-group"><label>Exit Target Amount</label><input type="text" data-field="bs_exitTarget" placeholder="e.g. $75,000,000"></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="accordion" id="accOps">
+      <div class="accordion-header" onclick="toggleAccordion('accOps')">
+        <span class="accordion-title">Operations & Delivery</span>
+        <span class="accordion-count">8 fields</span>
+        <span class="accordion-arrow">&#9656;</span>
+      </div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <div class="field-grid">
+          <div class="field-group"><label>Customer Acquisition Process</label><textarea data-field="bs_custAcquisition" placeholder="How do customers currently find and buy?"></textarea></div>
+          <div class="field-group"><label>Customer Onboarding</label><textarea data-field="bs_custOnboarding" placeholder="What happens after they sign up?"></textarea></div>
+          <div class="field-group"><label>Service Delivery Model</label><textarea data-field="bs_serviceDelivery" placeholder="How is the product/service delivered?"></textarea></div>
+          <div class="field-group"><label>Team Structure</label><textarea data-field="bs_teamStructureOps" placeholder="e.g. Marketing (3), Sales (2), Ops (5)"></textarea></div>
+          <div class="field-group"><label>Workflow Stages</label><textarea data-field="bs_workflowStages" placeholder="Key stages in your delivery pipeline"></textarea></div>
+          <div class="field-group"><label>Quality Metrics</label><textarea data-field="bs_qualityMetrics" placeholder="How do you measure delivery quality?"></textarea></div>
+          <div class="field-group"><label>Data & Analytics</label><textarea data-field="bs_dataAnalytics" placeholder="e.g. GA4, Looker dashboards, custom SQL"></textarea></div>
+          <div class="field-group"><label>Scheduling / Capacity</label><textarea data-field="bs_scheduling" placeholder="Scheduling rules, capacity constraints"></textarea></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="accordion" id="accTechStack">
+      <div class="accordion-header" onclick="toggleAccordion('accTechStack')">
+        <span class="accordion-title">Tech Stack</span>
+        <span class="accordion-count">5 fields</span>
+        <span class="accordion-arrow">&#9656;</span>
+      </div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <div class="field-grid">
+          <div class="field-group"><label>Financial & Accounting Tools</label><input type="text" data-field="bs_toolsFinance" placeholder="e.g. QuickBooks, Xero, NetSuite"></div>
+          <div class="field-group"><label>Customer & Analytics Tools</label><input type="text" data-field="bs_toolsAnalytics" placeholder="e.g. HubSpot, GA4, Mixpanel"></div>
+          <div class="field-group"><label>Sales Tools</label><input type="text" data-field="bs_toolsSales" placeholder="e.g. Salesforce, Pipedrive, Close"></div>
+          <div class="field-group"><label>Marketing Tools</label><input type="text" data-field="bs_toolsMarketing" placeholder="e.g. Meta Ads, Mailchimp, SEMrush"></div>
+          <div class="field-group"><label>Other Platforms</label><input type="text" data-field="bs_toolsOther" placeholder="e.g. Slack, Notion, ClickUp, Zapier"></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="accordion" id="accBrand">
+      <div class="accordion-header" onclick="toggleAccordion('accBrand')">
+        <span class="accordion-title">Brand & Compliance</span>
+        <span class="accordion-count">5 fields</span>
+        <span class="accordion-arrow">&#9656;</span>
+      </div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <div class="field-grid">
+          <div class="field-group"><label>Brand Voice / Tone</label><textarea data-field="bs_brandVoice" placeholder="How should your brand sound? e.g. Professional but approachable, no jargon"></textarea></div>
+          <div class="field-group"><label>Prohibited Terms</label><textarea data-field="bs_prohibitedTerms" placeholder="Words or phrases to never use in marketing"></textarea></div>
+          <div class="field-group"><label>Trust Signals / Social Proof</label><textarea data-field="bs_trustSignals" placeholder="e.g. 200+ clients served, Featured in Forbes, SOC2 certified"></textarea></div>
+          <div class="field-group"><label>Licenses / Certifications</label><textarea data-field="bs_licenses" placeholder="Professional licenses, industry certifications"></textarea></div>
+          <div class="field-group"><label>Ad Restrictions</label><textarea data-field="bs_adRestrictions" placeholder="Any advertising limitations (industry, platform, regulatory)"></textarea></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="accordion" id="accOfferArch">
+      <div class="accordion-header" onclick="toggleAccordion('accOfferArch')">
+        <span class="accordion-title">Offer Architecture</span>
+        <span class="accordion-count">4 fields</span>
+        <span class="accordion-arrow">&#9656;</span>
+      </div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <div class="field-grid">
+          <div class="field-group"><label>Differentiators</label><textarea data-field="bs_differentiators" placeholder="What makes you different from every competitor?"></textarea></div>
+          <div class="field-group"><label>Proof Assets</label><textarea data-field="bs_proofAssets" placeholder="Case studies, testimonials, data, awards you can reference"></textarea></div>
+          <div class="field-group"><label>Offer Packages / Tiers</label><textarea data-field="bs_offerPackages" placeholder="List your pricing tiers, packages, or service levels"></textarea></div>
+          <div class="field-group"><label>Promotions / Lead Magnets</label><textarea data-field="bs_promotions" placeholder="Current offers, free resources, trials, audits"></textarea></div>
+        </div>
+      </div></div>
+    </div>
   </div>
 </section>
 
@@ -1122,6 +1399,25 @@ const PHELLOS_DEFAULTS = {
   er_upsellPaths:'', er_crossSell:'', er_expansionSignals:'', er_retentionRisks:'', er_referralMechanism:'', er_churnReasons:'', er_advocacyProgram:'', er_renewalProcess:'',
   hs_expert:'', hs_problem:'', hs_searched:'', hs_fedUp:'', hs_worked:'', hs_asking:'', hs_mission:'',
   hs_narrative:'This started when my business partner was the CFO of a VC, having lots of trouble getting reports from startups, they all reported the wrong way. I tried to solve it and get reports.\n\nLeo was in startups and saw founders how to do financials after raising millions of dollars.\n\nOne side saw it from the fund side and I saw it from the fund side.',
+  bs_website:'https://phellosconsultancy.co.uk', bs_product:'Finance consultancy for tech startups - investor due diligence, revenue reconciliation, financial modeling',
+  bs_annualRevenue:'', bs_employees:'', bs_newCustomersMonth:'', bs_avgDealSize:'3000',
+  bs_sellingMechanism:'Founder-Led Sales', bs_deliveryType:'Done-For-You (Service)',
+  bs_leadSource:'Referrals / Word of Mouth', bs_advertisingMode:'Cold Outreach',
+  bs_growthConstraint:'Lead quality', bs_techStatus:'',
+  bs_salesCycle:'', bs_closeRate:'', bs_qualifiedLeads:'', bs_salesTeamSize:'',
+  bs_monthlySpend:'', bs_pipelineValue:'', bs_monthlyLeads:'', bs_conversionRate:'',
+  bs_leadToCustomer:'', bs_followUpSLA:'', bs_competitors:'', bs_messagingAngles:'',
+  bs_totalCustomers:'', bs_aov:'', bs_cac:'', bs_ltv:'', bs_churnRate:'', bs_nps:'', bs_customerSegments:'',
+  bs_monthlyRevenue:'', bs_grossMargin:'', bs_netMargin:'', bs_mrrGrowth:'',
+  bs_burnRate:'', bs_runway:'', bs_yearlyProfit:'', bs_productLines:'',
+  bs_revenueGoal:'', bs_mainGrowthChannel:'', bs_growthStrategy:'', bs_growthConstraints:'',
+  bs_fundingNeeded:'', bs_exitTimeline:'', bs_exitTarget:'',
+  bs_custAcquisition:'', bs_custOnboarding:'', bs_serviceDelivery:'', bs_teamStructureOps:'',
+  bs_workflowStages:'', bs_qualityMetrics:'', bs_dataAnalytics:'', bs_scheduling:'',
+  bs_toolsFinance:'', bs_toolsAnalytics:'', bs_toolsSales:'', bs_toolsMarketing:'', bs_toolsOther:'',
+  bs_brandVoice:'', bs_prohibitedTerms:'', bs_trustSignals:'We have never failed a financial due diligence process',
+  bs_licenses:'', bs_adRestrictions:'',
+  bs_differentiators:'We are all auditors so we KNOW what they are looking for', bs_proofAssets:'', bs_offerPackages:'', bs_promotions:'',
   _lists: {
     caseStudies:[{name:'Mobile Commons',before:'',after:'',metric:'',notes:'Most likely to give case study'},{name:'Mindsite',before:'',after:'',metric:'',notes:''},{name:'Ease Global',before:'',after:'',metric:'',notes:''},{name:'Basic Block',before:'',after:'',metric:'',notes:'Most likely to give case study'},{name:'Wamo',before:'',after:'',metric:'',notes:''},{name:'Octopus',before:'',after:'',metric:'',notes:''}],
     features:[{step:'',feature:'',benefit:'',proof:''}],
@@ -1624,6 +1920,69 @@ async function restoreFromDrive() {
     saveToLS();
     showToast('Restored from Google Drive', 'success');
   } catch(e) { showToast('Could not restore from Drive', 'error'); console.error(e); }
+}
+
+
+// ==================== ACCORDION TOGGLE ====================
+function toggleAccordion(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ==================== AI CHAT ====================
+let chatHistory = [];
+
+function sendCoachChat() {
+  const input = document.getElementById('coachChatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  chatHistory.push({ role: 'user', content: msg });
+  renderChat();
+
+  collectState();
+  const context = JSON.stringify(state, null, 2).substring(0, 3000);
+
+  if (!appsScriptUrl) {
+    chatHistory.push({ role: 'assistant', content: 'AI chat needs an Apps Script URL configured. Use the rule-based suggestions above in the meantime, or ask Jordan to set up the Apps Script proxy.' });
+    renderChat();
+    return;
+  }
+
+  chatHistory.push({ role: 'assistant', content: '...', loading: true });
+  renderChat();
+
+  fetch(appsScriptUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'ai_chat',
+      messages: chatHistory.filter(m => !m.loading).slice(-6),
+      context: context,
+      question: msg
+    })
+  }).then(r => r.json()).then(data => {
+    chatHistory = chatHistory.filter(m => !m.loading);
+    chatHistory.push({ role: 'assistant', content: data.response || data.suggestions?.[0] || 'No response received.' });
+    renderChat();
+  }).catch(e => {
+    chatHistory = chatHistory.filter(m => !m.loading);
+    chatHistory.push({ role: 'assistant', content: 'Connection error. Check the Apps Script URL.' });
+    renderChat();
+  });
+}
+
+function renderChat() {
+  const container = document.getElementById('coachChatMessages');
+  if (!container) return;
+  container.innerHTML = chatHistory.map(m => {
+    const cls = m.role === 'user' ? 'user' : 'ai' + (m.loading ? ' loading' : '');
+    return '<div class="chat-bubble ' + cls + '">' + (m.loading ? 'Thinking...' : m.content.replace(/</g,'&lt;').replace(/\n/g,'<br>')) + '</div>';
+  }).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+function handleChatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendCoachChat(); }
 }
 
 // ==================== NAVIGATION ====================
