@@ -1792,7 +1792,7 @@ function updateCoachSuggestions() {
 }
 
 // ==================== AI SUGGESTIONS (via Apps Script + Claude API) ====================
-let appsScriptUrl = localStorage.getItem('vp_apps_script_url') || '';
+let appsScriptUrl = 'https://script.google.com/a/macros/dopaminedigital.io/s/AKfycbwCVMa0XcMJvIe1jgp6w575mbQr8sD2AGFn6pHHVgzU5O3nBKOcq7HDVtr29uT3sl5Z/exec';
 
 async function requestAISuggestions() {
   if (!appsScriptUrl) { showToast('Set Apps Script URL in settings for AI coaching', 'warning'); return; }
