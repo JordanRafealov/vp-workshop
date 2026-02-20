@@ -626,39 +626,197 @@ select[data-field]:focus { border-color: var(--accent); outline: none; box-shado
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2355556e' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
 }
 
-/* ==================== AI CHAT ==================== */
-.coach-chat { display: flex; flex-direction: column; height: 100%; }
-.coach-messages {
-  flex: 1; overflow-y: auto; padding: 10px 0; display: flex;
-  flex-direction: column; gap: 8px; max-height: 300px;
+/* ==================== AI COACH AUTO-SUGGESTIONS ==================== */
+.coach-loading {
+  display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+  background: var(--bg-input); border-radius: var(--radius-sm); margin-bottom: 8px;
+  font-size: 12px; color: var(--text-secondary); border: 1px solid var(--border);
 }
-.chat-bubble {
-  padding: 8px 12px; border-radius: 10px; font-size: 12.5px;
-  line-height: 1.5; max-width: 90%; word-wrap: break-word;
+.coach-loading .spinner { width: 14px; height: 14px; border: 2px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.coach-card-label.ai { background: #6366f1; }
+.coach-research-row {
+  display: flex; gap: 6px; padding-top: 10px; border-top: 1px solid var(--border); margin-top: 10px;
 }
-.chat-bubble.user {
-  background: var(--accent); color: #fff; align-self: flex-end;
-  border-bottom-right-radius: 3px;
-}
-.chat-bubble.ai {
-  background: var(--bg-input); color: var(--text-primary); align-self: flex-start;
-  border-bottom-left-radius: 3px; border: 1px solid var(--border);
-}
-.chat-bubble.ai.loading { opacity: 0.7; font-style: italic; }
-.coach-input-row {
-  display: flex; gap: 6px; padding-top: 8px; border-top: 1px solid var(--border); margin-top: 8px;
-}
-.coach-input-row input {
+.coach-research-row input {
   flex: 1; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);
   background: var(--bg-input); color: var(--text-primary); font-size: 12.5px; font-family: var(--font);
 }
-.coach-input-row input:focus { border-color: var(--accent); outline: none; }
-.coach-input-row button {
-  padding: 8px 12px; border-radius: 6px; border: none;
-  background: var(--accent); color: #fff; font-size: 12px; font-weight: 600;
+.coach-research-row input:focus { border-color: var(--accent); outline: none; }
+.coach-research-row button {
+  padding: 8px 14px; border-radius: 6px; border: none;
+  background: #6366f1; color: #fff; font-size: 12px; font-weight: 600;
   cursor: pointer; white-space: nowrap;
 }
-.coach-input-row button:hover { background: var(--accent-hover); }
+.coach-research-row button:hover { background: #4f46e5; }
+.coach-research-row button:disabled { opacity: 0.5; cursor: wait; }
+
+/* Research results */
+.research-card { border-color: rgba(99,102,241,0.3); }
+.research-sources {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.research-source {
+  font-size: 10px; padding: 2px 8px; border-radius: 10px;
+  background: var(--accent-glow); color: var(--accent); text-decoration: none;
+  transition: all 0.15s; border: 1px solid transparent;
+}
+.research-source:hover { border-color: var(--accent); }
+.research-web-badge {
+  display: inline-block; font-size: 8px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; background: #10b981; color: #fff; padding: 1px 5px;
+  border-radius: 3px; margin-left: 4px; vertical-align: middle;
+}
+.research-suggestions {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;
+}
+.research-chip {
+  font-size: 10px; padding: 3px 8px; border-radius: 10px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
+  white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+}
+.research-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+
+/* ==================== CMD+K SEARCH ==================== */
+.search-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  z-index: 500; justify-content: center; padding-top: 18vh;
+}
+.search-overlay.open { display: flex; }
+.search-modal {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); width: 560px; max-width: 90vw;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5); overflow: hidden; max-height: 60vh;
+  display: flex; flex-direction: column;
+}
+.search-input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px; border-bottom: 1px solid var(--border);
+}
+.search-input-wrap svg { width: 20px; height: 20px; color: var(--text-muted); flex-shrink: 0; }
+.search-input {
+  flex: 1; background: none; border: none; outline: none;
+  font-size: 16px; color: var(--text-primary); font-family: var(--font);
+}
+.search-input::placeholder { color: var(--text-muted); }
+.search-results { overflow-y: auto; max-height: 400px; padding: 8px; }
+.search-result {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 12px; border-radius: 6px; cursor: pointer; transition: background 0.1s;
+}
+.search-result:hover, .search-result.selected { background: var(--accent-glow-strong); }
+.search-result-section { font-size: 10px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.8px; }
+.search-result-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.search-result-value { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.search-empty { padding: 24px; text-align: center; color: var(--text-muted); font-size: 13px; }
+.search-hint { font-size: 11px; color: var(--text-muted); padding: 8px 16px; border-top: 1px solid var(--border); text-align: center; }
+[data-field].search-highlight {
+  animation: highlightPulse 2s ease;
+}
+@keyframes highlightPulse {
+  0%,30% { box-shadow: 0 0 0 3px rgba(124,58,237,0.35), 0 0 20px rgba(124,58,237,0.15); }
+  100% { box-shadow: none; }
+}
+
+/* ==================== EXPORT DROPDOWN ==================== */
+.export-wrap { position: relative; }
+.export-menu {
+  display: none; position: absolute; top: 100%; right: 0; margin-top: 6px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 4px;
+  box-shadow: var(--shadow-elevated); min-width: 200px; z-index: 120;
+}
+.export-wrap.open .export-menu { display: block; }
+.export-menu-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px; border-radius: 4px; font-size: 12.5px;
+  color: var(--text-primary); cursor: pointer; border: none;
+  background: none; width: 100%; text-align: left; font-family: var(--font);
+  transition: background 0.1s;
+}
+.export-menu-item:hover { background: var(--accent-glow); color: var(--accent); }
+.export-menu-item .em-icon { font-size: 14px; width: 20px; text-align: center; opacity: 0.7; }
+
+/* ==================== HAMBURGER MENU ==================== */
+.hamburger {
+  display: none; width: 36px; height: 36px; border: none;
+  background: none; cursor: pointer; flex-direction: column;
+  justify-content: center; align-items: center; gap: 5px; padding: 0;
+}
+.hamburger span { width: 20px; height: 2px; background: var(--text-secondary); border-radius: 1px; transition: all 0.2s; }
+@media (max-width: 900px) {
+  .hamburger { display: flex; }
+  #sidebar.mobile-open { display: flex !important; z-index: 200; box-shadow: var(--shadow-elevated); }
+}
+
+/* ==================== SECTION PROGRESS BADGE ==================== */
+.nav-progress {
+  font-size: 10px; color: var(--text-muted); margin-left: auto;
+  font-variant-numeric: tabular-nums; opacity: 0.7;
+}
+.nav-progress.done { color: var(--success); opacity: 1; font-weight: 600; }
+
+/* ==================== SCROLLBAR ==================== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+
+/* ==================== VISUAL POLISH ==================== */
+/* Smooth input focus transition */
+textarea[data-field]:focus, textarea[data-key]:focus,
+input[data-field]:focus, input[data-key]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rgba(124,58,237,0.06);
+  background: color-mix(in srgb, var(--bg-input) 95%, var(--accent) 5%);
+}
+
+/* Filled field subtle indicator */
+textarea[data-field]:not(:placeholder-shown):not(:focus),
+input[data-field]:not(:placeholder-shown):not(:focus) {
+  border-color: color-mix(in srgb, var(--border) 70%, var(--success) 30%);
+}
+
+/* Card hover lift */
+.dynamic-item:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.coach-card:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.matrix-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+/* Smooth accordion transition */
+.accordion-body { transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
+
+/* Section banner hover shine */
+.section-banner:hover::after { animation: shimmer 1.5s infinite; }
+
+/* Active nav item left border */
+.nav-item.active { border-left: 2px solid var(--accent); padding-left: 8px; }
+
+/* Coach card entrance animation */
+.coach-card { animation: slideIn 0.25s ease; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+
+/* Progress ring glow when > 80% */
+.progress-ring-fill.high { filter: drop-shadow(0 0 6px rgba(124,58,237,0.5)); }
+
+/* Smooth section body transition */
+.section-body { transition: background var(--transition), border-color var(--transition), box-shadow var(--transition); }
+.section-body:hover { box-shadow: var(--shadow-card), 0 0 0 1px var(--border-hover); }
+
+/* Tooltip style for nav phase labels */
+.nav-phase { position: relative; }
+.nav-phase::after { content: ''; display: block; width: 20px; height: 1px; background: var(--border); margin-top: 4px; }
+
+/* Better dropdown styling */
+select[data-field] { transition: border-color var(--transition), box-shadow var(--transition), background var(--transition); }
+select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rgba(124,58,237,0.06); }
+
+/* Keyboard shortcut hint */
+.kbd { display: inline-block; font-size: 10px; padding: 1px 5px; border-radius: 3px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-muted); font-family: monospace; }
+
 /* ==================== PRINT ==================== */
 @media print {
   #topBar, #sidebar, #rightPanel, .tip-box, .add-item-btn, .item-remove,
@@ -676,6 +834,7 @@ select[data-field]:focus { border-color: var(--accent); outline: none; box-shado
 <!-- ==================== HEADER ==================== -->
 <header id="topBar">
   <div class="header-left">
+    <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('mobile-open')"><span></span><span></span><span></span></button>
     <h1>Value Proposition Workshop</h1>
     <span class="client-badge" id="clientBadge">-</span>
   </div>
@@ -691,7 +850,15 @@ select[data-field]:focus { border-color: var(--accent); outline: none; box-shado
     </div>
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode"></button>
     <button class="drive-status" id="driveBtn" onclick="handleDriveConnect()" title="Connect Google Drive for auto-backup"><span class="drive-icon">&#9729;</span><span id="driveLabel">Connect Drive</span></button>
-    <button class="hdr-btn primary" onclick="exportMarkdown()">Export</button>
+    <button class="hdr-btn" onclick="openSearch()" title="Search fields (Cmd+K)" style="font-size:13px;padding:5px 8px">&#128269;</button>
+    <div class="export-wrap" id="exportWrap">
+      <button class="hdr-btn primary" onclick="this.parentElement.classList.toggle('open')">Export &#9662;</button>
+      <div class="export-menu">
+        <button class="export-menu-item" onclick="exportMarkdown();this.closest('.export-wrap').classList.remove('open')"><span class="em-icon">&#128196;</span>Copy as Markdown</button>
+        <button class="export-menu-item" onclick="exportPDF();this.closest('.export-wrap').classList.remove('open')"><span class="em-icon">&#128462;</span>Generate PDF Report</button>
+        <button class="export-menu-item" onclick="downloadBackup();this.closest('.export-wrap').classList.remove('open')"><span class="em-icon">&#128190;</span>Download JSON Backup</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -732,6 +899,12 @@ select[data-field]:focus { border-color: var(--accent); outline: none; box-shado
     <button class="nav-footer-btn" onclick="restoreFromDrive()">Restore from Drive</button>
     <label class="nav-footer-btn" style="cursor:pointer">Import File<input type="file" accept=".json" style="display:none" onchange="importBackup(this.files[0])"></label>
   </div>
+  <div style="padding:8px 10px;border-top:1px solid var(--border);text-align:center;">
+    <div style="font-size:9px;color:var(--text-muted);line-height:1.8;">
+      <span class="kbd">&#8984;S</span> Save &nbsp; <span class="kbd">&#8984;K</span> Search
+    </div>
+    <div style="font-size:9px;color:var(--text-muted);margin-top:4px;opacity:0.6;">Powered by Dopamine Digital</div>
+  </div>
 </nav>
 
 <!-- ==================== RIGHT PANEL: LIVE SUMMARY ==================== -->
@@ -746,14 +919,12 @@ select[data-field]:focus { border-color: var(--accent); outline: none; box-shado
   </div>
   <div id="rpCoachTab" class="rp-tab-content">
     <div class="rp-header"><span class="rp-live-dot"></span> AI Coach</div>
+    <div id="coachAiLoading" style="display:none" class="coach-loading"><div class="spinner"></div> Analyzing your inputs...</div>
     <div id="coachSuggestions"></div>
-    <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px">
-      <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">Ask the AI Coach</div>
-      <div id="coachChatMessages" class="coach-messages"></div>
-      <div class="coach-input-row">
-        <input type="text" id="coachChatInput" placeholder="Ask a question about this section..." onkeydown="handleChatKeydown(event)">
-        <button onclick="sendCoachChat()">Send</button>
-      </div>
+    <div id="researchSuggestions" class="research-suggestions"></div>
+    <div class="coach-research-row">
+      <input type="text" id="coachResearchInput" placeholder="Research: e.g. &quot;typical SaaS churn rates&quot;" onkeydown="if(event.key==='Enter'){event.preventDefault();runResearch();}" onfocus="showResearchSuggestions()">
+      <button onclick="runResearch()">Research</button>
     </div>
   </div>
 </aside>
@@ -1316,6 +1487,18 @@ select[data-field]:focus { border-color: var(--accent); outline: none; box-shado
 
 <div id="toastContainer"></div>
 
+<!-- ==================== CMD+K SEARCH ==================== -->
+<div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearch()">
+  <div class="search-modal">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search fields, sections, values..." oninput="performSearch(this.value)">
+    </div>
+    <div class="search-results" id="searchResults"><div class="search-empty">Type to search across all workshop fields</div></div>
+    <div class="search-hint">&#8984;K to open &middot; ESC to close &middot; &#8593;&#8595; to navigate &middot; Enter to jump</div>
+  </div>
+</div>
+
 <!-- ==================== JAVASCRIPT ==================== -->
 <script>
 const SAVE_DEBOUNCE = 300;
@@ -1369,7 +1552,9 @@ const PHELLOS_DEFAULTS = {
   dc_fundingStage:'First time or second time founders who are either from the industry they are trying to change or people who do not want to deal with finance even if they have the experience.\n\nHow many years experience? 3-7 years',
   dc_jobTitles:'Typically we work with the founders for smaller companies.\nCEO and founder/ CEO/ Co-Founder\n\nBut with larger ones it is not uncommon to work with CFOs or COOs though not typical.',
   dc_personality:'Mostly Men. Men are more pre-emptive.\n\nThe ideal thing I\'m looking for is, diligent founder, someone who\'s always on it, understands the importance of finance, and a cohesive working environment. A high degree of energy, and humility.',
-  dc_revenue:'', dc_growthSignals:'', dc_teamStructure:'',
+  dc_revenue:'Pre-Series A to Series C. Actively fundraising or preparing to raise.',
+  dc_growthSignals:'Preparing for a funding round\nInvestor due diligence requirements incoming\nFailed or stalled fundraise\nRunway under 12 months\nBoard pressure on financial reporting',
+  dc_teamStructure:'No dedicated finance team or CFO\nUsing a generalist bookkeeper or accountant\nFounder managing finances themselves',
   dc_techStack:'', dc_bestClients:'Mindsite - Because they\'re a no BS team, can be very direct.\n\nHelloKlean - Shower head that softens water\n\nBasicblock - I like working with them because\n\nThey all have clean operational data, and less complicated businesses',
   dc_dreamClients:'Canva would be a dream.\nUI Path\nRemarkable',
   wd_businessGoals:'Always "exit/IPO" long term\nMedium term goal is some form of profitability\nShort term goal is always "revenue growth"\n\nDaily goals are to focus on what they are good at doing (product, doing deals etc)\nReduce all the friction.',
@@ -1379,32 +1564,95 @@ const PHELLOS_DEFAULTS = {
   wd_suspicions:'Accessibility, it\'s a remote team. Pricing is rarely an issue, but sometimes they don\'t understand what we do, and then it might be.',
   wd_enemies:'Complacency', wd_trends:'',
   wd_identityStory:'', wd_statusSignals:'', wd_communityBehavior:'', wd_contentPreferences:'', wd_decisionFramework:'',
-  ri_budget:'', ri_purchaseCycle:'', ri_procurementProcess:'', ri_paymentPreferences:'', ri_lifetimeValue:'', ri_roiExpectation:'', ri_costOfInaction:'', ri_competingBudgets:'', ri_priceSensitivity:'6',
-  cm_socialPlatforms:'', cm_contentFormats:'', cm_events:'', cm_communities:'', cm_publications:'', cm_podcasts:'', cm_influencers:'', cm_searchBehavior:'', cm_referralSources:'', cm_outreachChannels:'',
-  lm_jargon:'', lm_wordsAvoid:'', lm_tonePreference:'', lm_painLanguage:'', lm_aspirationLanguage:'', lm_objectionLanguage:'', lm_socialProofType:'', lm_messagingDOs:'', lm_messagingDONTs:'',
+  ri_budget:'3000-6000 GBP/month retainer. 30-Day Sprint starts at 3000 GBP.',
+  ri_purchaseCycle:'1-3 weeks. Often urgent when funding round is approaching.',
+  ri_procurementProcess:'Founder decision, minimal procurement process. Occasionally involves COO or board approval.',
+  ri_paymentPreferences:'Monthly retainer. Some prefer project-based for initial sprint.',
+  ri_lifetimeValue:'12-24 months at 3-6K/month = 36K-144K GBP lifetime value',
+  ri_roiExpectation:'Protect or add 30% valuation during due diligence. ROI is 10-50x the retainer.',
+  ri_costOfInaction:'10-30% valuation haircut during due diligence. Failed fundraise. Delayed funding by 3-6 months. Investor confidence destroyed.',
+  ri_competingBudgets:'Legal counsel, product development, marketing spend',
+  ri_priceSensitivity:'4',
+  cm_socialPlatforms:'LinkedIn (primary), Twitter/X for tech founders',
+  cm_contentFormats:'Podcasts, LinkedIn posts, founder newsletters, case studies',
+  cm_events:'Web Summit, SaaStock, London Tech Week, TechCrunch Disrupt, local startup meetups',
+  cm_communities:'Startup accelerators (Y Combinator, Techstars, Seedcamp), founder Slack groups, VC networks',
+  cm_publications:'TechCrunch, Sifted, EU-Startups, The Information',
+  cm_podcasts:'Startup/VC podcasts, founder story podcasts, finance for startups content',
+  cm_influencers:'VC partners, accelerator mentors, successful founders in their network',
+  cm_searchBehavior:'Google: "startup CFO services", "due diligence preparation", "investor reporting template"',
+  cm_referralSources:'VCs who need portfolio companies cleaned up\nAccelerators recommending finance help\nFounder-to-founder referrals\nAccountants referring complex startup work',
+  cm_outreachChannels:'Podcast invitations (primary)\nLinkedIn DMs and content\nVC partner referrals\nStartup event speaking',
+  lm_jargon:'Due diligence, fundraise, runway, burn rate, MRR, ARR, cap table, data room, IPEV, Series A/B/C, term sheet, valuation',
+  lm_wordsAvoid:'Bookkeeping, accountancy (too generic), cheap, basic',
+  lm_tonePreference:'Direct, confident, no-BS. Like a trusted advisor, not a salesperson.',
+  lm_painLanguage:'Can\'t meet investor requirements\nNumbers are a mess\nDon\'t know how to report to investors\nRunning out of time before the raise\nThis is their only shot',
+  lm_aspirationLanguage:'Investor-ready from day one\nRaise with confidence\nFocus on building, not spreadsheets\nPass due diligence smoothly\nProtect your valuation',
+  lm_objectionLanguage:'I have an accountant - he can handle it right?\nHow much do you help on strategy?\nI don\'t really need this',
+  lm_socialProofType:'Successful due diligence outcomes\nValuation protection stories\nVC endorsements\n"Never failed a DD process"',
+  lm_messagingDOs:'Quantify the risk (10-30% valuation haircut)\nUse "investor-ready" and "due diligence"\nReference the auditor background\nMake it urgent (funding timeline)',
+  lm_messagingDONTs:'Don\'t say "bookkeeping" or "accounting services"\nDon\'t lead with price\nDon\'t use jargon the founder won\'t know\nDon\'t compare to accountants (different category)',
   trig_preparing:true, trig_boardPressure:true, trig_failedAudit:true, trig_runway:true, trig_newFunding:true,
-  trig_top3:'', trig_custom:'', trig_seasonality:'', trig_budgetCycles:'', trig_digitalSignals:'', trig_urgencyDrivers:'', trig_idealTiming:'',
-  bc_influenceMap:'', bc_dealKillers:'',
-  bb_evaluationCriteria:'', bb_vendorComparison:'', bb_proofRequired:'', bb_trialExpectation:'', bb_contractPreference:'', bb_selectionTimeline:'', bb_implementationConcerns:'', bb_successMetrics:'', bb_switchingBarriers:'',
+  trig_top3:'1. Preparing for a funding round (Series A/B/C)\n2. Failed or stalled fundraise due to messy financials\n3. Investor requirements they can\'t meet',
+  trig_custom:'New board member demanding proper reporting\nCFO departure leaving a gap\nAccountant unable to handle investor-grade work',
+  trig_seasonality:'Q1 and Q3 are peak fundraising seasons',
+  trig_budgetCycles:'Tied to fundraise timeline, not calendar year',
+  trig_digitalSignals:'Crunchbase fundraise announcements\nLinkedIn posts about "exciting news coming"\nJob posts for CFO or finance roles\nAccelerator cohort graduations',
+  trig_urgencyDrivers:'Runway under 12 months\nTerm sheet received with DD requirements\nInvestor meeting scheduled in next 30 days',
+  trig_idealTiming:'3-6 months before planned fundraise is ideal. Most come 4-8 weeks before (too late but still doable).',
+  bc_influenceMap:'Founder/CEO: Primary decision maker (especially in smaller companies)\nCOO/CFO: Involved in larger companies, focused on operational fit\nBoard/Investors: Often the ones pushing the founder to get proper finance help\nExisting accountant: Can be a blocker if they feel threatened',
+  bc_dealKillers:'Existing accountant actively blocking\nFounder doesn\'t see value in proper financials\nNo fundraise planned (no urgency)\nBoard has already mandated a specific firm',
+  bb_evaluationCriteria:'Industry expertise (do they understand startups?)\nTrack record with investors and due diligence\nResponsiveness and communication style\nPrice relative to fundraise size',
+  bb_vendorComparison:'Traditional accountant vs. fractional CFO vs. Phellos\nAccountants do compliance, not strategy\nFractional CFOs are expensive full-time hires\nPhellos bridges both with investor-side expertise',
+  bb_proofRequired:'Case studies from similar-stage startups\nReferences from VCs or investors\nExamples of successful due diligence outcomes',
+  bb_trialExpectation:'Free Round Readiness Audit - no commitment needed to get value',
+  bb_contractPreference:'Monthly retainer, flexible terms\n30-Day Sprint for quick wins\nNo long-term lock-in',
+  bb_selectionTimeline:'1-3 weeks, accelerated when funding round is imminent',
+  bb_implementationConcerns:'How quickly can you get up to speed on our numbers?\nWill you work with our existing accountant?\nHow much of our time will this take?',
+  bb_successMetrics:'Clean due diligence pass\nValuation protection (no haircut)\nInvestor confidence in financials\nMonthly reporting on time',
+  bb_switchingBarriers:'Relationship with existing accountant\nFear of changing systems mid-fundraise\nPerceived complexity of transition',
   ba_before:'The before state is unreconciled financials, poorly constructed accounting practices, limited view on financial performance, no sophisticated financial model. No reporting standards. As a result poor financial metrics, no narrative around financials. No data room',
   ba_steps:'1. Get the accounting records for the last 2 years.\n2. We map the accounting records and ingest it into the historic financial model.\n3. We ask the founder the questions about revenue, expenses, or anomalies, and understand their business model. (2-3 meetings)\n4. Well crunch out the first report, for them to review\n5. Move into the forecast (2-3 meetings), when they want to raise etc\n6. Data room set up, keeping the company sales ready at all times.\n7. Post onboarding\n8. Every month after that closes, we ingest that month\'s financials and review and ask questions, update forecasts and provide a report.',
   ba_after:'The after state is fully reconciled management accounts, full 5 year forecast, IPEV, monthly and quarterly reporting, metric sets, data room, fully reconciled reporting and dashboard. As a result they are able to raise funds from investors.\n\nNote we do not touch tax.',
   ba_frameworkName:'', ba_frameworkSteps:'', ba_frameworkSummary:'', ba_timeline:'',
   g_guarantee:'We have never failed a financial due diligence process ever.\nYour Due diligence process will run smoothly and quickly.\nIf they fail because of me will work for them for free for 3 months.\n\nWe will add 30% extra valuation to your company or XYZ\nWe will prevent the loss of 30% valuation of your company.',
   g_mechanism:'We are all auditors so we KNOW what they\'re looking for.',
-  g_riskReversal:'', g_valueStack:'', g_dreamOutcome:'',
-  np_timeWasters:'', np_cultureMismatch:'', np_overcomableFlags:'', np_referOutTo:'',
-  cp_differentiator:'',
-  sp_qualificationCriteria:'', sp_discoveryQuestions:'', sp_demoStrategy:'', sp_proposalStructure:'', sp_closingTechniques:'', sp_followUpCadence:'',
-  er_upsellPaths:'', er_crossSell:'', er_expansionSignals:'', er_retentionRisks:'', er_referralMechanism:'', er_churnReasons:'', er_advocacyProgram:'', er_renewalProcess:'',
-  hs_expert:'', hs_problem:'', hs_searched:'', hs_fedUp:'', hs_worked:'', hs_asking:'', hs_mission:'',
+  g_riskReversal:'If we fail your due diligence process, we work for free for 3 months.',
+  g_valueStack:'Fully reconciled management accounts\n5-year financial forecast (IPEV compliant)\nMonthly/quarterly investor reporting\nComplete data room setup\nMetric dashboards\nOngoing fractional CFO partnership',
+  g_dreamOutcome:'Pass due diligence smoothly, protect your valuation, and raise funds with confidence - so you can focus on building your product, not wrestling with spreadsheets.',
+  np_timeWasters:'Pre-revenue companies with no funding\nCompanies not planning to raise\nFounders who want to do it themselves',
+  np_cultureMismatch:'Founders who don\'t value finance or see it as optional\nCompanies with toxic internal politics\nMicromanagers who won\'t trust the process',
+  np_overcomableFlags:'Small budget initially - can start with Sprint\nLimited financial data - that\'s exactly why they need Phellos',
+  np_referOutTo:'Tax specialists, pure bookkeepers, companies needing full-time CFO hire',
+  cp_differentiator:'We are all auditors - we KNOW what investors are looking for because we\'ve been on the other side of the table.',
+  sp_qualificationCriteria:'Tech company with 5-500 employees\nPlanning to raise or currently raising\nNo dedicated CFO or finance team\nMinimum 2 years of trading history',
+  sp_discoveryQuestions:'When are you planning to raise next?\nWhat does your current financial reporting look like?\nHave you been through due diligence before?\nWho handles your finances currently?\nWhat are your investors asking for that you can\'t provide?',
+  sp_demoStrategy:'Round Readiness & Valuation Haircut Audit - free diagnostic call that quantifies the problem',
+  sp_proposalStructure:'',
+  sp_closingTechniques:'Quantify the valuation haircut risk\nShow the cost of delay (runway burning)\nReference similar companies who passed DD smoothly with Phellos\nGuarantee: never failed a DD process',
+  sp_followUpCadence:'Day 1: Audit results email\nDay 3: Case study relevant to their stage\nDay 7: Check-in call\nDay 14: Final follow-up with urgency around funding timeline',
+  er_upsellPaths:'30-Day Sprint to full monthly retainer\nBasic reporting to full CFO partnership\nOne-off data room to ongoing investor relations support',
+  er_crossSell:'Board reporting packages\nM&A preparation\nFinancial modeling for new products/markets',
+  er_expansionSignals:'Successful fundraise (need ongoing reporting)\nNew investor requirements\nPlanning next round\nGrowing team and complexity',
+  er_retentionRisks:'Hiring a full-time CFO\nRunning out of funding\nFounder disengagement from finances',
+  er_referralMechanism:'VC partners referring portfolio companies\nFounder-to-founder word of mouth\nAccountant referrals for complex startup work',
+  er_churnReasons:'Hired internal CFO\nCompany shut down\nFundraise completed and founder thinks they don\'t need it anymore',
+  er_advocacyProgram:'', er_renewalProcess:'Monthly auto-renewal. Quarterly business reviews to demonstrate ongoing value.',
+  hs_expert:'Leo\'s business partner was CFO of a venture capital fund. Leo worked directly with startup founders after they raised millions.',
+  hs_problem:'Startups consistently reported financials the wrong way. The VC side couldn\'t get proper reports, and the startup side didn\'t know how to do them.',
+  hs_searched:'Tried working with traditional accountants and bookkeepers - they didn\'t understand startup metrics, investor expectations, or due diligence requirements.',
+  hs_fedUp:'Built a system to bridge the gap between what investors need and what startups actually have.',
+  hs_worked:'Startups started passing due diligence smoothly. Fundraising timelines compressed. Investors got clean, consistent reporting.',
+  hs_asking:'Other VCs and founders started asking for the same service. Word spread through the startup ecosystem.',
+  hs_mission:'Make every tech startup investor-ready from day one, so no founder loses funding because their numbers are a mess.',
   hs_narrative:'This started when my business partner was the CFO of a VC, having lots of trouble getting reports from startups, they all reported the wrong way. I tried to solve it and get reports.\n\nLeo was in startups and saw founders how to do financials after raising millions of dollars.\n\nOne side saw it from the fund side and I saw it from the fund side.',
   bs_website:'https://phellosconsultancy.co.uk', bs_product:'Finance consultancy for tech startups - investor due diligence, revenue reconciliation, financial modeling',
   bs_annualRevenue:'', bs_employees:'', bs_newCustomersMonth:'', bs_avgDealSize:'3000',
   bs_sellingMechanism:'Founder-Led Sales', bs_deliveryType:'Done-For-You (Service)',
   bs_leadSource:'Referrals / Word of Mouth', bs_advertisingMode:'Cold Outreach',
   bs_growthConstraint:'Lead quality', bs_techStatus:'',
-  bs_salesCycle:'', bs_closeRate:'', bs_qualifiedLeads:'', bs_salesTeamSize:'',
+  bs_salesCycle:'1-3 weeks (accelerates when fundraise is imminent)',
+  bs_closeRate:'', bs_qualifiedLeads:'', bs_salesTeamSize:'Founder-led (Leo)',
   bs_monthlySpend:'', bs_pipelineValue:'', bs_monthlyLeads:'', bs_conversionRate:'',
   bs_leadToCustomer:'', bs_followUpSLA:'', bs_competitors:'', bs_messagingAngles:'',
   bs_totalCustomers:'', bs_aov:'', bs_cac:'', bs_ltv:'', bs_churnRate:'', bs_nps:'', bs_customerSegments:'',
@@ -1421,8 +1669,8 @@ const PHELLOS_DEFAULTS = {
   _lists: {
     caseStudies:[{name:'Mobile Commons',before:'',after:'',metric:'',notes:'Most likely to give case study'},{name:'Mindsite',before:'',after:'',metric:'',notes:''},{name:'Ease Global',before:'',after:'',metric:'',notes:''},{name:'Basic Block',before:'',after:'',metric:'',notes:'Most likely to give case study'},{name:'Wamo',before:'',after:'',metric:'',notes:''},{name:'Octopus',before:'',after:'',metric:'',notes:''}],
     features:[{step:'',feature:'',benefit:'',proof:''}],
-    competitors:[{name:'Do Nothing',positioning:'',advantage:'',loseWhen:''},{name:'Generic Accountant',positioning:'',advantage:'',loseWhen:''}],
-    objections:[{objection:'I have an accountant, he can handle it right?',response:''},{objection:'How much do you help on strategy?',response:''},{objection:'I don\'t really need this.',response:''}],
+    competitors:[{name:'Do Nothing',positioning:'Founders try to handle finances themselves or ignore them until fundraise',advantage:'We prevent the 10-30% valuation haircut they don\'t see coming. The cost of doing nothing is far higher than the retainer.',loseWhen:'Founder is not planning to raise and has no investor pressure'},{name:'Generic Accountant',positioning:'Tax compliance, bookkeeping, year-end accounts',advantage:'Accountants do compliance, not investor-ready financials. We are auditors who know what investors look for because we\'ve been on the fund side.',loseWhen:'Company only needs basic compliance and has no investor-facing needs'},{name:'Fractional CFO',positioning:'Part-time senior finance hire, strategic advisory',advantage:'We combine operational finance work with due diligence expertise at a fraction of a full-time CFO cost. Plus we\'ve sat on the investor side.',loseWhen:'Company wants a senior executive who attends board meetings and manages a finance team'}],
+    objections:[{objection:'I have an accountant, he can handle it right?',response:'Your accountant handles compliance and tax. We handle investor-grade financials - reconciled management accounts, forecasts, data rooms, and due diligence preparation. These are completely different skillsets. Has your accountant ever sat on the other side of a due diligence table?'},{objection:'How much do you help on strategy?',response:'Our core is making your numbers tell the right story. We build the financial models, forecasts, and reporting that inform strategy. We don\'t replace your business strategy - we give you the financial clarity to make better strategic decisions.'},{objection:'I don\'t really need this.',response:'Most founders say that until they\'re 4 weeks from a term sheet and their numbers don\'t reconcile. The cost of being unprepared is a 10-30% valuation haircut or a failed raise entirely. When are you planning to raise next?'}],
     faqs:[{question:'',answer:''}]
   }
 };
@@ -1534,14 +1782,24 @@ function updateProgress() {
     fields.forEach(f=>{ if(f.value&&f.value.trim()) filled++; });
     listFields.forEach(f=>{ if(f.value&&f.value.trim()) filled++; });
     totalF+=total; totalFilled+=filled;
-    const dot=document.querySelector(`[data-nav="${sec.id}"] .nav-dot`);
+    const navItem=document.querySelector(`[data-nav="${sec.id}"]`);
+    const dot=navItem?.querySelector('.nav-dot');
     if(dot) { if(total===0||filled===0) dot.className='nav-dot'; else if(filled>=total*0.6) dot.className='nav-dot complete'; else dot.className='nav-dot partial'; }
+    if(navItem&&total>0) { let badge=navItem.querySelector('.nav-progress'); if(!badge){badge=document.createElement('span');badge.className='nav-progress';navItem.appendChild(badge);} badge.textContent=filled+'/'+total; badge.classList.toggle('done',filled>=total*0.6); }
   });
   const pct=totalF>0?Math.round((totalFilled/totalF)*100):0;
   document.getElementById('progressValue').textContent=pct+'%';
   const circ=document.getElementById('progressRing');
   const circumference=81.68;
   circ.style.strokeDashoffset=circumference-(pct/100)*circumference;
+  circ.classList.toggle('high', pct >= 80);
+  // Section completion celebration
+  if(navItem&&total>0&&filled>=total) {
+    if(!sec.classList.contains('section-complete')) {
+      sec.classList.add('section-complete');
+      showToast(sec.querySelector('.section-banner')?.textContent?.replace('Copy','').trim()+' - Section complete!','success');
+    }
+  } else { sec.classList.remove('section-complete'); }
 }
 
 // ==================== LIVE SUMMARY ====================
@@ -1794,10 +2052,11 @@ function updateCoachSuggestions() {
 // ==================== AI SUGGESTIONS (via Apps Script + Claude API) ====================
 let appsScriptUrl = 'https://script.google.com/a/macros/dopaminedigital.io/s/AKfycbwCVMa0XcMJvIe1jgp6w575mbQr8sD2AGFn6pHHVgzU5O3nBKOcq7HDVtr29uT3sl5Z/exec';
 
+let aiSuggestTimeout = null;
+let lastAiSectionData = '';
+
 async function requestAISuggestions() {
-  if (!appsScriptUrl) { showToast('Set Apps Script URL in settings for AI coaching', 'warning'); return; }
-  const btn = document.getElementById('coachApiBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Thinking...'; }
+  if (!appsScriptUrl) return;
   collectState();
   const secs = document.querySelectorAll('.workshop-section');
   let activeSec = 's0', activeLabel = 'Setup';
@@ -1805,24 +2064,96 @@ async function requestAISuggestions() {
   const sectionData = {};
   const sec = document.getElementById(activeSec);
   if (sec) sec.querySelectorAll('[data-field]').forEach(el => { if (el.value) sectionData[el.dataset.field] = el.type === 'checkbox' ? el.checked : el.value; });
+  // Skip if section data hasn't changed
+  const dataKey = JSON.stringify(sectionData);
+  if (dataKey === lastAiSectionData || Object.keys(sectionData).length < 2) return;
+  lastAiSectionData = dataKey;
+  const loader = document.getElementById('coachAiLoading');
+  if (loader) loader.style.display = 'flex';
   try {
     const resp = await fetch(appsScriptUrl, {
       method: 'POST', headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ action: 'ai_suggest', sectionData, sectionName: activeLabel, allData: state })
     });
     const data = await resp.json();
-    if (data.error === 'no_api_key') { showToast('Add ANTHROPIC_API_KEY in your Apps Script properties', 'warning'); }
-    else if (data.error) { showToast('AI error: ' + data.error, 'error'); }
+    if (data.error === 'no_api_key' || data.error) { console.log('AI coach:', data.error); }
     else {
       const container = document.getElementById('coachSuggestions');
       let html = '';
-      if (data.suggestions) data.suggestions.forEach(s => { html += `<div class="coach-card"><div class="coach-card-label suggest">AI Suggestion</div><p>${s}</p></div>`; });
+      if (data.suggestions) data.suggestions.forEach(s => { html += `<div class="coach-card"><div class="coach-card-label ai">AI</div><p>${s}</p></div>`; });
       if (data.question) html += `<div class="coach-card"><div class="coach-card-label question">AI Question</div><p>${data.question}</p></div>`;
-      if (html) container.innerHTML = html + container.innerHTML;
-      showToast('AI suggestions added', 'success');
+      if (html) container.innerHTML = html;
     }
-  } catch(e) { showToast('Could not reach AI coaching endpoint', 'error'); }
-  if (btn) { btn.disabled = false; btn.textContent = 'Get AI Suggestions'; }
+  } catch(e) { console.log('AI coach error:', e.message); }
+  if (loader) loader.style.display = 'none';
+}
+
+async function runResearch() {
+  const input = document.getElementById('coachResearchInput');
+  const query = input.value.trim();
+  if (!query) return;
+  if (!appsScriptUrl) { showToast('Apps Script not configured', 'warning'); return; }
+  input.value = '';
+  const loader = document.getElementById('coachAiLoading');
+  if (loader) { loader.style.display = 'flex'; loader.innerHTML = '<div class="spinner"></div> Searching the web...'; }
+  const btn = document.querySelector('.coach-research-row button');
+  if (btn) { btn.disabled = true; btn.textContent = 'Searching...'; }
+  collectState();
+  const context = JSON.stringify(state, null, 2).substring(0, 2000);
+  const industry = state.dc_industry ? state.dc_industry.split('\n')[0] : '';
+  try {
+    const resp = await fetch(appsScriptUrl, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'ai_research', query: query, context: context, industry: industry })
+    });
+    const data = await resp.json();
+    const container = document.getElementById('coachSuggestions');
+    const answer = (data.response || 'No response received.').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+    let sourcesHtml = '';
+    if (data.sources && data.sources.length > 0) {
+      sourcesHtml = '<div class="research-sources">';
+      data.sources.slice(0, 4).forEach(s => {
+        const domain = s.url ? new URL(s.url).hostname.replace('www.','') : '';
+        sourcesHtml += '<a class="research-source" href="' + (s.url||'#') + '" target="_blank" rel="noopener">' + domain + '</a>';
+      });
+      sourcesHtml += '</div>';
+    }
+    const webBadge = data.webSearchUsed ? '<span class="research-web-badge">Web</span>' : '';
+    container.innerHTML = `<div class="coach-card research-card"><div class="coach-card-label ai">Research ${webBadge}</div><p>${answer}</p>${sourcesHtml}</div>` + container.innerHTML;
+    showToast(data.webSearchUsed ? 'Web research complete' : 'Research complete', 'success');
+  } catch(e) { showToast('Research failed - check connection', 'error'); }
+  if (loader) { loader.style.display = 'none'; loader.innerHTML = '<div class="spinner"></div> Analyzing your inputs...'; }
+  if (btn) { btn.disabled = false; btn.textContent = 'Research'; }
+}
+
+// Quick research suggestions based on current section
+function getResearchSuggestions() {
+  const secs = document.querySelectorAll('.workshop-section');
+  let activeSec = 's0';
+  secs.forEach(s => { if (s.getBoundingClientRect().top <= 200) activeSec = s.id; });
+  const suggestions = {
+    's1': ['typical {industry} company size', '{industry} average deal size', '{industry} TAM market size'],
+    's2': ['top pain points for {industry} founders', 'founder psychology buying triggers', 'B2B SaaS churn benchmarks'],
+    'sRI': ['average CAC for {industry}', '{industry} sales cycle length', 'B2B pricing benchmarks {industry}'],
+    's7': ['{industry} case study metrics', 'typical ROI for financial consulting', 'due diligence timeline benchmarks'],
+    's9': ['guarantee examples B2B services', 'risk reversal strategies SaaS', 'Hormozi offer stack examples'],
+    's10': ['competitor landscape {industry}', '{industry} market positioning', 'differentiation strategies B2B'],
+    'sSP': ['B2B discovery call best questions', 'sales qualification frameworks', 'B2B follow-up cadence benchmarks'],
+    'sER': ['B2B retention rate benchmarks', 'upsell strategies for services', 'NPS benchmarks {industry}']
+  };
+  const raw = suggestions[activeSec] || ['market size for {industry}', '{industry} growth rate', 'competitor analysis {industry}'];
+  const industry = (state.dc_industry || 'your industry').split('\n')[0].trim();
+  return raw.map(s => s.replace(/\{industry\}/g, industry));
+}
+
+function showResearchSuggestions() {
+  const container = document.getElementById('researchSuggestions');
+  if (!container) return;
+  collectState();
+  const suggestions = getResearchSuggestions();
+  container.innerHTML = suggestions.map(s =>
+    '<button class="research-chip" onclick="document.getElementById(\'coachResearchInput\').value=\'' + s.replace(/'/g,"\\'") + '\';runResearch();">' + s + '</button>'
+  ).join('');
 }
 
 // ==================== GOOGLE DRIVE BACKUP (OAuth) ====================
@@ -1928,65 +2259,8 @@ function toggleAccordion(id) {
   document.getElementById(id).classList.toggle('open');
 }
 
-// ==================== AI CHAT ====================
-let chatHistory = [];
-
-function sendCoachChat() {
-  const input = document.getElementById('coachChatInput');
-  const msg = input.value.trim();
-  if (!msg) return;
-  input.value = '';
-  chatHistory.push({ role: 'user', content: msg });
-  renderChat();
-
-  collectState();
-  const context = JSON.stringify(state, null, 2).substring(0, 3000);
-
-  if (!appsScriptUrl) {
-    chatHistory.push({ role: 'assistant', content: 'AI chat needs an Apps Script URL configured. Use the rule-based suggestions above in the meantime, or ask Jordan to set up the Apps Script proxy.' });
-    renderChat();
-    return;
-  }
-
-  chatHistory.push({ role: 'assistant', content: '...', loading: true });
-  renderChat();
-
-  fetch(appsScriptUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'ai_chat',
-      messages: chatHistory.filter(m => !m.loading).slice(-6),
-      context: context,
-      question: msg
-    })
-  }).then(r => r.json()).then(data => {
-    chatHistory = chatHistory.filter(m => !m.loading);
-    chatHistory.push({ role: 'assistant', content: data.response || data.suggestions?.[0] || 'No response received.' });
-    renderChat();
-  }).catch(e => {
-    chatHistory = chatHistory.filter(m => !m.loading);
-    chatHistory.push({ role: 'assistant', content: 'Connection error. Check the Apps Script URL.' });
-    renderChat();
-  });
-}
-
-function renderChat() {
-  const container = document.getElementById('coachChatMessages');
-  if (!container) return;
-  container.innerHTML = chatHistory.map(m => {
-    const cls = m.role === 'user' ? 'user' : 'ai' + (m.loading ? ' loading' : '');
-    return '<div class="chat-bubble ' + cls + '">' + (m.loading ? 'Thinking...' : m.content.replace(/</g,'&lt;').replace(/\n/g,'<br>')) + '</div>';
-  }).join('');
-  container.scrollTop = container.scrollHeight;
-}
-
-function handleChatKeydown(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendCoachChat(); }
-}
-
 // ==================== NAVIGATION ====================
-function goToSection(id) { document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); }
+function goToSection(id) { document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); document.getElementById('sidebar')?.classList.remove('mobile-open'); }
 function updateActiveNav() {
   const secs=document.querySelectorAll('.workshop-section'); let active='s0';
   secs.forEach(s=>{ if(s.getBoundingClientRect().top<=120) active=s.id; });
@@ -2030,8 +2304,214 @@ function createNewWorkshop() {
 }
 function loadClient(key) { saveToLS(); const d=loadFromLS(key); if(d){populateForm(d);currentClientKey=key;localStorage.setItem('vp_last_client',key);} closeModal('loadModal'); }
 
+// ==================== CMD+K SEARCH ====================
+let searchSelectedIndex = -1;
+
+function openSearch() {
+  document.getElementById('searchOverlay').classList.add('open');
+  const input = document.getElementById('searchInput');
+  input.value = '';
+  input.focus();
+  searchSelectedIndex = -1;
+  document.getElementById('searchResults').innerHTML = '<div class="search-empty">Type to search across all workshop fields</div>';
+}
+
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('open');
+}
+
+function performSearch(query) {
+  const container = document.getElementById('searchResults');
+  searchSelectedIndex = -1;
+  if (!query.trim()) {
+    container.innerHTML = '<div class="search-empty">Type to search across all workshop fields</div>';
+    return;
+  }
+  const q = query.toLowerCase();
+  const results = [];
+  document.querySelectorAll('.workshop-section').forEach(sec => {
+    const secName = (sec.querySelector('.section-banner')?.textContent?.trim() || '').replace('AUTO-GENERATED', '').trim();
+    sec.querySelectorAll('.field-group').forEach(fg => {
+      const label = fg.querySelector('label')?.textContent?.trim() || '';
+      const field = fg.querySelector('[data-field]');
+      const value = field ? (field.type === 'checkbox' ? (field.checked ? 'Yes' : 'No') : field.value || '') : '';
+      if (label.toLowerCase().includes(q) || value.toLowerCase().includes(q)) {
+        results.push({ section: secName, label, value: value.substring(0, 120), sectionId: sec.id, fieldId: field?.dataset?.field || '' });
+      }
+    });
+  });
+  if (results.length === 0) { container.innerHTML = '<div class="search-empty">No matching fields found</div>'; return; }
+  container.innerHTML = results.slice(0, 25).map((r, i) =>
+    `<div class="search-result" data-idx="${i}" onclick="goToField('${r.sectionId}','${r.fieldId}')">
+      <div class="search-result-section">${r.section}</div>
+      <div class="search-result-label">${r.label}</div>
+      ${r.value ? `<div class="search-result-value">${r.value.replace(/</g,'&lt;').replace(/\n/g,' ')}</div>` : ''}
+    </div>`
+  ).join('');
+}
+
+function goToField(sectionId, fieldId) {
+  closeSearch();
+  document.getElementById('sidebar')?.classList.remove('mobile-open');
+  const sec = document.getElementById(sectionId);
+  if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+  if (fieldId) {
+    setTimeout(() => {
+      const field = document.querySelector('[data-field="' + fieldId + '"]');
+      if (field) { field.focus(); field.classList.add('search-highlight'); setTimeout(() => field.classList.remove('search-highlight'), 2000); }
+    }, 500);
+  }
+}
+
+// ==================== PDF EXPORT ====================
+function exportPDF() {
+  collectState();
+  const s = state;
+  const filled = (v) => v && v.trim();
+  const esc = (v) => (v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+
+  let sections = '';
+
+  // Business Snapshot
+  const bsFields = [['Website','bs_website'],['Product/Service','bs_product'],['Annual Revenue','bs_annualRevenue'],['Employees','bs_employees'],['New Customers/Month','bs_newCustomersMonth'],['Avg Deal Size','bs_avgDealSize'],['Selling Mechanism','bs_sellingMechanism'],['Lead Source','bs_leadSource'],['Growth Constraint','bs_growthConstraint']];
+  let bsHtml = '';
+  bsFields.forEach(([l,k]) => { if (filled(s[k])) bsHtml += '<div class="pf"><label>' + l + '</label><p>' + esc(s[k]) + '</p></div>'; });
+  if (bsHtml) sections += '<div class="ps"><h2>Business Snapshot</h2><div class="pg">' + bsHtml + '</div></div>';
+
+  // ICP
+  const icpFields = [['Geography','dc_geography'],['Industry','dc_industry'],['Company Size','dc_companySize'],['Funding Stage','dc_fundingStage'],['Decision Makers','dc_jobTitles'],['Buyer Traits','dc_personality'],['Revenue Range','dc_revenue'],['Growth Signals','dc_growthSignals'],['Team Structure','dc_teamStructure'],['Best Clients','dc_bestClients'],['Dream Clients','dc_dreamClients']];
+  let icpHtml = '';
+  icpFields.forEach(([l,k]) => { if (filled(s[k])) icpHtml += '<div class="pf"><label>' + l + '</label><p>' + esc(s[k]) + '</p></div>'; });
+  if (icpHtml) sections += '<div class="ps"><h2>Ideal Client Profile</h2>' + icpHtml + '</div>';
+
+  // Psychology
+  const psyFields = [['Business Goals','wd_businessGoals'],['Personal Motivations','wd_personalDreams'],['Core Problems','wd_problems'],['Deepest Fears','wd_fears'],['Suspicions','wd_suspicions'],['Internal Enemies','wd_enemies'],['Market Trends','wd_trends'],['Identity Story','wd_identityStory'],['Status Signals','wd_statusSignals']];
+  let psyHtml = '<div class="pf"><label>Pain Severity</label><p><strong>' + (s.wd_painSeverity || '?') + '/10</strong></p></div>';
+  if (filled(s.wd_painCost)) psyHtml += '<div class="pf hl"><label>Cost of Pain</label><p>' + esc(s.wd_painCost) + '</p></div>';
+  psyFields.forEach(([l,k]) => { if (filled(s[k])) psyHtml += '<div class="pf"><label>' + l + '</label><p>' + esc(s[k]) + '</p></div>'; });
+  sections += '<div class="ps"><h2>Psychographic Profile</h2>' + psyHtml + '</div>';
+
+  // Revenue Intelligence
+  const riFields = [['Budget Range','ri_budget'],['Purchase Cycle','ri_purchaseCycle'],['Expected LTV','ri_lifetimeValue'],['ROI Expectations','ri_roiExpectation'],['Cost of Inaction','ri_costOfInaction']];
+  let riHtml = '';
+  riFields.forEach(([l,k]) => { if (filled(s[k])) riHtml += '<div class="pf"><label>' + l + '</label><p>' + esc(s[k]) + '</p></div>'; });
+  if (riHtml) sections += '<div class="ps"><h2>Revenue Intelligence</h2>' + riHtml + '</div>';
+
+  // Transformation
+  let tfHtml = '';
+  if (filled(s.ba_before)) tfHtml += '<div class="pf hl"><label>BEFORE</label><p>' + esc(s.ba_before) + '</p></div>';
+  if (filled(s.ba_steps)) tfHtml += '<div class="pf"><label>Process Steps</label><p>' + esc(s.ba_steps) + '</p></div>';
+  if (filled(s.ba_after)) tfHtml += '<div class="pf hl"><label>AFTER</label><p>' + esc(s.ba_after) + '</p></div>';
+  if (filled(s.ba_frameworkName)) tfHtml += '<div class="pf"><label>Framework</label><p><strong>' + esc(s.ba_frameworkName) + '</strong></p></div>';
+  if (filled(s.ba_frameworkSteps)) tfHtml += '<div class="pf"><label>Named Steps</label><p>' + esc(s.ba_frameworkSteps) + '</p></div>';
+  if (filled(s.ba_timeline)) tfHtml += '<div class="pf"><label>Timeline</label><p>' + esc(s.ba_timeline) + '</p></div>';
+  if (tfHtml) sections += '<div class="ps"><h2>Transformation Journey</h2>' + tfHtml + '</div>';
+
+  // Guarantee
+  let gHtml = '';
+  if (filled(s.g_guarantee)) gHtml += '<div class="pf hl"><label>Guarantee</label><p>' + esc(s.g_guarantee) + '</p></div>';
+  if (filled(s.g_mechanism)) gHtml += '<div class="pf"><label>Unique Mechanism</label><p>' + esc(s.g_mechanism) + '</p></div>';
+  if (filled(s.g_dreamOutcome)) gHtml += '<div class="pf hl"><label>Dream Outcome</label><p>' + esc(s.g_dreamOutcome) + '</p></div>';
+  if (filled(s.g_valueStack)) gHtml += '<div class="pf"><label>Value Stack</label><p>' + esc(s.g_valueStack) + '</p></div>';
+  if (filled(s.g_riskReversal)) gHtml += '<div class="pf"><label>Risk Reversal</label><p>' + esc(s.g_riskReversal) + '</p></div>';
+  if (gHtml) sections += '<div class="ps"><h2>Guarantee &amp; Offer</h2>' + gHtml + '</div>';
+
+  // Sales Process
+  const spFields = [['Qualification Criteria','sp_qualificationCriteria'],['Discovery Questions','sp_discoveryQuestions'],['Demo Strategy','sp_demoStrategy'],['Closing Strategies','sp_closingTechniques'],['Follow-Up Cadence','sp_followUpCadence']];
+  let spHtml = '';
+  spFields.forEach(([l,k]) => { if (filled(s[k])) spHtml += '<div class="pf"><label>' + l + '</label><p>' + esc(s[k]) + '</p></div>'; });
+  if (spHtml) sections += '<div class="ps"><h2>Sales Process</h2>' + spHtml + '</div>';
+
+  // Case Studies
+  if (s._lists?.caseStudies?.some(c => c.name)) {
+    let csHtml = '';
+    s._lists.caseStudies.forEach(c => {
+      if (c.name) csHtml += '<div class="pf"><label>' + esc(c.name) + '</label><p>' + (c.metric ? '<strong>' + esc(c.metric) + '</strong><br>' : '') + esc(c.after || c.before || c.notes || '') + '</p></div>';
+    });
+    sections += '<div class="ps"><h2>Case Studies</h2>' + csHtml + '</div>';
+  }
+
+  // Competitive
+  if (filled(s.cp_differentiator) || s._lists?.competitors?.some(c => c.name)) {
+    let cpHtml = '';
+    if (filled(s.cp_differentiator)) cpHtml += '<div class="pf hl"><label>#1 Differentiator</label><p>' + esc(s.cp_differentiator) + '</p></div>';
+    if (s._lists?.competitors) s._lists.competitors.forEach(c => {
+      if (c.name) cpHtml += '<div class="pf"><label>vs. ' + esc(c.name) + '</label><p>' + esc(c.advantage || c.positioning || '') + '</p></div>';
+    });
+    sections += '<div class="ps"><h2>Competitive Position</h2>' + cpHtml + '</div>';
+  }
+
+  // Objections
+  if (s._lists?.objections?.some(o => o.objection)) {
+    let obHtml = '';
+    s._lists.objections.forEach(o => {
+      if (o.objection) obHtml += '<div class="pf"><label>"' + esc(o.objection) + '"</label><p>' + esc(o.response || 'Response pending') + '</p></div>';
+    });
+    sections += '<div class="ps"><h2>Common Objections</h2>' + obHtml + '</div>';
+  }
+
+  // Hero Story
+  if (filled(s.hs_narrative)) sections += '<div class="ps"><h2>Founder Story</h2><div class="pf"><p>' + esc(s.hs_narrative) + '</p></div></div>';
+
+  // Auto-generated one-liner
+  let oneliner = '';
+  if (filled(s.dc_industry) && filled(s.wd_problems)) {
+    const who = (s.dc_industry || '').split('\\n')[0].substring(0, 50);
+    const pain = (s.wd_problems || '').split('\\n')[0].substring(0, 60);
+    const outcome = (s.g_dreamOutcome || s.ba_after || '').split('\\n')[0].substring(0, 60);
+    oneliner = 'We help ' + who + ' who struggle with ' + pain.toLowerCase() + (outcome ? ' to ' + outcome.toLowerCase() : '') + '.';
+  }
+
+  const dateStr = s.workshopDate ? new Date(s.workshopDate + 'T12:00:00').toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'}) : '';
+
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Value Proposition Report - ' + (s.clientName || 'Client') + '</title>' +
+    '<style>@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");' +
+    '*{margin:0;padding:0;box-sizing:border-box}' +
+    'body{font-family:"Inter",system-ui,sans-serif;color:#1a1a30;line-height:1.7;padding:48px;max-width:820px;margin:0 auto}' +
+    '.cover{text-align:center;padding:60px 0 40px;margin-bottom:40px;border-bottom:3px solid #7c3aed}' +
+    '.cover h1{font-size:32px;font-weight:800;color:#7c3aed;margin-bottom:6px;letter-spacing:-0.5px}' +
+    '.cover .sub{font-size:20px;font-weight:500;color:#55556e;margin-bottom:24px}' +
+    '.cover .meta{font-size:13px;color:#8888a0}.cover .meta span{margin:0 12px}' +
+    '.ol{background:#f5f0ff;border-left:4px solid #7c3aed;padding:16px 20px;margin-bottom:36px;border-radius:0 8px 8px 0;font-size:15px;line-height:1.7}' +
+    '.ps{margin-bottom:36px;page-break-inside:avoid}' +
+    '.ps h2{font-size:14px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:2.5px;padding-bottom:8px;border-bottom:2px solid #e8e0f8;margin-bottom:16px}' +
+    '.pf{margin-bottom:14px}.pf label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#8888a0;margin-bottom:3px}' +
+    '.pf p{font-size:13.5px;color:#1a1a30;line-height:1.7}' +
+    '.pf.hl{background:#f8f7ff;padding:14px 18px;border-radius:8px;border:1px solid #e8e0f8}' +
+    '.pg{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px}' +
+    '.ft{text-align:center;margin-top:60px;padding-top:20px;border-top:1px solid #e0e0ee;font-size:11px;color:#8888a0}' +
+    '.ft strong{color:#7c3aed}' +
+    '@media print{body{padding:24px}.cover{padding:40px 0 30px}}' +
+    '</style></head><body>' +
+    '<div class="cover"><h1>Value Proposition Report</h1>' +
+    '<div class="sub">' + esc(s.clientName || 'Client') + '</div>' +
+    '<div class="meta">' + dateStr + '<span>|</span>Facilitator: ' + esc(s.facilitator || 'N/A') + '</div></div>' +
+    (oneliner ? '<div class="ol">' + oneliner + '</div>' : '') +
+    sections +
+    '<div class="ft">Generated by <strong>Dopamine Digital</strong> Value Proposition Workshop</div>' +
+    '</body></html>';
+
+  const win = window.open('', '_blank');
+  if (win) { win.document.write(html); win.document.close(); setTimeout(() => win.print(), 600); }
+  showToast('PDF report generated', 'success');
+}
+
 // ==================== INIT ====================
-document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='s'){e.preventDefault();collectState();saveToLS();}});
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='s'){e.preventDefault();collectState();saveToLS();}
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openSearch();}
+  if(e.key==='Escape'){
+    closeSearch();
+    document.getElementById('exportWrap')?.classList.remove('open');
+  }
+  // Arrow keys in search
+  if(document.getElementById('searchOverlay').classList.contains('open')){
+    const results=document.querySelectorAll('.search-result');
+    if(e.key==='ArrowDown'){e.preventDefault();searchSelectedIndex=Math.min(searchSelectedIndex+1,results.length-1);results.forEach((r,i)=>r.classList.toggle('selected',i===searchSelectedIndex));if(searchSelectedIndex>=0)results[searchSelectedIndex]?.scrollIntoView({block:'nearest'});}
+    else if(e.key==='ArrowUp'){e.preventDefault();searchSelectedIndex=Math.max(searchSelectedIndex-1,-1);results.forEach((r,i)=>r.classList.toggle('selected',i===searchSelectedIndex));}
+    else if(e.key==='Enter'&&searchSelectedIndex>=0){e.preventDefault();results[searchSelectedIndex]?.click();}
+  }
+});
 
 function init() {
   const lastKey=localStorage.getItem('vp_last_client');
@@ -2054,14 +2534,21 @@ function init() {
   window.addEventListener('beforeunload',()=>{collectState();saveToLS();});
   if(navigator.storage&&navigator.storage.persist) navigator.storage.persist();
   document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+  document.addEventListener('click',e=>{const ew=document.getElementById('exportWrap');if(ew&&!ew.contains(e.target))ew.classList.remove('open');});
   updateProgress(); updateLiveSummary(); updateMessagingMatrix();
   injectCopyButtons();
   setInterval(updateTimer, 1000);
   // Init Google Drive OAuth connection
   setTimeout(initDrive, 1500);
-  // Update coach on input with debounce
+  // Update coach on input with debounce (rule-based = 1s, AI = 3s)
   let coachTimeout = null;
-  document.addEventListener('focusout', e => { if (e.target.matches('[data-field]')) { clearTimeout(coachTimeout); coachTimeout = setTimeout(updateCoachSuggestions, 1000); } });
+  document.addEventListener('focusout', e => {
+    if (e.target.matches('[data-field]')) {
+      clearTimeout(coachTimeout); clearTimeout(aiSuggestTimeout);
+      coachTimeout = setTimeout(updateCoachSuggestions, 1000);
+      aiSuggestTimeout = setTimeout(requestAISuggestions, 3000);
+    }
+  });
 }
 document.addEventListener('DOMContentLoaded',init);
 </script>
