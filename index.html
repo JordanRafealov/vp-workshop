@@ -557,6 +557,26 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
 .coach-card-label.question { color: var(--success); }
 .coach-card p { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
 .coach-empty { text-align: center; padding: 24px 12px; color: var(--text-muted); font-size: 12px; }
+
+/* Panel intro + coach legend */
+.rp-intro {
+  font-size: 11.5px; color: var(--text-muted); line-height: 1.6;
+  margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+.coach-how-it-works {
+  display: flex; flex-direction: column; gap: 5px;
+  margin-bottom: 14px; padding: 10px 12px;
+  background: var(--bg-input); border-radius: var(--radius-sm); border: 1px solid var(--border);
+}
+.coach-how-item {
+  display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-secondary); line-height: 1.4;
+}
+.coach-how-item strong { color: var(--text-primary); }
+.coach-how-icon { font-size: 8px; flex-shrink: 0; }
+.coach-research-label {
+  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--text-muted); margin-top: 10px; margin-bottom: 6px;
+}
 .coach-api-section {
   margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
 }
@@ -915,15 +935,24 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
   </div>
   <div id="rpSummaryTab" class="rp-tab-content active">
     <div class="rp-header"><span class="rp-live-dot"></span> Live Summary</div>
+    <div class="rp-intro">Your value proposition builds itself as you fill in sections. This panel updates in real-time to show the key elements.</div>
     <div id="liveSummary"></div>
   </div>
   <div id="rpCoachTab" class="rp-tab-content">
     <div class="rp-header"><span class="rp-live-dot"></span> AI Coach</div>
+    <div class="rp-intro">Your AI facilitator watches what you type and gives tailored suggestions. It flags missing fields, asks deeper questions, and helps sharpen your answers.</div>
+    <div class="coach-how-it-works">
+      <div class="coach-how-item"><span class="coach-how-icon" style="color:var(--warning);">&#9679;</span><span><strong>Missing</strong> - Critical fields you haven't filled yet</span></div>
+      <div class="coach-how-item"><span class="coach-how-icon" style="color:var(--accent);">&#9679;</span><span><strong>Suggestion</strong> - Ways to improve what you've written</span></div>
+      <div class="coach-how-item"><span class="coach-how-icon" style="color:var(--success);">&#9679;</span><span><strong>Question</strong> - Clarifying questions to unlock deeper insight</span></div>
+      <div class="coach-how-item"><span class="coach-how-icon" style="color:#6366f1;">&#9679;</span><span><strong>AI</strong> - Claude-powered analysis of your inputs</span></div>
+    </div>
     <div id="coachAiLoading" style="display:none" class="coach-loading"><div class="spinner"></div> Analyzing your inputs...</div>
     <div id="coachSuggestions"></div>
+    <div class="coach-research-label">Ask a question and get live data, benchmarks, or examples:</div>
     <div id="researchSuggestions" class="research-suggestions"></div>
     <div class="coach-research-row">
-      <input type="text" id="coachResearchInput" placeholder="Research: e.g. &quot;typical SaaS churn rates&quot;" onkeydown="if(event.key==='Enter'){event.preventDefault();runResearch();}" onfocus="showResearchSuggestions()">
+      <input type="text" id="coachResearchInput" placeholder="e.g. &quot;average SaaS churn rate&quot;" onkeydown="if(event.key==='Enter'){event.preventDefault();runResearch();}" onfocus="showResearchSuggestions()">
       <button onclick="runResearch()">Research</button>
     </div>
   </div>
