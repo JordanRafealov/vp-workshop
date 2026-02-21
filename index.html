@@ -722,19 +722,25 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
 
 /* ==================== COLLAPSIBLE SECTIONS ==================== */
 .section-banner { cursor: pointer; user-select: none; }
+/* v54: Improved accordion UX with smooth transitions */
 .section-banner .collapse-indicator {
   position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-  font-size: 10px; opacity: 0.6; transition: transform 0.2s;
+  font-size: 10px; opacity: 0.6;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
   z-index: 2;
 }
-.workshop-section.collapsed .section-banner .collapse-indicator { transform: translateY(-50%) rotate(-90deg); }
+.workshop-section.collapsed .section-banner .collapse-indicator {
+  transform: translateY(-50%) rotate(-90deg);
+}
 .workshop-section.collapsed .section-body {
   max-height: 0; padding: 0 28px; overflow: hidden; border: none;
-  opacity: 0; transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+  opacity: 0;
 }
 .section-body {
-  max-height: 5000px; opacity: 1;
-  transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+  max-height: 5000px; opacity: 1; overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1),
+              padding 0.3s cubic-bezier(0.4,0,0.2,1),
+              opacity 0.3s ease;
 }
 
 /* ==================== EMPTY FIELD HINT (DASHED BORDERS) ==================== */
@@ -1760,6 +1766,170 @@ body.presentation-mode .pres-bar { display: block; }
 .coach-card:has(.coach-card-label.question) { border-left-color: var(--success); }
 .coach-card:has(.coach-card-label.ai) { border-left-color: #6366f1; }
 
+/* ==================== v48: FIELD HELP TOOLTIPS ==================== */
+.field-help {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--border); color: var(--text-muted);
+  font-size: 10px; font-weight: 700; cursor: help;
+  margin-left: 6px; position: relative; vertical-align: middle;
+  transition: all var(--transition); flex-shrink: 0;
+}
+.field-help:hover { background: var(--accent); color: #fff; }
+.field-help::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  background: #1a1a2e; color: #e6e6f0; font-size: 12px; font-weight: 400;
+  padding: 8px 12px; border-radius: 6px; max-width: 250px; width: max-content;
+  line-height: 1.5; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+  z-index: 100; text-transform: none; letter-spacing: 0;
+}
+.field-help::before {
+  content: '';
+  position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: #1a1a2e;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 100;
+}
+.field-help:hover::after, .field-help:hover::before { opacity: 1; }
+:root.light .field-help::after { background: #1e1e30; }
+
+/* ==================== v49: SECTION TIME ESTIMATES ==================== */
+.section-time-pill {
+  position: absolute; right: 48px; top: 50%; transform: translateY(-50%);
+  font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.15); padding: 2px 10px; border-radius: 10px;
+  z-index: 2; letter-spacing: 0.3px; white-space: nowrap;
+  pointer-events: none;
+}
+/* Shift section badge to the left when time pill exists */
+.section-banner .section-badge { right: 110px; }
+
+/* ==================== v50: GREEN CHECKMARKS ON WELL-FILLED FIELDS ==================== */
+.field-group { position: relative; }
+.field-complete::after {
+  content: '\2713'; position: absolute; top: 0; right: 0;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--success); color: #fff; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1; z-index: 2;
+  animation: checkPop 0.3s ease;
+}
+@keyframes checkPop {
+  0% { transform: scale(0); } 60% { transform: scale(1.2); } 100% { transform: scale(1); }
+}
+
+/* ==================== v51: FLOATING ACTION BUTTON ==================== */
+.fab-container {
+  position: fixed; bottom: 24px; right: calc(var(--right-w) + 20px);
+  z-index: 150; display: flex; flex-direction: column-reverse; align-items: center; gap: 8px;
+}
+.fab-main {
+  width: 48px; height: 48px; border-radius: 50%; border: none;
+  background: var(--accent); color: #fff; font-size: 22px;
+  cursor: pointer; box-shadow: 0 4px 16px rgba(124,58,237,0.4);
+  transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
+}
+.fab-main:hover { background: var(--accent-hover); transform: scale(1.05); }
+.fab-main.open { transform: rotate(45deg); }
+.fab-actions {
+  display: none; flex-direction: column; gap: 6px; align-items: center;
+}
+.fab-container.open .fab-actions { display: flex; animation: fadeUp 0.2s ease; }
+.fab-action {
+  position: relative; width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary);
+  font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-card); transition: all 0.15s;
+}
+.fab-action:hover { border-color: var(--accent); color: var(--accent); }
+.fab-action-label {
+  position: absolute; right: calc(100% + 8px); top: 50%; transform: translateY(-50%);
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px;
+  padding: 3px 8px; font-size: 11px; font-weight: 500; color: var(--text-secondary);
+  white-space: nowrap; box-shadow: var(--shadow-card);
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+}
+.fab-action:hover .fab-action-label { opacity: 1; }
+@media (max-width: 900px) { .fab-container { display: none; } }
+@media (max-width: 1300px) { .fab-container { right: 20px; bottom: 80px; } }
+
+/* ==================== v52: EMPTY FIELD PULSE ACCENT ==================== */
+@keyframes emptyFieldPulse {
+  0%, 100% { border-left-color: rgba(124,58,237,0.2); }
+  50% { border-left-color: rgba(124,58,237,0.5); }
+}
+.field-group:has(textarea[data-field]:placeholder-shown:not(:focus)) {
+  border-left: 2px solid rgba(124,58,237,0.3);
+  padding-left: 10px;
+  animation: emptyFieldPulse 3s ease-in-out infinite;
+}
+.field-group:has(textarea[data-field]:not(:placeholder-shown)),
+.field-group:has(textarea[data-field]:focus) {
+  border-left: 2px solid transparent;
+  padding-left: 10px;
+  animation: none;
+}
+
+/* ==================== v55: SECTION DIVIDER ORNAMENTS ==================== */
+.workshop-section + .workshop-section { position: relative; margin-top: 44px; }
+.workshop-section + .workshop-section::before {
+  content: '\25C6'; /* diamond */
+  position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+  font-size: 6px; color: var(--text-muted); opacity: 0.3;
+  line-height: 1;
+}
+
+/* ==================== v53: SECTION SUMMARY PILLS ==================== */
+.section-summary-pills {
+  display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 12px 0;
+  margin: -2px 0 0; min-height: 0;
+}
+.section-summary-pills:empty { display: none; }
+.summary-pill {
+  font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px;
+  background: var(--accent-glow); color: var(--accent); white-space: nowrap;
+  max-width: 180px; overflow: hidden; text-overflow: ellipsis;
+  border: 1px solid rgba(124,58,237,0.12);
+}
+
+/* ==================== v56: VP SCORE BREAKDOWN BARS ==================== */
+.vp-breakdown { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.vp-bar-row {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 3px;
+}
+.vp-bar-label {
+  font-size: 9px; color: var(--text-muted); width: 90px; flex-shrink: 0;
+  text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.vp-bar-track {
+  flex: 1; height: 4px; background: var(--border); border-radius: 2px;
+  overflow: hidden;
+}
+.vp-bar-fill {
+  height: 100%; border-radius: 2px; transition: width 0.5s ease, background 0.3s;
+}
+.vp-bar-fill.done { background: var(--success); }
+.vp-bar-fill.empty { background: var(--border); width: 0; }
+
+/* ==================== v57: INPUT FOCUS RIPPLE EFFECT ==================== */
+textarea[data-field], input[data-field] { position: relative; overflow: hidden; }
+.field-group { overflow: hidden; }
+@keyframes focusRipple {
+  0% { transform: scale(0); opacity: 0.05; }
+  50% { opacity: 0.03; }
+  100% { transform: scale(4); opacity: 0; }
+}
+textarea[data-field]:focus ~ .focus-ripple,
+input[data-field]:focus ~ .focus-ripple {
+  display: block;
+}
+.focus-ripple {
+  display: none; position: absolute; width: 60px; height: 60px; border-radius: 50%;
+  background: var(--accent); pointer-events: none; z-index: 0;
+  animation: focusRipple 0.4s ease-out forwards;
+}
+
 </style>
 </head>
 <body>
@@ -1886,6 +2056,7 @@ body.presentation-mode .pres-bar { display: block; }
       </div>
       <div class="vp-score-grade" id="vpScoreGrade">Fill in sections to build your score</div>
       <div class="vp-score-checklist" id="vpChecklist"></div>
+      <div class="vp-breakdown" id="vpBreakdown"></div>
     </div>
     <div class="quick-wins" id="quickWinsPanel"></div>
     <div class="rp-header"><span class="rp-live-dot"></span> Live Summary</div>
@@ -3061,6 +3232,15 @@ function updateVPScore(overallPct) {
       `<div class="vp-check-item ${c.done?'done':''}"><span class="ck">${c.done?'\u2713':'\u25CB'}</span>${c.label}</div>`
     ).join('');
   }
+
+  // v56: Breakdown bars
+  const bd = document.getElementById('vpBreakdown');
+  if (bd) {
+    bd.innerHTML = checks.map(c => {
+      const pct = c.done ? 100 : 0;
+      return `<div class="vp-bar-row"><span class="vp-bar-label">${c.label}</span><div class="vp-bar-track"><div class="vp-bar-fill ${c.done?'done':'empty'}" style="width:${pct}%"></div></div></div>`;
+    }).join('');
+  }
 }
 
 function launchConfetti() {
@@ -3967,6 +4147,140 @@ function addCharCounters() {
   });
 }
 
+// v57: Input focus ripple effect
+function initFocusRipple() {
+  document.addEventListener('focusin', e => {
+    const el = e.target;
+    if (!el.matches('textarea[data-field], input[data-field]')) return;
+    const fg = el.closest('.field-group');
+    if (!fg) return;
+    // Remove old ripple
+    const old = fg.querySelector('.focus-ripple');
+    if (old) old.remove();
+    // Create ripple
+    const ripple = document.createElement('div');
+    ripple.className = 'focus-ripple';
+    const rect = el.getBoundingClientRect();
+    const fgRect = fg.getBoundingClientRect();
+    ripple.style.left = (rect.left - fgRect.left + rect.width / 2 - 30) + 'px';
+    ripple.style.top = (rect.top - fgRect.top + 10 - 30) + 'px';
+    fg.style.position = 'relative';
+    fg.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 450);
+  });
+}
+
+// v53: Section summary pills
+const summaryPillDefs = {
+  's1': ['dc_industry', 'dc_companySize', 'dc_geography'],
+  's2': ['wd_problems'],
+  's9': ['g_guarantee']
+};
+function initSummaryPills() {
+  for (const [secId, fields] of Object.entries(summaryPillDefs)) {
+    const sec = document.getElementById(secId);
+    if (!sec) continue;
+    const banner = sec.querySelector('.section-banner');
+    if (!banner) continue;
+    const container = document.createElement('div');
+    container.className = 'section-summary-pills';
+    container.id = 'pills_' + secId;
+    banner.insertAdjacentElement('afterend', container);
+    fields.forEach(f => {
+      const el = document.querySelector(`[data-field="${f}"]`);
+      if (el) el.addEventListener('input', () => updateSummaryPills(secId));
+    });
+    updateSummaryPills(secId);
+  }
+}
+function updateSummaryPills(secId) {
+  const container = document.getElementById('pills_' + secId);
+  if (!container) return;
+  const fields = summaryPillDefs[secId] || [];
+  const pills = [];
+  fields.forEach(f => {
+    const el = document.querySelector(`[data-field="${f}"]`);
+    if (!el || !el.value.trim()) return;
+    const val = el.value.trim();
+    // Split on commas or newlines for multi-value fields, take first 3
+    const parts = val.split(/[,\n]/).map(s => s.trim()).filter(Boolean).slice(0, 3);
+    parts.forEach(p => {
+      if (p.length > 40) p = p.substring(0, 37) + '...';
+      pills.push(p);
+    });
+  });
+  container.innerHTML = pills.map(p => `<span class="summary-pill">${p.replace(/</g,'&lt;')}</span>`).join('');
+}
+
+// v51: Floating Action Button
+function toggleFab() {
+  const fc = document.getElementById('fabContainer');
+  fc.classList.toggle('open');
+  fc.querySelector('.fab-main').classList.toggle('open');
+}
+function closeFab() {
+  const fc = document.getElementById('fabContainer');
+  fc.classList.remove('open');
+  fc.querySelector('.fab-main').classList.remove('open');
+}
+
+// v50: Green checkmarks on well-filled fields
+function checkFieldComplete(textarea) {
+  const fg = textarea.closest('.field-group');
+  if (!fg) return;
+  fg.classList.toggle('field-complete', (textarea.value || '').length >= 50);
+}
+function initFieldCompleteChecks() {
+  document.querySelectorAll('textarea[data-field]').forEach(ta => {
+    checkFieldComplete(ta);
+    ta.addEventListener('input', () => checkFieldComplete(ta));
+  });
+}
+
+// v49: Section time estimate badges
+function addTimeEstimates() {
+  const times = {
+    's0': '2 min', 'sBS': '5 min', 's1': '5 min', 's2': '5 min',
+    'sRI': '5 min', 'sCM': '3 min', 'sLM': '5 min', 's3': '3 min',
+    's4': '5 min', 'sBB': '3 min', 's6': '8 min', 's7': '5 min',
+    's8': '8 min', 's9': '5 min', 'sCalc': '3 min', 's10': '5 min',
+    'sSP': '5 min', 's5': '3 min', 'sER': '5 min', 's11': '5 min',
+    's12': '5 min', 'sNotes': '2 min', 's13': '0 min'
+  };
+  for (const [secId, time] of Object.entries(times)) {
+    const sec = document.getElementById(secId);
+    if (!sec || time === '0 min') continue;
+    const banner = sec.querySelector('.section-banner');
+    if (!banner || banner.querySelector('.section-time-pill')) continue;
+    const pill = document.createElement('span');
+    pill.className = 'section-time-pill';
+    pill.textContent = time;
+    banner.appendChild(pill);
+  }
+}
+
+// v48: Field help tooltips on key fields
+function addFieldHelpTooltips() {
+  const tips = {
+    'wd_problems': 'List every specific problem your service solves. Use symptom-level detail your prospects would recognize.',
+    'wd_fears': 'What worst-case scenarios keep your ideal client up at night? These drive urgency in sales conversations.',
+    'g_guarantee': 'A strong guarantee removes risk. State what happens if you fail to deliver - this builds trust and confidence.',
+    'ba_before': 'Paint the painful reality before your solution. Use emotional language your prospects actually use.',
+    'cp_differentiator': 'What makes you the ONLY choice? This should be specific, provable, and impossible for competitors to claim.'
+  };
+  for (const [field, tip] of Object.entries(tips)) {
+    const el = document.querySelector(`[data-field="${field}"]`);
+    if (!el) continue;
+    const label = el.closest('.field-group')?.querySelector('label');
+    if (!label || label.querySelector('.field-help')) continue;
+    const help = document.createElement('span');
+    help.className = 'field-help';
+    help.textContent = '?';
+    help.setAttribute('data-tip', tip);
+    label.appendChild(help);
+  }
+}
+
 // v44: Auto-collapse completed sections
 function autoCollapseComplete() {
   let collapsed = 0;
@@ -4823,6 +5137,16 @@ async function init() {
   checkStorageQuota();
   // v39: Character counters on key textareas
   addCharCounters();
+  // v48: Field help tooltips
+  addFieldHelpTooltips();
+  // v49: Section time estimate badges
+  addTimeEstimates();
+  // v50: Green checkmarks on well-filled textareas
+  initFieldCompleteChecks();
+  // v53: Section summary pills
+  initSummaryPills();
+  // v57: Input focus ripple
+  initFocusRipple();
 }
 document.addEventListener('DOMContentLoaded',()=>init());
 </script>
@@ -4882,6 +5206,17 @@ document.addEventListener('DOMContentLoaded',()=>init());
       <button onclick="toggleWorkshopTimer()">Close</button>
     </div>
   </div>
+</div>
+
+<!-- v51: Floating Action Button -->
+<div class="fab-container" id="fabContainer">
+  <div class="fab-actions">
+    <button class="fab-action" onclick="jumpToNextEmpty();closeFab()" title="Next empty field"><span>N</span><span class="fab-action-label">Next empty</span></button>
+    <button class="fab-action" onclick="expandAllSections();closeFab()" title="Expand all"><span>&#9660;</span><span class="fab-action-label">Expand all</span></button>
+    <button class="fab-action" onclick="collapseAllSections();closeFab()" title="Collapse all"><span>&#9650;</span><span class="fab-action-label">Collapse all</span></button>
+    <button class="fab-action" onclick="downloadBackup();closeFab()" title="Download backup"><span>&#8595;</span><span class="fab-action-label">Download backup</span></button>
+  </div>
+  <button class="fab-main" onclick="toggleFab()" aria-label="Quick actions">+</button>
 </div>
 
 </body>
