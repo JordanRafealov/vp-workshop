@@ -613,6 +613,16 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
 .matrix-card p { font-size: 13px; line-height: 1.6; color: var(--text-primary); }
 .matrix-card p.empty-hint { color: var(--text-muted); font-style: italic; font-size: 12px; }
 .matrix-card.full-width { grid-column: 1 / -1; }
+.matrix-card { cursor: pointer; position: relative; }
+.card-copy-hint {
+  position: absolute; top: 8px; right: 10px;
+  font-size: 9px; color: var(--text-muted); opacity: 0;
+  transition: opacity 0.2s; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.matrix-card:hover .card-copy-hint { opacity: 0.6; }
+.matrix-card.copied { border-color: var(--success); }
+.matrix-card.copied .card-copy-hint { opacity: 1; color: var(--success); }
+.matrix-card.copied .card-copy-hint::before { content: '\2713 '; }
 .matrix-copy-all {
   margin-top: 14px; display: flex; justify-content: center;
 }
@@ -1009,9 +1019,16 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
     <div class="nav-phase">Story - Narrative</div>
     <a class="nav-item" data-nav="s11" onclick="goToSection('s11')"><span class="nav-dot"></span>Hero Story</a>
     <a class="nav-item" data-nav="s12" onclick="goToSection('s12')"><span class="nav-dot"></span>Objections & FAQs</a>
+    <div class="nav-phase">Output</div>
+    <a class="nav-item" data-nav="sNotes" onclick="goToSection('sNotes')"><span class="nav-dot"></span>Session Notes</a>
     <a class="nav-item" data-nav="s13" onclick="goToSection('s13')"><span class="nav-dot"></span>Messaging Matrix</a>
   </div>
   <div class="nav-footer">
+    <div style="display:flex;gap:4px;margin-bottom:4px">
+      <button class="nav-footer-btn" style="flex:1" onclick="expandAllSections()">Expand All</button>
+      <button class="nav-footer-btn" style="flex:1" onclick="collapseAllSections()">Collapse All</button>
+    </div>
+    <button class="nav-footer-btn" onclick="jumpToNextEmpty()" style="border-color:var(--accent);color:var(--accent)">Next Empty Field</button>
     <button class="nav-footer-btn" onclick="showNewWorkshop()">+ New Workshop</button>
     <button class="nav-footer-btn" onclick="showLoadDialog()">Load Previous</button>
     <button class="nav-footer-btn" onclick="restoreFromDrive()">Restore from Drive</button>
@@ -1592,6 +1609,17 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
   </div>
 </section>
 
+<!-- SESSION NOTES (free-form) -->
+<section id="sNotes" class="workshop-section">
+  <div class="section-banner">Session Notes</div>
+  <div class="section-body">
+    <p class="section-intro">Free-form space for notes, action items, and follow-ups during the workshop. Everything here is saved and exported with the rest of the data.</p>
+    <div class="field-group"><label>Workshop Notes</label><span class="field-sublabel">Key insights, decisions, action items, follow-up tasks</span><textarea data-field="sessionNotes" placeholder="Capture anything important discussed during the session...&#10;&#10;- Action items&#10;- Key decisions&#10;- Follow-up tasks&#10;- Ideas to explore later" style="min-height:160px"></textarea></div>
+    <div class="field-group"><label>Next Steps</label><span class="field-sublabel">Concrete next actions with owners and deadlines</span><textarea data-field="nextSteps" placeholder="1. [Owner] - [Action] - [Deadline]&#10;2. &#10;3. "></textarea></div>
+    <div class="field-group"><label>Follow-up Date</label><input type="date" data-field="followUpDate"></div>
+  </div>
+</section>
+
 <!-- S13: MESSAGING MATRIX (Auto-Generated) -->
 <section id="s13" class="workshop-section">
   <div class="section-banner">Messaging Matrix <span style="font-size:9px;font-weight:400;letter-spacing:0.5px;opacity:0.7;margin-left:8px">AUTO-GENERATED</span></div>
@@ -1622,9 +1650,11 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
     <div class="help-row"><span class="help-key"><kbd>Ctrl</kbd><kbd>K</kbd></span><span class="help-desc">Search fields</span></div>
     <div class="help-row"><span class="help-key"><kbd>Ctrl</kbd><kbd>S</kbd></span><span class="help-desc">Force save</span></div>
     <div class="help-row"><span class="help-key"><kbd>?</kbd></span><span class="help-desc">Show this help</span></div>
+    <div class="help-row"><span class="help-key"><kbd>N</kbd></span><span class="help-desc">Jump to next empty field</span></div>
     <div class="help-row"><span class="help-key"><kbd>Esc</kbd></span><span class="help-desc">Close overlay / search</span></div>
     <div class="help-section-title">Sections</div>
     <div class="help-row"><span class="help-desc">Click any section banner to collapse/expand</span></div>
+    <div class="help-row"><span class="help-desc">Click messaging cards to copy individually</span></div>
     <div class="help-row"><span class="help-desc">Sidebar dots show section completion</span></div>
     <div class="help-section-title">Data</div>
     <div class="help-row"><span class="help-desc">Auto-saves on every input change</span></div>
@@ -2127,14 +2157,64 @@ function updateMessagingMatrix() {
   const linkedIn = filled(s.dc_industry) ? `Helping ${who} ${dreamOutcome ? dreamOutcome.toLowerCase() : 'solve ' + painLC}${mech ? ' | ' + mech : ''}` : 'Fill in sections above';
   const hero = filled(s.ba_before) && filled(s.ba_after) ? `From ${first(s.ba_before).toLowerCase()} to ${first(s.ba_after).toLowerCase()}.` : 'Fill in Before/After section';
 
+  // Cold email opener
+  let coldEmail = '';
+  if (filled(s.dc_industry) && filled(s.wd_problems)) {
+    coldEmail = `Hi [Name],\n\nI noticed ${who.toLowerCase()} like yours often struggle with ${painLC}. ${fear ? 'The risk? ' + fear.substring(0,80) + '.' : ''}\n\nWe help companies ${outcome ? outcome.toLowerCase() : 'solve this'}${mech ? ' through ' + mech.toLowerCase() : ''}.\n\n${guarantee ? guarantee.split('\n')[0] : 'Would love to share how.'}\n\nWorth a quick chat?`;
+  }
+
+  // LinkedIn DM
+  let linkedInDM = '';
+  if (filled(s.dc_industry)) {
+    linkedInDM = `Hey [Name] - saw you\'re building in ${industry.split(',')[0].trim().toLowerCase()}. Quick question: ${filled(s.wd_problems) ? 'are ' + painLC.substring(0,60) + ' keeping you up at night?' : 'how are you handling [pain point]?'} We\'ve helped similar companies ${outcome ? outcome.toLowerCase().substring(0,60) : 'get past this'}. Happy to share what we\'ve seen work.`;
+  }
+
+  // Podcast pitch
+  let podcastPitch = '';
+  if (filled(s.dc_industry) && filled(s.wd_problems)) {
+    podcastPitch = `[Name] would be a great guest because they work with ${who.toLowerCase()} and have a unique take on ${painLC.substring(0,50)}. ${s.clientName || 'The company'} has ${filled(s.g_guarantee) ? guarantee.split('\n')[0].toLowerCase() : 'an impressive track record'}. Great story: ${filled(s.hs_problem) ? s.hs_problem.split('.')[0].toLowerCase() : 'founder saw a gap in the market and built the solution'}.`;
+  }
+
+  // CTA variations
+  const ctas = [];
+  if (filled(s.g_guarantee)) ctas.push('Book your free audit - ' + guarantee.split('\n')[0]);
+  if (filled(s.ba_after)) ctas.push('See how to go from ' + first(s.ba_before).substring(0,25).toLowerCase() + ' to ' + first(s.ba_after).substring(0,25).toLowerCase());
+  if (filled(s.sp_demoStrategy)) ctas.push(first(s.sp_demoStrategy));
+  if (ctas.length === 0) ctas.push('Fill in Guarantee and Sales Process for CTA suggestions');
+
+  // One-liner variations
+  const oneLiners = [];
+  if (filled(s.dc_industry) && filled(s.wd_problems)) {
+    oneLiners.push(`We help ${who} ${outcome ? outcome.toLowerCase() : 'solve ' + painLC}.`);
+    if (filled(s.g_mechanism)) oneLiners.push(`${mech} for ${who} who need ${outcome ? outcome.toLowerCase() : 'results'}.`);
+    if (filled(s.ri_costOfInaction)) oneLiners.push(`Stop losing ${first(s.ri_costOfInaction).toLowerCase()}. We fix it.`);
+  }
+
+  const cardCopy = `onclick="copyMatrixCard(this)"`;
   grid.innerHTML = `
-    <div class="matrix-card full-width"><h4>Positioning Statement</h4><p>${positioning}</p></div>
-    <div class="matrix-card full-width"><h4>Elevator Pitch (30 sec)</h4><p>${elevator}</p></div>
-    <div class="matrix-card"><h4>Website Hero Headline</h4><p>${hero}</p></div>
-    <div class="matrix-card"><h4>LinkedIn Headline</h4><p>${linkedIn}</p></div>
-    <div class="matrix-card full-width"><h4>Email Subject Lines</h4>${subjects.map(s=>'<p>'+s+'</p>').join('')}</div>
-    <div class="matrix-card full-width"><h4>Ad Copy Hooks</h4>${hooks.map(h=>'<p>'+h+'</p>').join('')}</div>
+    <div class="matrix-card full-width" ${cardCopy}><h4>Positioning Statement</h4><p>${positioning}</p><span class="card-copy-hint">Click to copy</span></div>
+    <div class="matrix-card full-width" ${cardCopy}><h4>Elevator Pitch (30 sec)</h4><p>${elevator}</p><span class="card-copy-hint">Click to copy</span></div>
+    ${oneLiners.length > 0 ? `<div class="matrix-card full-width" ${cardCopy}><h4>One-Liner Variations</h4>${oneLiners.map(o=>'<p>'+o+'</p>').join('')}<span class="card-copy-hint">Click to copy</span></div>` : ''}
+    <div class="matrix-card" ${cardCopy}><h4>Website Hero Headline</h4><p>${hero}</p><span class="card-copy-hint">Click to copy</span></div>
+    <div class="matrix-card" ${cardCopy}><h4>LinkedIn Headline</h4><p>${linkedIn}</p><span class="card-copy-hint">Click to copy</span></div>
+    <div class="matrix-card full-width" ${cardCopy}><h4>Email Subject Lines</h4>${subjects.map(s=>'<p>'+s+'</p>').join('')}<span class="card-copy-hint">Click to copy</span></div>
+    <div class="matrix-card full-width" ${cardCopy}><h4>Ad Copy Hooks</h4>${hooks.map(h=>'<p>'+h+'</p>').join('')}<span class="card-copy-hint">Click to copy</span></div>
+    ${coldEmail ? `<div class="matrix-card full-width" ${cardCopy}><h4>Cold Email Template</h4><p style="white-space:pre-line">${coldEmail}</p><span class="card-copy-hint">Click to copy</span></div>` : ''}
+    ${linkedInDM ? `<div class="matrix-card full-width" ${cardCopy}><h4>LinkedIn DM Template</h4><p>${linkedInDM}</p><span class="card-copy-hint">Click to copy</span></div>` : ''}
+    ${podcastPitch ? `<div class="matrix-card full-width" ${cardCopy}><h4>Podcast Guest Pitch</h4><p>${podcastPitch}</p><span class="card-copy-hint">Click to copy</span></div>` : ''}
+    <div class="matrix-card full-width" ${cardCopy}><h4>Call-to-Action Variations</h4>${ctas.map(c=>'<p>'+c+'</p>').join('')}<span class="card-copy-hint">Click to copy</span></div>
   `;
+}
+
+function copyMatrixCard(card) {
+  const title = card.querySelector('h4')?.textContent || '';
+  const paras = Array.from(card.querySelectorAll('p')).map(p => p.textContent).join('\n');
+  const text = title + '\n' + paras;
+  navigator.clipboard.writeText(text).then(() => {
+    card.classList.add('copied');
+    showToast(title + ' copied');
+    setTimeout(() => card.classList.remove('copied'), 1200);
+  });
 }
 
 function copyAllMessaging() {
@@ -2463,6 +2543,44 @@ function injectCollapseIndicators() {
   });
 }
 
+function expandAllSections() {
+  document.querySelectorAll('.workshop-section.collapsed').forEach(sec => sec.classList.remove('collapsed'));
+  localStorage.setItem('vp_collapsed', '{}');
+  showToast('All sections expanded', 'info');
+}
+
+function collapseAllSections() {
+  const collapsed = {};
+  document.querySelectorAll('.workshop-section').forEach(sec => {
+    sec.classList.add('collapsed');
+    collapsed[sec.id] = true;
+  });
+  localStorage.setItem('vp_collapsed', JSON.stringify(collapsed));
+  showToast('All sections collapsed', 'info');
+}
+
+function jumpToNextEmpty() {
+  const fields = document.querySelectorAll('textarea[data-field], input[type="text"][data-field]');
+  for (const f of fields) {
+    if (!f.value || !f.value.trim()) {
+      // Uncollapse parent section
+      const sec = f.closest('.workshop-section');
+      if (sec && sec.classList.contains('collapsed')) sec.classList.remove('collapsed');
+      // Open parent accordion
+      const acc = f.closest('.accordion');
+      if (acc && !acc.classList.contains('open')) acc.classList.add('open');
+      f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        f.focus();
+        f.classList.add('search-highlight');
+        setTimeout(() => f.classList.remove('search-highlight'), 2000);
+      }, 400);
+      return;
+    }
+  }
+  showToast('All fields have content!', 'success');
+}
+
 function toggleAccordion(id) {
   document.getElementById(id).classList.toggle('open');
 }
@@ -2483,6 +2601,8 @@ function exportMarkdown() {
   fields.forEach(([h,fs])=>{ md+=`## ${h}\n\n`; fs.forEach(([l,k])=>md+=`### ${l}\n${state[k]||'(empty)'}\n\n`); });
   if(state._lists?.caseStudies?.length) { md+='## Case Studies\n\n'; state._lists.caseStudies.forEach((c,i)=>{ if(c.name) md+=`${i+1}. **${c.name}** - ${c.after||'-'} (${c.metric||'-'})\n`; }); md+='\n'; }
   if(state._lists?.objections?.length) { md+='## Objections\n\n'; state._lists.objections.forEach(o=>{ if(o.objection) md+=`**${o.objection}**\n${o.response||'-'}\n\n`; }); }
+  if(state._lists?.faqs?.length) { md+='## FAQs\n\n'; state._lists.faqs.forEach(f=>{ if(f.question) md+=`**${f.question}**\n${f.answer||'-'}\n\n`; }); }
+  if(state.sessionNotes||state.nextSteps) { md+='## Session Notes\n\n'; if(state.sessionNotes) md+=state.sessionNotes+'\n\n'; if(state.nextSteps) md+='### Next Steps\n'+state.nextSteps+'\n\n'; if(state.followUpDate) md+='**Follow-up:** '+state.followUpDate+'\n\n'; }
   navigator.clipboard.writeText(md).then(()=>showToast('Exported to clipboard as Markdown')).catch(()=>{downloadFile(md,`vp-${(state.clientName||'export').toLowerCase()}.md`,'text/markdown');showToast('Downloaded as Markdown file');});
 }
 function downloadBackup() { collectState(); downloadFile(JSON.stringify(state,null,2),`vp-backup-${(state.clientName||'x').toLowerCase().replace(/[^a-z0-9]+/g,'-')}-${Date.now()}.json`,'application/json'); }
@@ -2661,6 +2781,33 @@ function exportPDF() {
   // Hero Story
   if (filled(s.hs_narrative)) sections += '<div class="ps"><h2>Founder Story</h2><div class="pf"><p>' + esc(s.hs_narrative) + '</p></div></div>';
 
+  // Messaging Matrix in PDF
+  if (filled(s.dc_industry) && filled(s.wd_problems)) {
+    const pWho = (s.dc_industry||'').split('\n')[0].substring(0,50);
+    const pPain = (s.wd_problems||'').split('\n')[0].substring(0,60).toLowerCase();
+    const pOutcome = (s.g_dreamOutcome||s.ba_after||'').split('\n')[0].substring(0,60).toLowerCase();
+    const pMech = (s.g_mechanism||'').split('\n')[0].toLowerCase();
+    const pGuarantee = (s.g_guarantee||'').split('\n')[0];
+    const pFear = (s.wd_fears||'').split('\n')[0].substring(0,80).toLowerCase();
+    let mmHtml = '';
+    mmHtml += '<div class="pf hl"><label>Positioning Statement</label><p>We help ' + pWho + ' who struggle with ' + pPain + ' to ' + (pOutcome||'achieve their goals') + (pMech ? ' through ' + pMech : '') + '.</p></div>';
+    mmHtml += '<div class="pf"><label>Website Hero</label><p>From ' + esc((s.ba_before||'').split('\n')[0].substring(0,40).toLowerCase()) + ' to ' + esc((s.ba_after||'').split('\n')[0].substring(0,40).toLowerCase()) + '.</p></div>';
+    mmHtml += '<div class="pf"><label>LinkedIn Headline</label><p>Helping ' + pWho + ' ' + (pOutcome||'solve ' + pPain) + (pMech ? ' | ' + pMech : '') + '</p></div>';
+    if (pGuarantee) mmHtml += '<div class="pf"><label>Guarantee CTA</label><p>' + esc(pGuarantee) + '</p></div>';
+    if (pFear) mmHtml += '<div class="pf"><label>Fear-Based Hook</label><p>Stop worrying about ' + esc(pFear) + '. Here is the fix.</p></div>';
+    mmHtml += '<div class="pf"><label>Cold Email Opener</label><p>I noticed ' + pWho.toLowerCase() + ' like yours often struggle with ' + pPain + '. ' + (pFear ? 'The risk? ' + esc(pFear) + '.' : '') + ' We help companies ' + (pOutcome||'solve this') + '. Worth a quick chat?</p></div>';
+    sections += '<div class="ps"><h2>Messaging Matrix</h2>' + mmHtml + '</div>';
+  }
+
+  // Session Notes in PDF
+  if (filled(s.sessionNotes) || filled(s.nextSteps)) {
+    let notesHtml = '';
+    if (filled(s.sessionNotes)) notesHtml += '<div class="pf"><label>Workshop Notes</label><p>' + esc(s.sessionNotes) + '</p></div>';
+    if (filled(s.nextSteps)) notesHtml += '<div class="pf hl"><label>Next Steps</label><p>' + esc(s.nextSteps) + '</p></div>';
+    if (s.followUpDate) notesHtml += '<div class="pf"><label>Follow-up Date</label><p>' + esc(s.followUpDate) + '</p></div>';
+    sections += '<div class="ps"><h2>Session Notes &amp; Next Steps</h2>' + notesHtml + '</div>';
+  }
+
   // Auto-generated one-liner
   let oneliner = '';
   if (filled(s.dc_industry) && filled(s.wd_problems)) {
@@ -2716,6 +2863,10 @@ document.addEventListener('keydown',e=>{
   if(e.key==='?' && !e.target.matches('input,textarea,select,[contenteditable]')){
     e.preventDefault();
     document.getElementById('helpOverlay')?.classList.toggle('open');
+  }
+  if(e.key==='n' && !e.metaKey && !e.ctrlKey && !e.target.matches('input,textarea,select,[contenteditable]')){
+    e.preventDefault();
+    jumpToNextEmpty();
   }
   // Arrow keys in search
   if(document.getElementById('searchOverlay').classList.contains('open')){
