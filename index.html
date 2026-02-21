@@ -2190,16 +2190,13 @@ let driveAutoBackupTimer = null;
 
 function initDrive() {
   if (!appsScriptUrl) return;
-  // Ping the Apps Script to check if Drive is reachable
-  fetch(appsScriptUrl + '?action=ping')
+  fetch(appsScriptUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'ping' }) })
     .then(r => r.json())
     .then(d => {
-      if (d.ok) {
-        driveConnected = true;
-        const btn = document.getElementById('driveBtn');
-        if (btn) { btn.classList.add('connected'); document.getElementById('driveLabel').textContent = 'Drive Ready'; }
-        startDriveAutoBackup();
-      }
+      driveConnected = true;
+      const btn = document.getElementById('driveBtn');
+      if (btn) { btn.classList.add('connected'); document.getElementById('driveLabel').textContent = 'Drive Ready'; }
+      startDriveAutoBackup();
     }).catch(() => {});
 }
 
@@ -2207,20 +2204,16 @@ function handleDriveConnect() {
   if (!appsScriptUrl) { showToast('Set your Apps Script URL first (click the gear icon)', 'warning'); return; }
   if (driveConnected) { backupToDrive(); return; }
   showToast('Connecting to Drive...', 'info');
-  fetch(appsScriptUrl + '?action=ping')
+  fetch(appsScriptUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'ping' }) })
     .then(r => r.json())
     .then(d => {
-      if (d.ok) {
-        driveConnected = true;
-        const btn = document.getElementById('driveBtn');
-        if (btn) { btn.classList.add('connected'); document.getElementById('driveLabel').textContent = 'Drive Connected'; }
-        showToast('Google Drive connected via Apps Script - auto-backup every 5 min', 'success');
-        startDriveAutoBackup();
-        backupToDrive();
-      } else {
-        showToast('Apps Script responded but Drive folder not found: ' + JSON.stringify(d), 'error');
-      }
-    }).catch(e => { showToast('Could not reach Apps Script. Check URL in settings.', 'error'); });
+      driveConnected = true;
+      const btn = document.getElementById('driveBtn');
+      if (btn) { btn.classList.add('connected'); document.getElementById('driveLabel').textContent = 'Drive Connected'; }
+      showToast('Google Drive connected - auto-backup every 5 min', 'success');
+      startDriveAutoBackup();
+      backupToDrive();
+    }).catch(e => { showToast('Could not reach Apps Script: ' + e.message, 'error'); });
 }
 
 function startDriveAutoBackup() {
@@ -2251,7 +2244,7 @@ async function restoreFromDrive() {
   const clientSlug = (state.clientName || 'untitled').toLowerCase().replace(/[^a-z0-9]+/g, '-');
   try {
     showToast('Restoring from Drive...', 'info');
-    const resp = await fetch(appsScriptUrl + '?action=restore&client=' + encodeURIComponent(clientSlug));
+    const resp = await fetch(appsScriptUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'restore', client: clientSlug }) });
     const data = await resp.json();
     if (data.error) { showToast('No Drive backup found for ' + (state.clientName||'this client'), 'warning'); return; }
     populateForm(data);
