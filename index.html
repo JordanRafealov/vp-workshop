@@ -2447,8 +2447,13 @@ let driveTokenClient = null;
 let driveFileIds = {};
 let driveAutoBackupTimer = null;
 
+let driveInitAttempts = 0;
 function initDrive() {
-  if (typeof google === 'undefined' || !google.accounts) { setTimeout(initDrive, 500); return; }
+  driveInitAttempts++;
+  if (typeof google === 'undefined' || !google.accounts) {
+    if (driveInitAttempts > 20) { showToast('Google sign-in library failed to load. Check if an ad blocker is active.', 'error'); return; }
+    setTimeout(initDrive, 500); return;
+  }
   try {
     driveTokenClient = google.accounts.oauth2.initTokenClient({
       client_id: DRIVE_CLIENT_ID,
