@@ -8,7 +8,6 @@
 // Load theme BEFORE paint to prevent flash
 (function(){var t=localStorage.getItem('vpTheme');if(t==='light')document.documentElement.classList.add('light');})();
 </script>
-<script src="https://apis.google.com/js/api.js" async defer></script>
 <style>
 /* ==================== VARIABLES ==================== */
 :root {
@@ -480,8 +479,112 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
 .toast.warning::before { content: '\26A0'; }
 .toast.error { border-color: var(--danger); }
 .toast.error::before { content: '\2717'; color: var(--danger); font-weight: 700; }
+.toast.info { border-color: #3b82f6; }
+.toast.info::before { content: '\2139'; color: #3b82f6; font-weight: 700; font-size: 14px; }
 @keyframes toastIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 @keyframes toastOut { from { opacity:1; } to { opacity:0; transform:translateY(-8px); } }
+
+/* ==================== KEYBOARD SHORTCUT HELP ==================== */
+#helpOverlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 500;
+  justify-content: center; align-items: center;
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+#helpOverlay.open { display: flex; }
+.help-modal {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px 32px;
+  max-width: 480px; width: 90%; box-shadow: var(--shadow-elevated);
+  max-height: 80vh; overflow-y: auto;
+}
+.help-modal h2 { font-size: 16px; margin-bottom: 16px; color: var(--accent); }
+.help-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0; border-bottom: 1px solid var(--border);
+}
+.help-row:last-child { border-bottom: none; }
+.help-key {
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.help-key kbd {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 4px; padding: 2px 7px; font-size: 11px;
+  font-family: var(--font); font-weight: 600; color: var(--text-primary);
+  box-shadow: 0 1px 0 var(--border);
+}
+.help-desc { font-size: 13px; color: var(--text-secondary); }
+.help-section-title {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text-muted); padding-top: 12px; margin-bottom: 4px;
+}
+
+/* ==================== COLLAPSIBLE SECTIONS ==================== */
+.section-banner { cursor: pointer; user-select: none; }
+.section-banner .collapse-indicator {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 10px; opacity: 0.6; transition: transform 0.2s;
+  z-index: 2;
+}
+.workshop-section.collapsed .section-banner .collapse-indicator { transform: translateY(-50%) rotate(-90deg); }
+.workshop-section.collapsed .section-body {
+  max-height: 0; padding: 0 28px; overflow: hidden; border: none;
+  opacity: 0; transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+}
+.section-body {
+  max-height: 5000px; opacity: 1;
+  transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+}
+
+/* ==================== FIELD HIGHLIGHT ON EMPTY CRITICAL ==================== */
+.field-group.critical-empty > label::after {
+  content: 'Required'; font-size: 9px; font-weight: 600;
+  color: var(--warning); margin-left: 8px; opacity: 0.7;
+}
+
+/* ==================== SEARCH HIGHLIGHT ==================== */
+.search-highlight {
+  animation: highlightPulse 2s ease;
+}
+@keyframes highlightPulse {
+  0% { box-shadow: 0 0 0 3px rgba(124,58,237,0.5); }
+  100% { box-shadow: 0 0 0 3px transparent; }
+}
+
+/* ==================== NAV PROGRESS BADGE ==================== */
+.nav-progress {
+  font-size: 9px; font-weight: 600; color: var(--text-muted);
+  margin-left: auto; font-variant-numeric: tabular-nums;
+  opacity: 0.6; transition: all var(--transition);
+}
+.nav-progress.done { color: var(--success); opacity: 1; }
+
+/* ==================== AI COACH LABELS ==================== */
+.coach-card-label.ai {
+  color: #a855f7; background: rgba(168,85,247,0.1);
+  padding: 2px 6px; border-radius: 3px; display: inline-block;
+}
+
+/* ==================== RESEARCH CARD POLISH ==================== */
+.research-card { border-color: rgba(168,85,247,0.3); }
+.research-sources { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.research-source {
+  font-size: 10px; padding: 2px 8px; border-radius: 10px;
+  background: var(--accent-glow); color: var(--accent);
+  text-decoration: none; transition: all var(--transition);
+}
+.research-source:hover { background: var(--accent); color: #fff; }
+.research-web-badge {
+  font-size: 8px; font-weight: 700; background: var(--success);
+  color: #fff; padding: 1px 5px; border-radius: 3px;
+  margin-left: 4px; vertical-align: middle;
+}
+.research-chip {
+  font-size: 11px; padding: 4px 10px; border-radius: 12px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  color: var(--text-secondary); cursor: pointer; transition: all var(--transition);
+}
+.research-chip:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ==================== COPY BUTTON ON BANNERS ==================== */
 .section-banner { display: flex; align-items: center; justify-content: center; position: relative; }
@@ -772,12 +875,7 @@ select[data-field]:focus { border-color: var(--accent); outline: none; box-shado
   #sidebar.mobile-open { display: flex !important; z-index: 200; box-shadow: var(--shadow-elevated); }
 }
 
-/* ==================== SECTION PROGRESS BADGE ==================== */
-.nav-progress {
-  font-size: 10px; color: var(--text-muted); margin-left: auto;
-  font-variant-numeric: tabular-nums; opacity: 0.7;
-}
-.nav-progress.done { color: var(--success); opacity: 1; font-weight: 600; }
+/* Nav progress badge - see main definition below */
 
 /* ==================== SCROLLBAR ==================== */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -870,6 +968,7 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode"></button>
     <button class="drive-status" id="driveBtn" onclick="handleDriveConnect()" title="Connect Google Drive for auto-backup"><span class="drive-icon">&#9729;</span><span id="driveLabel">Connect Drive</span></button>
     <button class="hdr-btn" onclick="openSearch()" title="Search fields (Cmd+K)" style="font-size:13px;padding:5px 8px">&#128269;</button>
+    <button class="hdr-btn" onclick="document.getElementById('helpOverlay').classList.toggle('open')" title="Keyboard shortcuts (?)" style="font-size:13px;padding:5px 8px">?</button>
     <div class="export-wrap" id="exportWrap">
       <button class="hdr-btn primary" onclick="this.parentElement.classList.toggle('open')">Export &#9662;</button>
       <div class="export-menu">
@@ -1515,6 +1614,30 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
 
 <div id="toastContainer"></div>
 
+<!-- ==================== KEYBOARD SHORTCUT HELP ==================== -->
+<div id="helpOverlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="help-modal">
+    <h2>Keyboard Shortcuts</h2>
+    <div class="help-section-title">Navigation</div>
+    <div class="help-row"><span class="help-key"><kbd>Ctrl</kbd><kbd>K</kbd></span><span class="help-desc">Search fields</span></div>
+    <div class="help-row"><span class="help-key"><kbd>Ctrl</kbd><kbd>S</kbd></span><span class="help-desc">Force save</span></div>
+    <div class="help-row"><span class="help-key"><kbd>?</kbd></span><span class="help-desc">Show this help</span></div>
+    <div class="help-row"><span class="help-key"><kbd>Esc</kbd></span><span class="help-desc">Close overlay / search</span></div>
+    <div class="help-section-title">Sections</div>
+    <div class="help-row"><span class="help-desc">Click any section banner to collapse/expand</span></div>
+    <div class="help-row"><span class="help-desc">Sidebar dots show section completion</span></div>
+    <div class="help-section-title">Data</div>
+    <div class="help-row"><span class="help-desc">Auto-saves on every input change</span></div>
+    <div class="help-row"><span class="help-desc">IndexedDB snapshot every 60 seconds</span></div>
+    <div class="help-row"><span class="help-desc">Drive auto-backup every 5 minutes (when connected)</span></div>
+    <div class="help-section-title">Export</div>
+    <div class="help-row"><span class="help-desc">PDF Report - full formatted document</span></div>
+    <div class="help-row"><span class="help-desc">Markdown - plain text copy</span></div>
+    <div class="help-row"><span class="help-desc">JSON Backup - full data for restore</span></div>
+    <div style="text-align:center;margin-top:16px"><button class="hdr-btn" onclick="document.getElementById('helpOverlay').classList.remove('open')">Close</button></div>
+  </div>
+</div>
+
 <!-- ==================== CMD+K SEARCH ==================== -->
 <div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearch()">
   <div class="search-modal">
@@ -1675,31 +1798,47 @@ const PHELLOS_DEFAULTS = {
   hs_mission:'Make every tech startup investor-ready from day one, so no founder loses funding because their numbers are a mess.',
   hs_narrative:'This started when my business partner was the CFO of a VC, having lots of trouble getting reports from startups, they all reported the wrong way. I tried to solve it and get reports.\n\nLeo was in startups and saw founders how to do financials after raising millions of dollars.\n\nOne side saw it from the fund side and I saw it from the fund side.',
   bs_website:'https://phellosconsultancy.co.uk', bs_product:'Finance consultancy for tech startups - investor due diligence, revenue reconciliation, financial modeling',
-  bs_annualRevenue:'', bs_employees:'', bs_newCustomersMonth:'', bs_avgDealSize:'3000',
+  bs_annualRevenue:'', bs_employees:'Small team (co-founders + associates)', bs_newCustomersMonth:'', bs_avgDealSize:'3000-6000 GBP/month',
   bs_sellingMechanism:'Founder-Led Sales', bs_deliveryType:'Done-For-You (Service)',
   bs_leadSource:'Referrals / Word of Mouth', bs_advertisingMode:'Cold Outreach',
   bs_growthConstraint:'Lead quality', bs_techStatus:'',
   bs_salesCycle:'1-3 weeks (accelerates when fundraise is imminent)',
   bs_closeRate:'', bs_qualifiedLeads:'', bs_salesTeamSize:'Founder-led (Leo)',
   bs_monthlySpend:'', bs_pipelineValue:'', bs_monthlyLeads:'', bs_conversionRate:'',
-  bs_leadToCustomer:'', bs_followUpSLA:'', bs_competitors:'', bs_messagingAngles:'',
-  bs_totalCustomers:'', bs_aov:'', bs_cac:'', bs_ltv:'', bs_churnRate:'', bs_nps:'', bs_customerSegments:'',
+  bs_leadToCustomer:'', bs_followUpSLA:'Reply within 24 hours', bs_competitors:'Generic accountants and bookkeepers\nFractional CFO services\nBig 4 / mid-tier audit firms (for larger companies)\nDo Nothing (founder handles it themselves)', bs_messagingAngles:'Investor-ready financials\nValuation protection (prevent 10-30% haircut)\nAuditors who know what investors look for\nNever failed a due diligence process',
+  bs_totalCustomers:'', bs_aov:'3000-6000 GBP/month', bs_cac:'', bs_ltv:'36,000-144,000 GBP (12-24 month avg engagement)', bs_churnRate:'', bs_nps:'', bs_customerSegments:'Pre-Series A startups (Sprint focus)\nSeries A-B companies (ongoing retainer)\nHardware-enabled tech (most complex finances)',
   bs_monthlyRevenue:'', bs_grossMargin:'', bs_netMargin:'', bs_mrrGrowth:'',
   bs_burnRate:'', bs_runway:'', bs_yearlyProfit:'', bs_productLines:'',
   bs_revenueGoal:'', bs_mainGrowthChannel:'', bs_growthStrategy:'', bs_growthConstraints:'',
   bs_fundingNeeded:'', bs_exitTimeline:'', bs_exitTarget:'',
-  bs_custAcquisition:'', bs_custOnboarding:'', bs_serviceDelivery:'', bs_teamStructureOps:'',
-  bs_workflowStages:'', bs_qualityMetrics:'', bs_dataAnalytics:'', bs_scheduling:'',
+  bs_custAcquisition:'Referrals from VCs and accelerators\nFounder-to-founder word of mouth\nPodcast appearances\nLinkedIn content and DMs', bs_custOnboarding:'1. Collect 2 years accounting records\n2. Map into historic financial model\n3. 2-3 founder Q&A sessions\n4. First report delivery\n5. Forecast + data room setup', bs_serviceDelivery:'Remote team, fully digital. Monthly data ingestion, reconciliation, reporting, and forecast updates.', bs_teamStructureOps:'Co-founders (Leo + partner) + associate team',
+  bs_workflowStages:'Collect > Map > Diagnose > Report > Forecast > Data Room > Ongoing Monthly', bs_qualityMetrics:'100% DD pass rate\nOn-time monthly reporting\nValuation protection metrics', bs_dataAnalytics:'Financial modeling tools, accounting integrations', bs_scheduling:'Monthly review cadence, ad-hoc meetings around fundraise milestones',
   bs_toolsFinance:'', bs_toolsAnalytics:'', bs_toolsSales:'', bs_toolsMarketing:'', bs_toolsOther:'',
-  bs_brandVoice:'', bs_prohibitedTerms:'', bs_trustSignals:'We have never failed a financial due diligence process',
+  bs_brandVoice:'Direct, confident, no-BS. Like a trusted advisor, not a salesperson. Professional but approachable.', bs_prohibitedTerms:'Bookkeeping, accountancy (too generic), cheap, basic', bs_trustSignals:'We have never failed a financial due diligence process\nAll team members are qualified auditors\nExperience from both investor and startup side',
   bs_licenses:'', bs_adRestrictions:'',
-  bs_differentiators:'We are all auditors so we KNOW what they are looking for', bs_proofAssets:'', bs_offerPackages:'', bs_promotions:'',
+  bs_differentiators:'We are all auditors so we KNOW what they are looking for', bs_proofAssets:'Case studies: Mobile Commons, Mindsite, Ease Global, Basic Block, Wamo, Octopus\nVC endorsements\nSuccessful DD outcomes', bs_offerPackages:'1. Free: Round Readiness & Valuation Haircut Audit\n2. Sprint: 30-Day Round Readiness Sprint (3,000 GBP)\n3. Core: Audit-Proof Finance Department (3-6K GBP/month retainer)', bs_promotions:'',
   _lists: {
     caseStudies:[{name:'Mobile Commons',before:'',after:'',metric:'',notes:'Most likely to give case study'},{name:'Mindsite',before:'',after:'',metric:'',notes:''},{name:'Ease Global',before:'',after:'',metric:'',notes:''},{name:'Basic Block',before:'',after:'',metric:'',notes:'Most likely to give case study'},{name:'Wamo',before:'',after:'',metric:'',notes:''},{name:'Octopus',before:'',after:'',metric:'',notes:''}],
-    features:[{step:'',feature:'',benefit:'',proof:''}],
+    features:[
+      {step:'Step 1: COLLECT',feature:'Historic data ingestion',benefit:'We pull 2 years of accounting records and map every transaction so nothing is missed',proof:'Used by 40+ startups across SaaS, fintech, and hardware-enabled tech'},
+      {step:'Step 2: MAP',feature:'Historic financial model',benefit:'Your raw data is transformed into a clean, investor-grade financial model that tells the real story',proof:'Catches 10-30% valuation discrepancies that generic accountants miss'},
+      {step:'Step 3: DIAGNOSE',feature:'Founder Q&A sessions (2-3 meetings)',benefit:'We deep-dive into revenue, expenses, and anomalies - understanding your business model inside out',proof:'Identifies blind spots founders didn\'t know existed'},
+      {step:'Step 4: REPORT',feature:'First financial report',benefit:'Your first reconciled report gives you instant visibility into true financial health',proof:'Founders say "I finally understand my own numbers"'},
+      {step:'Step 5: FORECAST',feature:'5-year financial forecast (IPEV compliant)',benefit:'Investor-ready projections that pass due diligence scrutiny',proof:'Built by auditors who know exactly what the other side checks'},
+      {step:'Step 6: DATA ROOM',feature:'Complete data room setup',benefit:'Everything investors need - organised, accessible, always up to date. Company stays "sales ready"',proof:'Reduces DD timeline from months to weeks'},
+      {step:'Step 7: ONBOARD',feature:'Post-onboarding handoff',benefit:'Seamless transition to ongoing support with no gaps in coverage',proof:'100% client retention through onboarding phase'},
+      {step:'Step 8: MONITOR',feature:'Monthly financial review + reporting',benefit:'Every month\'s financials are ingested, reviewed, questioned, and reported. Forecasts updated automatically.',proof:'Clients report 50% less time spent on finance admin'}
+    ],
     competitors:[{name:'Do Nothing',positioning:'Founders try to handle finances themselves or ignore them until fundraise',advantage:'We prevent the 10-30% valuation haircut they don\'t see coming. The cost of doing nothing is far higher than the retainer.',loseWhen:'Founder is not planning to raise and has no investor pressure'},{name:'Generic Accountant',positioning:'Tax compliance, bookkeeping, year-end accounts',advantage:'Accountants do compliance, not investor-ready financials. We are auditors who know what investors look for because we\'ve been on the fund side.',loseWhen:'Company only needs basic compliance and has no investor-facing needs'},{name:'Fractional CFO',positioning:'Part-time senior finance hire, strategic advisory',advantage:'We combine operational finance work with due diligence expertise at a fraction of a full-time CFO cost. Plus we\'ve sat on the investor side.',loseWhen:'Company wants a senior executive who attends board meetings and manages a finance team'}],
     objections:[{objection:'I have an accountant, he can handle it right?',response:'Your accountant handles compliance and tax. We handle investor-grade financials - reconciled management accounts, forecasts, data rooms, and due diligence preparation. These are completely different skillsets. Has your accountant ever sat on the other side of a due diligence table?'},{objection:'How much do you help on strategy?',response:'Our core is making your numbers tell the right story. We build the financial models, forecasts, and reporting that inform strategy. We don\'t replace your business strategy - we give you the financial clarity to make better strategic decisions.'},{objection:'I don\'t really need this.',response:'Most founders say that until they\'re 4 weeks from a term sheet and their numbers don\'t reconcile. The cost of being unprepared is a 10-30% valuation haircut or a failed raise entirely. When are you planning to raise next?'}],
-    faqs:[{question:'',answer:''}]
+    faqs:[
+      {question:'How long does it take to get set up?',answer:'The 30-Day Sprint gets you investor-ready in 30 days. Full onboarding for ongoing retainer takes 2-3 weeks of initial meetings, then you\'re on autopilot.'},
+      {question:'Do you replace our accountant?',answer:'No. Your accountant handles tax compliance. We handle investor-grade financials - management accounts, forecasts, data rooms, and DD prep. Completely different skillsets. We work alongside your accountant.'},
+      {question:'What if we\'re not planning to raise right now?',answer:'Even better - you get your house in order before the pressure hits. Founders who come to us 3-6 months before a raise get 2-3x better outcomes than those who come 4 weeks before.'},
+      {question:'How is this different from hiring a fractional CFO?',answer:'A fractional CFO is a senior executive hire at 5-10x our cost. We combine hands-on operational finance work with due diligence expertise - and we\'ve sat on the investor side of the table. You get CFO-level insight at a fraction of the price.'},
+      {question:'What size companies do you work with?',answer:'Typically 5-500 employees, with the sweet spot being 10-30 employee startups at pre-Series A to Series B stage. We work across SaaS, fintech, and tech-enabled businesses.'},
+      {question:'What does the monthly retainer include?',answer:'Monthly data ingestion, reconciled management accounts, forecast updates, investor reporting, data room maintenance, and direct access to our team for financial questions. Think of it as a fully outsourced finance department.'}
+    ]
   }
 };
 
@@ -2286,6 +2425,44 @@ async function restoreFromDrive() {
 
 
 // ==================== ACCORDION TOGGLE ====================
+function toggleSectionCollapse(sec) {
+  if (!sec) return;
+  sec.classList.toggle('collapsed');
+  // Save collapsed state
+  const id = sec.id;
+  try {
+    const collapsed = JSON.parse(localStorage.getItem('vp_collapsed') || '{}');
+    collapsed[id] = sec.classList.contains('collapsed');
+    localStorage.setItem('vp_collapsed', JSON.stringify(collapsed));
+  } catch(e) {}
+}
+
+function restoreCollapsedState() {
+  try {
+    const collapsed = JSON.parse(localStorage.getItem('vp_collapsed') || '{}');
+    for (const [id, isCollapsed] of Object.entries(collapsed)) {
+      if (isCollapsed) document.getElementById(id)?.classList.add('collapsed');
+    }
+  } catch(e) {}
+}
+
+function injectCollapseIndicators() {
+  document.querySelectorAll('.section-banner').forEach(banner => {
+    const sec = banner.closest('.workshop-section');
+    if (!sec) return;
+    // Add collapse indicator
+    const ind = document.createElement('span');
+    ind.className = 'collapse-indicator';
+    ind.textContent = '\u25BC';
+    banner.insertBefore(ind, banner.firstChild);
+    // Add click handler (but not on copy button)
+    banner.addEventListener('click', e => {
+      if (e.target.closest('.copy-section-btn')) return;
+      toggleSectionCollapse(sec);
+    });
+  });
+}
+
 function toggleAccordion(id) {
   document.getElementById(id).classList.toggle('open');
 }
@@ -2534,6 +2711,11 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     closeSearch();
     document.getElementById('exportWrap')?.classList.remove('open');
+    document.getElementById('helpOverlay')?.classList.remove('open');
+  }
+  if(e.key==='?' && !e.target.matches('input,textarea,select,[contenteditable]')){
+    e.preventDefault();
+    document.getElementById('helpOverlay')?.classList.toggle('open');
   }
   // Arrow keys in search
   if(document.getElementById('searchOverlay').classList.contains('open')){
@@ -2568,6 +2750,8 @@ function init() {
   document.addEventListener('click',e=>{const ew=document.getElementById('exportWrap');if(ew&&!ew.contains(e.target))ew.classList.remove('open');});
   updateProgress(); updateLiveSummary(); updateMessagingMatrix();
   injectCopyButtons();
+  injectCollapseIndicators();
+  restoreCollapsedState();
   setInterval(updateTimer, 1000);
   // Init Google Drive connection via Apps Script
   setTimeout(initDrive, 1000);
