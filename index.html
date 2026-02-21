@@ -1264,6 +1264,264 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
   100% { transform: translate(-50%,-50%) scale(0.8); opacity: 0; }
 }
 
+/* ==================== v15: SCROLL PROGRESS BAR ==================== */
+#scrollProgress {
+  position: fixed; top: 0; left: 0; width: 0%; height: 3px;
+  background: var(--accent); z-index: 200;
+  transition: width 0.15s ease;
+}
+
+/* v15: Section completion badge on banners */
+.section-badge {
+  position: absolute; right: 48px; top: 50%; transform: translateY(-50%);
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 10px;
+  z-index: 2; font-variant-numeric: tabular-nums; letter-spacing: 0.3px;
+  transition: all 0.3s ease;
+}
+.section-badge.complete { background: rgba(34,197,94,0.3); color: #fff; }
+
+/* v16: Scroll-to-top button */
+#scrollTopBtn {
+  display: none; position: fixed; bottom: 24px; right: 24px;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--accent); color: #fff; border: none;
+  font-size: 20px; cursor: pointer; z-index: 150;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.4);
+  transition: all 0.2s ease; align-items: center; justify-content: center;
+}
+#scrollTopBtn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+@media (max-width: 900px) { #scrollTopBtn { bottom: 72px; right: 16px; } }
+@media (max-width: 1300px) { #scrollTopBtn { right: 16px; } }
+
+/* v16: Recently edited field highlight */
+@keyframes editPulse {
+  0% { border-left: 3px solid var(--accent); }
+  50% { border-left: 3px solid transparent; }
+  100% { border-left: 3px solid transparent; }
+}
+.recently-edited {
+  animation: editPulse 3s ease forwards;
+}
+
+/* v17: Multi-Client Switcher */
+.client-switcher {
+  position: relative; display: inline-flex; align-items: center;
+}
+.client-switcher-btn {
+  font-size: 11px; font-weight: 600; background: var(--accent-glow); color: var(--accent);
+  padding: 3px 8px 3px 4px; border-radius: 20px; border: 1px solid rgba(124,58,237,0.2);
+  cursor: pointer; transition: all var(--transition); display: flex; align-items: center; gap: 4px;
+}
+.client-switcher-btn:hover { border-color: var(--accent); }
+.client-switcher-btn .cs-arrow { font-size: 8px; opacity: 0.7; }
+.client-switcher-menu {
+  display: none; position: absolute; top: 100%; left: 0; margin-top: 6px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 4px; min-width: 200px;
+  box-shadow: var(--shadow-elevated); z-index: 120;
+}
+.client-switcher.open .client-switcher-menu { display: block; }
+.cs-menu-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; border-radius: 4px; font-size: 12px;
+  color: var(--text-primary); cursor: pointer; border: none;
+  background: none; width: 100%; text-align: left; font-family: var(--font);
+  transition: background 0.1s;
+}
+.cs-menu-item:hover { background: var(--accent-glow); }
+.cs-menu-item.active { color: var(--accent); font-weight: 600; }
+.cs-menu-item .cs-date { font-size: 9px; color: var(--text-muted); }
+.cs-menu-item.action { color: var(--accent); font-weight: 600; border-top: 1px solid var(--border); margin-top: 2px; }
+.cs-menu-item.danger { color: var(--danger); }
+
+/* v18: Session Notes Cards */
+.note-cards { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.note-card {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  transition: border-color var(--transition);
+}
+.note-card:hover { border-color: var(--border-hover); }
+.note-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.note-card-time { font-size: 10px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.note-card-cat {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; padding: 1px 6px; border-radius: 3px;
+}
+.note-card-cat.action-item { background: rgba(239,68,68,0.15); color: var(--danger); }
+.note-card-cat.insight { background: rgba(124,58,237,0.15); color: var(--accent); }
+.note-card-cat.question { background: rgba(34,197,94,0.15); color: var(--success); }
+.note-card-cat.follow-up { background: rgba(245,158,11,0.15); color: var(--warning); }
+.note-card-text { font-size: 13px; color: var(--text-primary); line-height: 1.6; }
+.note-card-remove {
+  margin-left: auto; font-size: 10px; color: var(--text-muted);
+  background: none; border: none; cursor: pointer; opacity: 0.4;
+  transition: all var(--transition);
+}
+.note-card-remove:hover { opacity: 1; color: var(--danger); }
+.add-note-row {
+  display: flex; gap: 8px; margin-top: 12px; align-items: flex-start;
+}
+.add-note-row textarea {
+  flex: 1; min-height: 40px; font-size: 13px; padding: 8px 12px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-primary);
+  font-family: var(--font); resize: none;
+}
+.add-note-row textarea:focus { outline: none; border-color: var(--accent); }
+.note-cat-select {
+  padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg-input); color: var(--text-primary); font-size: 11px;
+  font-family: var(--font); cursor: pointer; min-width: 110px;
+}
+.add-note-btn {
+  padding: 8px 16px; border-radius: var(--radius-sm); border: none;
+  background: var(--accent); color: #fff; font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.add-note-btn:hover { background: var(--accent-hover); }
+
+/* v19: Share Link Modal */
+.share-link-box {
+  display: flex; gap: 6px; align-items: center; margin-top: 10px;
+}
+.share-link-input {
+  flex: 1; padding: 8px 10px; font-size: 11px; font-family: monospace;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text-primary); word-break: break-all;
+}
+.share-link-copy {
+  padding: 8px 14px; border-radius: 6px; border: none;
+  background: var(--accent); color: #fff; font-size: 11px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+}
+
+/* v20: Value Calculator */
+.calc-results {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 18px;
+}
+.calc-result-card {
+  background: var(--accent-glow); border: 1px solid rgba(124,58,237,0.25);
+  border-radius: var(--radius); padding: 18px; text-align: center;
+}
+.calc-result-card .cr-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--accent); margin-bottom: 6px;
+}
+.calc-result-card .cr-value {
+  font-size: 28px; font-weight: 800; color: var(--text-primary);
+  font-variant-numeric: tabular-nums; letter-spacing: -0.5px;
+}
+.calc-result-card .cr-sub {
+  font-size: 11px; color: var(--text-muted); margin-top: 4px;
+}
+.calc-result-card.highlight {
+  background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(124,58,237,0.12));
+  border-color: rgba(34,197,94,0.3);
+}
+.calc-result-card.highlight .cr-value { color: var(--success); }
+@media (max-width: 768px) { .calc-results { grid-template-columns: 1fr; } }
+
+/* v21: Section dependency banners */
+.dependency-banner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; margin-bottom: 16px;
+  background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2);
+  border-radius: var(--radius-sm); font-size: 12px; color: var(--warning);
+}
+.dependency-banner .dep-icon { font-size: 14px; flex-shrink: 0; }
+.dependency-banner .dep-text { flex: 1; }
+.dependency-banner .dep-go {
+  padding: 4px 10px; border-radius: 4px; border: 1px solid var(--warning);
+  background: transparent; color: var(--warning); font-size: 10px; font-weight: 600;
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.dependency-banner .dep-go:hover { background: var(--warning); color: #fff; }
+.dependency-banner .dep-dismiss {
+  background: none; border: none; color: var(--text-muted); cursor: pointer;
+  font-size: 16px; opacity: 0.6; transition: opacity 0.15s;
+}
+.dependency-banner .dep-dismiss:hover { opacity: 1; }
+
+/* v22: Presentation Mode */
+body.presentation-mode #sidebar,
+body.presentation-mode #rightPanel,
+body.presentation-mode .mobile-nav,
+body.presentation-mode .facilitator-bar,
+body.presentation-mode .tip-box,
+body.presentation-mode .add-item-btn,
+body.presentation-mode .item-remove,
+body.presentation-mode .copy-section-btn,
+body.presentation-mode .collapse-indicator,
+body.presentation-mode .field-sublabel,
+body.presentation-mode .section-badge,
+body.presentation-mode .dependency-banner,
+body.presentation-mode #scrollTopBtn { display: none !important; }
+body.presentation-mode #topBar { padding-left: 20px; }
+body.presentation-mode #content {
+  margin-left: 0; margin-right: 0; max-width: 860px;
+  margin: 0 auto; padding-top: calc(var(--header-h) + 30px);
+}
+body.presentation-mode .pres-header {
+  display: block; text-align: center; padding: 40px 0 30px;
+  border-bottom: 3px solid var(--accent); margin-bottom: 36px;
+}
+body.presentation-mode .pres-header h2 {
+  font-size: 28px; font-weight: 800; color: var(--accent);
+  letter-spacing: -0.5px; margin-bottom: 6px;
+}
+body.presentation-mode .pres-header .pres-date {
+  font-size: 14px; color: var(--text-secondary);
+}
+.pres-header { display: none; }
+body.presentation-mode .workshop-section.pres-empty { display: none !important; }
+body.presentation-mode .section-banner { cursor: default; pointer-events: none; }
+body.presentation-mode textarea,
+body.presentation-mode input[type="text"],
+body.presentation-mode input[type="date"],
+body.presentation-mode select {
+  background: transparent !important; border: none !important;
+  box-shadow: none !important; resize: none !important;
+  pointer-events: none; padding-left: 0;
+}
+body.presentation-mode .section-body { font-size: 15px; }
+body.presentation-mode .trigger-card { pointer-events: none; }
+body.presentation-mode .slider-row input[type="range"] { pointer-events: none; }
+.pres-bar {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--banner-grad); color: #fff; text-align: center;
+  padding: 8px; font-size: 12px; font-weight: 600; z-index: 500;
+  letter-spacing: 0.5px;
+}
+body.presentation-mode .pres-bar { display: block; }
+
+/* v23: Accessibility + Polish */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+.section-banner { transition: box-shadow 0.2s ease, transform 0.15s ease; }
+.section-banner:hover { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
+@keyframes listItemFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.dynamic-item { animation: listItemFadeIn 0.25s ease; }
+.coach-loading-skeleton {
+  background: linear-gradient(90deg, var(--bg-input) 25%, var(--border) 50%, var(--bg-input) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+  border-radius: var(--radius-sm); height: 60px; margin-bottom: 8px;
+}
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* ==================== PRINT ==================== */
 @media print {
   #topBar, #sidebar, #rightPanel, .tip-box, .add-item-btn, .item-remove,
@@ -1278,12 +1536,20 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
 </head>
 <body>
 
+<!-- v15: Scroll Progress Bar -->
+<div id="scrollProgress"></div>
+
 <!-- ==================== HEADER ==================== -->
 <header id="topBar">
   <div class="header-left">
     <button class="hamburger" onclick="toggleMobileSidebar()"><span></span><span></span><span></span></button>
     <h1>Value Proposition Workshop</h1>
     <span class="client-badge" id="clientBadge">-</span>
+    <!-- v17: Client Switcher -->
+    <div class="client-switcher" id="clientSwitcher">
+      <button class="client-switcher-btn" onclick="toggleClientSwitcher()" title="Switch client"><span class="cs-arrow">&#9662;</span></button>
+      <div class="client-switcher-menu" id="clientSwitcherMenu"></div>
+    </div>
   </div>
   <div class="header-right">
     <div class="session-timer"><span class="timer-dot"></span><span id="timerDisplay">0:00</span></div>
@@ -1305,6 +1571,8 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
         <button class="export-menu-item" onclick="exportMarkdown();this.closest('.export-wrap').classList.remove('open')"><span class="em-icon">&#128196;</span>Copy as Markdown</button>
         <button class="export-menu-item" onclick="exportPDF();this.closest('.export-wrap').classList.remove('open')"><span class="em-icon">&#128462;</span>Generate PDF Report</button>
         <button class="export-menu-item" onclick="downloadBackup();this.closest('.export-wrap').classList.remove('open')"><span class="em-icon">&#128190;</span>Download JSON Backup</button>
+        <button class="export-menu-item" onclick="copyAsEmail();this.closest('.export-wrap').classList.remove('open')"><span class="em-icon">&#9993;</span>Copy as Email</button>
+        <button class="export-menu-item" onclick="shareAsLink();this.closest('.export-wrap').classList.remove('open')"><span class="em-icon">&#128279;</span>Share as Link</button>
       </div>
     </div>
   </div>
@@ -1334,6 +1602,7 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
     <a class="nav-item" data-nav="s7" onclick="goToSection('s7')"><span class="nav-dot"></span>Before / After</a>
     <a class="nav-item" data-nav="s8" onclick="goToSection('s8')"><span class="nav-dot"></span>Features & Benefits</a>
     <a class="nav-item" data-nav="s9" onclick="goToSection('s9')"><span class="nav-dot"></span>Guarantee & Offer</a>
+    <a class="nav-item" data-nav="sCalc" onclick="goToSection('sCalc')"><span class="nav-dot"></span>Value Calculator</a>
     <div class="nav-phase">How - Positioning</div>
     <a class="nav-item" data-nav="s10" onclick="goToSection('s10')"><span class="nav-dot"></span>Competitive Position</a>
     <a class="nav-item" data-nav="sSP" onclick="goToSection('sSP')"><span class="nav-dot"></span>Sales Process</a>
@@ -1410,6 +1679,12 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
 
 <!-- ==================== MAIN CONTENT ==================== -->
 <main id="content">
+
+<!-- v22: Presentation Mode Header -->
+<div class="pres-header" id="presHeader">
+  <h2 id="presClientName">Value Proposition</h2>
+  <div class="pres-date" id="presDate"></div>
+</div>
 
 <!-- S0: SETUP -->
 <section id="s0" class="workshop-section">
@@ -1850,6 +2125,28 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
   </div>
 </section>
 
+<!-- v20: VALUE CALCULATOR -->
+<section id="sCalc" class="workshop-section">
+  <div class="section-banner">Value Calculator</div>
+  <div class="section-body">
+    <p class="section-intro">Quantify the revenue impact of your service. Input your client's numbers to generate compelling ROI data for proposals and sales conversations.</p>
+    <div class="field-row">
+      <div class="field-group"><label>Average Deal Size</label><input type="text" data-field="calc_dealSize" placeholder="e.g. 50000" oninput="updateValueCalc();debouncedSave();"></div>
+      <div class="field-group"><label>Deals Per Month</label><input type="text" data-field="calc_dealsPerMonth" placeholder="e.g. 4" oninput="updateValueCalc();debouncedSave();"></div>
+    </div>
+    <div class="field-row">
+      <div class="field-group"><label>Current Close Rate (%)</label><input type="text" data-field="calc_closeRate" placeholder="e.g. 25" oninput="updateValueCalc();debouncedSave();"></div>
+      <div class="field-group"><label>Expected Improvement (%)</label><span class="field-sublabel">How much your service improves their close rate</span><input type="text" data-field="calc_improvement" placeholder="e.g. 30" oninput="updateValueCalc();debouncedSave();"></div>
+    </div>
+    <div class="field-group"><label>Your Service Cost (Monthly)</label><input type="text" data-field="calc_serviceCost" placeholder="e.g. 5000" oninput="updateValueCalc();debouncedSave();"></div>
+    <div class="calc-results" id="calcResults" style="display:none">
+      <div class="calc-result-card"><div class="cr-label">Monthly Impact</div><div class="cr-value" id="calcMonthly">-</div><div class="cr-sub">Additional revenue/month</div></div>
+      <div class="calc-result-card"><div class="cr-label">Annual Impact</div><div class="cr-value" id="calcAnnual">-</div><div class="cr-sub">Additional revenue/year</div></div>
+      <div class="calc-result-card highlight"><div class="cr-label">ROI</div><div class="cr-value" id="calcROI">-</div><div class="cr-sub">Return on investment</div></div>
+    </div>
+  </div>
+</section>
+
 <!-- S10: COMPETITIVE -->
 <section id="s10" class="workshop-section">
   <div class="section-banner">Competitive Positioning</div>
@@ -1952,6 +2249,20 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
     <div class="field-group"><label>Workshop Notes</label><span class="field-sublabel">Key insights, decisions, action items, follow-up tasks</span><textarea data-field="sessionNotes" placeholder="Capture anything important discussed during the session...&#10;&#10;- Action items&#10;- Key decisions&#10;- Follow-up tasks&#10;- Ideas to explore later" style="min-height:160px"></textarea></div>
     <div class="field-group"><label>Next Steps</label><span class="field-sublabel">Concrete next actions with owners and deadlines</span><textarea data-field="nextSteps" placeholder="1. [Owner] - [Action] - [Deadline]&#10;2. &#10;3. "></textarea></div>
     <div class="field-group"><label>Follow-up Date</label><input type="date" data-field="followUpDate"></div>
+    <hr class="section-divider">
+    <!-- v18: Timestamped Notes -->
+    <h3 style="font-size:14px;margin-bottom:8px;color:var(--accent-hover)">Timestamped Notes</h3>
+    <div class="add-note-row">
+      <textarea id="newNoteText" placeholder="Add a note..." oninput="autoResize(this)"></textarea>
+      <select class="note-cat-select" id="newNoteCat">
+        <option value="insight">Insight</option>
+        <option value="action-item">Action Item</option>
+        <option value="question">Question</option>
+        <option value="follow-up">Follow-up</option>
+      </select>
+      <button class="add-note-btn" onclick="addTimestampedNote()">Add</button>
+    </div>
+    <div class="note-cards" id="noteCards"></div>
   </div>
 </section>
 
@@ -1989,6 +2300,7 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
     <div class="help-row"><span class="help-key"><kbd>J</kbd></span><span class="help-desc">Next section</span></div>
     <div class="help-row"><span class="help-key"><kbd>K</kbd></span><span class="help-desc">Previous section</span></div>
     <div class="help-row"><span class="help-key"><kbd>F</kbd></span><span class="help-desc">Toggle Facilitator Mode</span></div>
+    <div class="help-row"><span class="help-key"><kbd>P</kbd></span><span class="help-desc">Toggle Presentation Mode</span></div>
     <div class="help-row"><span class="help-key"><kbd>Cmd+Z</kbd></span><span class="help-desc">Undo</span></div>
     <div class="help-row"><span class="help-key"><kbd>Cmd+Shift+Z</kbd></span><span class="help-desc">Redo</span></div>
     <div class="help-row"><span class="help-key"><kbd>Esc</kbd></span><span class="help-desc">Close overlay / search</span></div>
@@ -2254,6 +2566,7 @@ function collectState() {
   });
   state._lists={};
   for(const id of Object.keys(listDefs)) state._lists[id]=[...listDefs[id].items];
+  state._timestampedNotes = timestampedNotes;
   return state;
 }
 
@@ -2266,13 +2579,14 @@ function populateForm(data) {
     else { el.value=v; if(el.tagName==='TEXTAREA') autoResize(el); }
   });
   if(data._lists) for(const[id,items] of Object.entries(data._lists)) { if(listDefs[id]){listDefs[id].items=[...items.map(i=>({...i}))]; renderDynamicList(id);} }
-  updateClientBadge(); updateProgress(); updateLiveSummary(); updateMessagingMatrix();
+  loadNotesFromState(data);
+  updateClientBadge(); updateProgress(); updateLiveSummary(); updateMessagingMatrix(); updateSectionBadges();
 }
 
 function debouncedSave() {
   showSaveStatus('saving');
   clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(()=>{ saveToLS(); updateProgress(); updateLiveSummary(); updateMessagingMatrix(); scheduleUndoSnapshot(); }, SAVE_DEBOUNCE);
+  saveTimeout = setTimeout(()=>{ saveToLS(); updateProgress(); updateLiveSummary(); updateMessagingMatrix(); updateSectionBadges(); scheduleUndoSnapshot(); checkDependencies(); }, SAVE_DEBOUNCE);
 }
 
 // ==================== DYNAMIC LISTS ====================
@@ -2982,10 +3296,10 @@ function copyAllMessaging() {
 
 // ==================== RIGHT PANEL TABS ====================
 function switchRPTab(tab) {
-  document.querySelectorAll('.rp-tab').forEach(t => t.classList.toggle('active', t.textContent.trim().toLowerCase() === tab));
+  document.querySelectorAll('.rp-tab').forEach(t => { t.classList.toggle('active', t.textContent.trim().toLowerCase() === tab); t.setAttribute('aria-selected', t.classList.contains('active') ? 'true' : 'false'); });
   document.getElementById('rpSummaryTab').classList.toggle('active', tab === 'summary');
   document.getElementById('rpCoachTab').classList.toggle('active', tab === 'coach');
-  if (tab === 'coach') updateCoachSuggestions();
+  if (tab === 'coach') { showCoachSkeleton(); updateCoachSuggestions(); }
 }
 
 // ==================== AI COACHING ENGINE (Rule-Based) ====================
@@ -3338,7 +3652,7 @@ function toggleAccordion(id) {
 }
 
 // ==================== NAVIGATION ====================
-function goToSection(id) { document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); document.getElementById('sidebar')?.classList.remove('mobile-open'); }
+function goToSection(id) { const sec=document.getElementById(id); if(sec){ if(sec.classList.contains('collapsed')) sec.classList.remove('collapsed'); sec.scrollIntoView({behavior:'smooth'}); } document.getElementById('sidebar')?.classList.remove('mobile-open'); }
 function updateActiveNav() {
   const secs=document.querySelectorAll('.workshop-section'); let active='s0';
   secs.forEach(s=>{ if(s.getBoundingClientRect().top<=120) active=s.id; });
@@ -3608,6 +3922,352 @@ function exportPDF() {
   showToast('PDF report generated', 'success');
 }
 
+// ==================== v15: SCROLL PROGRESS ====================
+function updateScrollProgress() {
+  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+  const bar = document.getElementById('scrollProgress');
+  if (bar) bar.style.width = pct + '%';
+}
+
+// v15: Section completion badges on banners
+function updateSectionBadges() {
+  document.querySelectorAll('.workshop-section').forEach(sec => {
+    const fields = sec.querySelectorAll('textarea[data-field],input[type="text"][data-field],input[type="date"][data-field]');
+    const listFields = sec.querySelectorAll('textarea[data-key],input[data-key]');
+    let filled = 0, total = fields.length + listFields.length;
+    fields.forEach(f => { if (f.value && f.value.trim()) filled++; });
+    listFields.forEach(f => { if (f.value && f.value.trim()) filled++; });
+    if (total === 0) return;
+    let badge = sec.querySelector('.section-badge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'section-badge';
+      const banner = sec.querySelector('.section-banner');
+      if (banner) banner.appendChild(badge);
+    }
+    badge.textContent = filled + '/' + total;
+    badge.classList.toggle('complete', filled >= total);
+  });
+}
+
+// ==================== v16: SCROLL TO TOP BUTTON ====================
+function updateScrollTopBtn() {
+  const btn = document.getElementById('scrollTopBtn');
+  if (btn) btn.style.display = (window.scrollY > 500) ? 'flex' : 'none';
+}
+
+// v16: Recently edited highlight
+function markRecentlyEdited(field) {
+  field.classList.add('recently-edited');
+  setTimeout(() => field.classList.remove('recently-edited'), 3000);
+}
+
+// ==================== v17: MULTI-CLIENT SUPPORT ====================
+function toggleClientSwitcher() {
+  const sw = document.getElementById('clientSwitcher');
+  sw.classList.toggle('open');
+  if (sw.classList.contains('open')) renderClientSwitcherMenu();
+}
+
+function renderClientSwitcherMenu() {
+  const menu = document.getElementById('clientSwitcherMenu');
+  const clients = getSavedClients();
+  const entries = Object.entries(clients);
+  let html = '';
+  entries.forEach(([key, info]) => {
+    const isActive = key === currentClientKey;
+    const dateStr = info.lastSaved ? new Date(info.lastSaved).toLocaleDateString() : '';
+    html += '<button class="cs-menu-item' + (isActive ? ' active' : '') + '" onclick="switchClient(\'' + key + '\')">' + (info.name || key) + '<span class="cs-date">' + dateStr + '</span></button>';
+  });
+  html += '<button class="cs-menu-item action" onclick="showNewWorkshop();toggleClientSwitcher()">+ New Client</button>';
+  if (entries.length > 0) {
+    html += '<button class="cs-menu-item danger" onclick="deleteCurrentClient()">Delete Current</button>';
+  }
+  menu.innerHTML = html;
+}
+
+function switchClient(key) {
+  saveToLS();
+  const data = loadFromLS(key);
+  if (data) {
+    populateForm(data);
+    currentClientKey = key;
+    localStorage.setItem('vp_last_client', key);
+    showToast('Switched to ' + (data.clientName || 'client'), 'success');
+  }
+  document.getElementById('clientSwitcher').classList.remove('open');
+}
+
+function deleteCurrentClient() {
+  const clientName = state.clientName || 'this client';
+  if (!confirm('Delete workshop for "' + clientName + '"? This cannot be undone.')) return;
+  try {
+    localStorage.removeItem(currentClientKey);
+    const idx = JSON.parse(localStorage.getItem('vp_client_index') || '{}');
+    delete idx[currentClientKey];
+    localStorage.setItem('vp_client_index', JSON.stringify(idx));
+    const remaining = Object.keys(idx);
+    if (remaining.length > 0) {
+      switchClient(remaining[0]);
+    } else {
+      localStorage.removeItem('vp_last_client');
+      location.reload();
+    }
+    showToast('Deleted workshop for ' + clientName, 'info');
+  } catch(e) { showToast('Delete failed', 'error'); }
+  document.getElementById('clientSwitcher').classList.remove('open');
+}
+
+// ==================== v18: TIMESTAMPED NOTES ====================
+let timestampedNotes = [];
+
+function addTimestampedNote() {
+  const textEl = document.getElementById('newNoteText');
+  const catEl = document.getElementById('newNoteCat');
+  const text = textEl.value.trim();
+  if (!text) { showToast('Enter a note first', 'warning'); return; }
+  timestampedNotes.push({
+    text: text,
+    category: catEl.value,
+    timestamp: new Date().toISOString()
+  });
+  textEl.value = '';
+  autoResize(textEl);
+  renderNoteCards();
+  saveNotesToState();
+  debouncedSave();
+}
+
+function removeTimestampedNote(idx) {
+  timestampedNotes.splice(idx, 1);
+  renderNoteCards();
+  saveNotesToState();
+  debouncedSave();
+}
+
+function renderNoteCards() {
+  const container = document.getElementById('noteCards');
+  if (!container) return;
+  if (timestampedNotes.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = timestampedNotes.map((n, i) => {
+    const d = new Date(n.timestamp);
+    const timeStr = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + ' ' + d.toLocaleDateString();
+    const catLabel = n.category.replace('-', ' ');
+    return '<div class="note-card"><div class="note-card-header"><span class="note-card-cat ' + n.category + '">' + catLabel + '</span><span class="note-card-time">' + timeStr + '</span><button class="note-card-remove" onclick="removeTimestampedNote(' + i + ')" aria-label="Remove note">&times;</button></div><div class="note-card-text">' + n.text.replace(/</g,'&lt;').replace(/\n/g,'<br>') + '</div></div>';
+  }).join('');
+}
+
+function saveNotesToState() {
+  state._timestampedNotes = timestampedNotes;
+}
+
+function loadNotesFromState(data) {
+  timestampedNotes = data._timestampedNotes || [];
+  renderNoteCards();
+}
+
+// ==================== v19: COPY AS EMAIL + SHARE LINK ====================
+function copyAsEmail() {
+  collectState();
+  const s = state;
+  const has = v => v && v.trim();
+  let email = 'Subject: Value Proposition Workshop Summary - ' + (s.clientName || 'Client') + '\n\n';
+  email += 'Hi,\n\nHere is a summary from our Value Proposition Workshop' + (s.workshopDate ? ' on ' + s.workshopDate : '') + '.\n\n';
+  if (has(s.dc_industry)) email += 'TARGET: ' + s.dc_industry.split('\n')[0] + '\n';
+  if (has(s.wd_problems)) email += 'CORE PROBLEM: ' + s.wd_problems.split('\n')[0] + '\n';
+  if (has(s.ba_after)) email += 'OUTCOME: ' + s.ba_after.split('\n')[0] + '\n';
+  if (has(s.g_guarantee)) email += 'GUARANTEE: ' + s.g_guarantee.split('\n')[0] + '\n';
+  if (has(s.g_mechanism)) email += 'WHY US: ' + s.g_mechanism.split('\n')[0] + '\n';
+  email += '\n';
+  if (has(s.g_dreamOutcome)) email += 'ONE-LINER: We help ' + (s.dc_industry||'clients').split('\n')[0] + ' to ' + s.g_dreamOutcome.toLowerCase() + '.\n\n';
+  if (has(s.nextSteps)) email += 'NEXT STEPS:\n' + s.nextSteps + '\n\n';
+  if (s.followUpDate) email += 'Follow-up date: ' + s.followUpDate + '\n\n';
+  email += 'Best regards,\n' + (s.facilitator || 'The Team');
+  navigator.clipboard.writeText(email).then(() => showToast('Email summary copied to clipboard', 'success'));
+}
+
+function shareAsLink() {
+  collectState();
+  try {
+    const json = JSON.stringify(state);
+    const compressed = btoa(encodeURIComponent(json));
+    const url = window.location.origin + window.location.pathname + '?data=' + compressed;
+    document.getElementById('shareLinkInput').value = url;
+    document.getElementById('shareLinkModal').classList.add('open');
+  } catch(e) {
+    showToast('Data too large to share as link. Use JSON backup instead.', 'warning');
+  }
+}
+
+function copyShareLink() {
+  const input = document.getElementById('shareLinkInput');
+  navigator.clipboard.writeText(input.value).then(() => {
+    showToast('Share link copied!', 'success');
+  });
+}
+
+function loadFromShareLink() {
+  const params = new URLSearchParams(window.location.search);
+  const data = params.get('data');
+  if (data) {
+    try {
+      const json = decodeURIComponent(atob(data));
+      const parsed = JSON.parse(json);
+      if (parsed.clientName) {
+        populateForm(parsed);
+        saveToLS();
+        showToast('Loaded shared workshop: ' + parsed.clientName, 'success');
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    } catch(e) { console.log('Failed to load share link:', e); }
+  }
+}
+
+// ==================== v20: VALUE CALCULATOR ====================
+function updateValueCalc() {
+  const dealSize = parseFloat((state.calc_dealSize || document.querySelector('[data-field="calc_dealSize"]')?.value || '').replace(/[^0-9.]/g, ''));
+  const dealsPerMonth = parseFloat((state.calc_dealsPerMonth || document.querySelector('[data-field="calc_dealsPerMonth"]')?.value || '').replace(/[^0-9.]/g, ''));
+  const closeRate = parseFloat((state.calc_closeRate || document.querySelector('[data-field="calc_closeRate"]')?.value || '').replace(/[^0-9.]/g, ''));
+  const improvement = parseFloat((state.calc_improvement || document.querySelector('[data-field="calc_improvement"]')?.value || '').replace(/[^0-9.]/g, ''));
+  const serviceCost = parseFloat((state.calc_serviceCost || document.querySelector('[data-field="calc_serviceCost"]')?.value || '').replace(/[^0-9.]/g, ''));
+  const results = document.getElementById('calcResults');
+  if (isNaN(dealSize) || isNaN(dealsPerMonth) || isNaN(closeRate) || isNaN(improvement)) {
+    if (results) results.style.display = 'none';
+    return;
+  }
+  const currentRevenue = dealSize * dealsPerMonth * (closeRate / 100);
+  const newCloseRate = closeRate * (1 + improvement / 100);
+  const newRevenue = dealSize * dealsPerMonth * (newCloseRate / 100);
+  const monthlyImpact = newRevenue - currentRevenue;
+  const annualImpact = monthlyImpact * 12;
+  const roi = serviceCost > 0 ? ((monthlyImpact - serviceCost) / serviceCost * 100) : 0;
+  const fmt = n => n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' : n >= 1000 ? '$' + (n/1000).toFixed(0) + 'K' : '$' + Math.round(n);
+  document.getElementById('calcMonthly').textContent = fmt(monthlyImpact);
+  document.getElementById('calcAnnual').textContent = fmt(annualImpact);
+  document.getElementById('calcROI').textContent = (isFinite(roi) ? Math.round(roi) : 0) + '%';
+  if (results) results.style.display = 'grid';
+}
+
+// ==================== v21: SECTION DEPENDENCIES ====================
+const sectionDependencies = {
+  's13': { deps: ['s2','s1'], label: 'Messaging depends on Pain + ICP sections', sections: ['Psychographic Depth', 'Dream Client Profile'] },
+  's9': { deps: ['s7'], label: 'Guarantee is stronger with Before/After context', sections: ['Before / After'] },
+  'sSP': { deps: ['s1','s4'], label: 'Sales Process benefits from ICP + Buying Committee data', sections: ['Dream Client Profile', 'Buying Committee'] }
+};
+const dismissedDeps = new Set();
+
+function checkDependencies() {
+  collectState();
+  const has = v => v && v.trim();
+  const sectionEmpty = {
+    's1': !has(state.dc_industry) && !has(state.dc_companySize),
+    's2': !has(state.wd_problems) && !has(state.wd_fears),
+    's4': !has(state.bc_influenceMap),
+    's7': !has(state.ba_before) && !has(state.ba_after)
+  };
+  for (const [secId, config] of Object.entries(sectionDependencies)) {
+    const sec = document.getElementById(secId);
+    if (!sec) continue;
+    const existing = sec.querySelector('.dependency-banner');
+    if (existing) existing.remove();
+    if (dismissedDeps.has(secId)) continue;
+    const missingDeps = config.deps.filter(d => sectionEmpty[d]);
+    if (missingDeps.length > 0) {
+      const banner = document.createElement('div');
+      banner.className = 'dependency-banner';
+      banner.innerHTML = '<span class="dep-icon">&#128161;</span><span class="dep-text">Tip: Fill in ' + config.sections.join(' and ') + ' first for better results here.</span><button class="dep-go" onclick="goToSection(\'' + missingDeps[0] + '\')">Go</button><button class="dep-dismiss" onclick="dismissDependency(\'' + secId + '\')" aria-label="Dismiss tip">&times;</button>';
+      const body = sec.querySelector('.section-body');
+      if (body) body.insertBefore(banner, body.querySelector('.section-intro')?.nextSibling || body.firstChild);
+    }
+  }
+}
+
+function dismissDependency(secId) {
+  dismissedDeps.add(secId);
+  const sec = document.getElementById(secId);
+  const banner = sec?.querySelector('.dependency-banner');
+  if (banner) banner.remove();
+}
+
+// ==================== v22: PRESENTATION MODE ====================
+let presentationMode = false;
+
+function togglePresentationMode() {
+  presentationMode = !presentationMode;
+  document.body.classList.toggle('presentation-mode', presentationMode);
+  if (presentationMode) {
+    collectState();
+    document.getElementById('presClientName').textContent = state.clientName || 'Value Proposition';
+    document.getElementById('presDate').textContent = state.workshopDate ? new Date(state.workshopDate + 'T12:00:00').toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'}) : '';
+    // Hide empty sections
+    document.querySelectorAll('.workshop-section').forEach(sec => {
+      const fields = sec.querySelectorAll('textarea[data-field],input[type="text"][data-field]');
+      let hasContent = false;
+      fields.forEach(f => { if (f.value && f.value.trim()) hasContent = true; });
+      const listFields = sec.querySelectorAll('textarea[data-key],input[data-key]');
+      listFields.forEach(f => { if (f.value && f.value.trim()) hasContent = true; });
+      sec.classList.toggle('pres-empty', !hasContent);
+      // Expand collapsed sections
+      sec.classList.remove('collapsed');
+    });
+    showToast('Presentation Mode ON - press P or Esc to exit', 'info');
+  } else {
+    document.querySelectorAll('.workshop-section').forEach(sec => sec.classList.remove('pres-empty'));
+    showToast('Presentation Mode OFF', 'info');
+  }
+}
+
+// ==================== v23: ACCESSIBILITY HELPERS ====================
+function addAccessibilityAttributes() {
+  // Aria labels on icon-only buttons
+  document.querySelectorAll('.copy-section-btn').forEach(btn => {
+    if (!btn.getAttribute('aria-label')) btn.setAttribute('aria-label', 'Copy section');
+  });
+  document.querySelectorAll('.item-remove').forEach(btn => {
+    if (!btn.getAttribute('aria-label')) btn.setAttribute('aria-label', 'Remove item');
+  });
+  document.getElementById('themeToggle')?.setAttribute('aria-label', 'Toggle light/dark mode');
+  // Tab roles on right panel tabs
+  const tabsContainer = document.querySelector('.rp-tabs');
+  if (tabsContainer) {
+    tabsContainer.setAttribute('role', 'tablist');
+    tabsContainer.querySelectorAll('.rp-tab').forEach(tab => {
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-selected', tab.classList.contains('active') ? 'true' : 'false');
+    });
+  }
+}
+
+// v23: Focus trap for modals
+function trapFocus(modal) {
+  const focusable = modal.querySelectorAll('button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
+  if (focusable.length === 0) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  modal._focusTrap = function(e) {
+    if (e.key === 'Tab') {
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  };
+  modal.addEventListener('keydown', modal._focusTrap);
+  first.focus();
+}
+
+function releaseFocusTrap(modal) {
+  if (modal._focusTrap) { modal.removeEventListener('keydown', modal._focusTrap); delete modal._focusTrap; }
+}
+
+// v23: Loading skeleton for AI coach
+function showCoachSkeleton() {
+  const container = document.getElementById('coachSuggestions');
+  if (container) {
+    container.innerHTML = '<div class="coach-loading-skeleton"></div><div class="coach-loading-skeleton" style="height:40px"></div>';
+  }
+}
+
 // ==================== INIT ====================
 document.addEventListener('keydown',e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==='s'){e.preventDefault();collectState();saveToLS();}
@@ -3616,6 +4276,7 @@ document.addEventListener('keydown',e=>{
     closeSearch();
     document.getElementById('exportWrap')?.classList.remove('open');
     document.getElementById('helpOverlay')?.classList.remove('open');
+    if(presentationMode) togglePresentationMode();
   }
   if(e.key==='?' && !e.target.matches('input,textarea,select,[contenteditable]')){
     e.preventDefault();
@@ -3634,6 +4295,10 @@ document.addEventListener('keydown',e=>{
   if(e.key==='f' && !e.metaKey && !e.ctrlKey && !e.target.matches('input,textarea,select,[contenteditable]')){
     e.preventDefault();
     toggleFacilitatorMode();
+  }
+  if(e.key==='p' && !e.metaKey && !e.ctrlKey && !e.target.matches('input,textarea,select,[contenteditable]')){
+    e.preventDefault();
+    togglePresentationMode();
   }
   if(e.key==='j' && !e.metaKey && !e.ctrlKey && !e.target.matches('input,textarea,select,[contenteditable]')){
     e.preventDefault();
@@ -3666,7 +4331,7 @@ function init() {
   }
   document.addEventListener('input',e=>{if(e.target.matches('[data-field]')){if(e.target.tagName==='TEXTAREA')autoResize(e.target);if(e.target.dataset.field==='clientName')updateClientBadge();debouncedSave();}});
   document.addEventListener('change',e=>{if(e.target.matches('[data-field]')&&e.target.type==='checkbox')debouncedSave();});
-  window.addEventListener('scroll',updateActiveNav,{passive:true}); updateActiveNav();
+  window.addEventListener('scroll',()=>{updateActiveNav();updateScrollProgress();updateScrollTopBtn();},{passive:true}); updateActiveNav();
   document.querySelectorAll('textarea').forEach(autoResize);
   setInterval(()=>{const d=collectState();saveToIDB(getStorageKey(d.clientName),d);},SNAPSHOT_INTERVAL);
   setInterval(()=>{document.getElementById('backupReminder').style.display='block';},BACKUP_REMINDER_INTERVAL);
@@ -3708,6 +4373,27 @@ function init() {
       if (ind && rec) updateFieldStrength(e.target, ind, rec);
     }
   });
+  // v15: Section badges
+  updateSectionBadges();
+  // v16: Edit highlight
+  document.addEventListener('input', e => {
+    if (e.target.matches('[data-field],[data-key]')) markRecentlyEdited(e.target);
+  });
+  // v17: Close client switcher on outside click
+  document.addEventListener('click', e => {
+    const sw = document.getElementById('clientSwitcher');
+    if (sw && !sw.contains(e.target)) sw.classList.remove('open');
+  });
+  // v18: Load timestamped notes
+  if (data && data._timestampedNotes) loadNotesFromState(data);
+  // v19: Check for share link
+  loadFromShareLink();
+  // v20: Init value calc
+  setTimeout(updateValueCalc, 500);
+  // v21: Check dependencies
+  setTimeout(checkDependencies, 800);
+  // v23: Accessibility
+  setTimeout(addAccessibilityAttributes, 600);
   // Welcome modal
   setTimeout(showWelcomeIfNeeded, 500);
   // Initial undo snapshot
@@ -3737,6 +4423,15 @@ document.addEventListener('DOMContentLoaded',init);
     <button class="welcome-start" onclick="dismissWelcome()">Start Workshop</button>
   </div>
 </div>
+
+<!-- v16: Scroll to Top Button -->
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">&#8593;</button>
+
+<!-- v22: Presentation Mode Bar -->
+<div class="pres-bar" id="presBar">PRESENTATION MODE &mdash; Press <kbd>P</kbd> or <kbd>Esc</kbd> to exit</div>
+
+<!-- v19: Share Link Modal -->
+<div class="modal-overlay" id="shareLinkModal"><div class="modal"><h2>Share Workshop</h2><p>Copy this link to share the current workshop state. The recipient can open it in their browser to load the data.</p><div class="share-link-box"><input type="text" class="share-link-input" id="shareLinkInput" readonly><button class="share-link-copy" onclick="copyShareLink()">Copy</button></div><div class="modal-actions" style="margin-top:14px"><button class="hdr-btn" onclick="closeModal('shareLinkModal')">Close</button></div></div></div>
 
 <!-- ==================== UNDO INDICATOR ==================== -->
 <div class="undo-toast" id="undoToast"></div>
