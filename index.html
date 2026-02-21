@@ -425,16 +425,164 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1300px) {
   #rightPanel { display: none; }
+  #rightPanel.mobile-open {
+    display: block; position: fixed; bottom: 0; left: 0; right: 0;
+    top: auto; width: 100%; height: 70vh; z-index: 250;
+    border-left: none; border-top: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
+    animation: slideUp 0.3s ease;
+  }
   #content { margin-right: 0; }
   #backupReminder { right: 16px; }
 }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @media (max-width: 900px) {
   #sidebar { display: none; }
-  #topBar { padding-left: 16px; }
-  #content { margin-left: 0; padding: calc(var(--header-h) + 16px) 14px 60px; }
+  #topBar { padding-left: 12px; gap: 6px; }
+  #content { margin-left: 0; padding: calc(var(--header-h) + 12px) 12px 72px; }
   .field-row, .field-row-3 { grid-template-columns: 1fr; }
   .role-grid { grid-template-columns: 1fr; }
+  .header-left h1 { font-size: 13px; }
+  .drive-status span:last-child { display: none; }
+  .hdr-btn:not(.primary) { display: none; }
 }
+/* ==================== MOBILE (Phone) ==================== */
+@media (max-width: 768px) {
+  :root { --header-h: 48px; }
+  body { font-size: 14px; -webkit-overflow-scrolling: touch; overscroll-behavior-y: none; }
+  #topBar { padding: 0 10px; }
+  .header-left h1 { font-size: 12px; }
+  .client-badge { font-size: 10px; padding: 2px 7px; max-width: 80px; }
+  .progress-mini { display: none; }
+  .session-timer { font-size: 10px; padding: 2px 6px; }
+  .save-status { display: none; }
+  .theme-toggle { width: 28px; height: 16px; }
+  .theme-toggle::after { width: 12px; height: 12px; }
+  :root.light .theme-toggle::after { left: 14px; }
+  .drive-status { display: none; }
+  .export-wrap .export-menu { right: -40px; }
+
+  #content { padding: calc(var(--header-h) + 10px) 10px 72px; }
+  .section-banner { font-size: 12px; padding: 10px 14px; letter-spacing: 1.5px; }
+  .section-body { padding: 14px; }
+  .section-intro { font-size: 12.5px; margin-bottom: 14px; }
+  .field-group { margin-bottom: 14px; }
+  .field-group > label, .field-label { font-size: 12.5px; }
+  .field-sublabel { font-size: 10.5px; }
+  textarea[data-field], textarea[data-key], input[data-field], input[data-key] {
+    font-size: 15px; padding: 10px 12px; /* 16px prevents iOS zoom, 15px is close */
+  }
+  .trigger-grid { grid-template-columns: 1fr 1fr; }
+  .trigger-card { font-size: 11.5px; padding: 8px 10px; }
+  .dynamic-item { padding: 12px; }
+  .item-fields textarea { font-size: 14px; }
+  .item-fields input { font-size: 14px; }
+  .add-item-btn { padding: 12px; font-size: 13px; }
+  .hero-table td:first-child { width: 100%; display: block; font-size: 11.5px; padding: 8px 10px 4px; }
+  .hero-table td:last-child { display: block; padding: 4px 10px 8px; }
+  .hero-table textarea { font-size: 14px; }
+  .matrix-grid { grid-template-columns: 1fr !important; }
+  .matrix-card { font-size: 13px; }
+  .battle-card-table { font-size: 11px; }
+  .battle-card-table th, .battle-card-table td { padding: 5px 6px; }
+  .modal { padding: 18px; }
+  .help-modal { padding: 20px; max-width: 100%; width: 95%; }
+  .search-modal { width: 95%; }
+  .search-input { font-size: 16px; }
+  .copy-section-btn { width: 28px; height: 28px; font-size: 14px; }
+  .collapse-indicator { font-size: 10px; }
+  /* Toast position above bottom nav */
+  #toastContainer { bottom: 68px; }
+  .toast { font-size: 12px; padding: 8px 14px; }
+  /* Facilitator mode on mobile */
+  body.facilitator-mode .facilitator-bar { font-size: 10px; padding: 6px; bottom: 56px; }
+  body.facilitator-mode #content { padding: 12px 10px 120px; }
+  /* Right panel as bottom sheet on mobile */
+  #rightPanel.mobile-open { height: 75vh; }
+  .rp-tab-content { padding-bottom: 60px; }
+  /* Quick wins on mobile */
+  .quick-win-item { font-size: 11.5px; }
+}
+/* ==================== BOTTOM MOBILE NAV ==================== */
+.mobile-nav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  height: 56px; background: var(--bg-sidebar); border-top: 1px solid var(--border);
+  z-index: 200; padding: 0 4px;
+  justify-content: space-around; align-items: stretch;
+}
+.mobile-nav button {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; background: none; border: none; color: var(--text-muted);
+  font-size: 9px; font-weight: 600; cursor: pointer; padding: 4px 0;
+  transition: color 0.15s; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.mobile-nav button:active { transform: scale(0.92); }
+.mobile-nav button .mn-icon { font-size: 18px; line-height: 1; }
+.mobile-nav button.active { color: var(--accent); }
+@media (max-width: 900px) { .mobile-nav { display: flex; } }
+@media (min-width: 901px) { .mobile-nav { display: none !important; } }
+/* ==================== WORKSHOP TIMER MODAL ==================== */
+.timer-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 300;
+  justify-content: center; align-items: center;
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+.timer-modal.open { display: flex; }
+.timer-panel {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px; width: 90%; max-width: 400px;
+  box-shadow: var(--shadow-elevated); text-align: center;
+}
+.timer-display {
+  font-size: 48px; font-weight: 800; color: var(--accent);
+  font-variant-numeric: tabular-nums; margin: 16px 0;
+  letter-spacing: -1px;
+}
+.timer-display.warning { color: var(--warning); }
+.timer-display.danger { color: var(--danger); animation: pulse 1s infinite; }
+.timer-phase-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 4px;
+}
+.timer-phase-name { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; }
+.timer-phases {
+  display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px;
+  text-align: left;
+}
+.timer-phase-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 10px; border-radius: 6px; font-size: 12px;
+  background: var(--bg-input); border: 1px solid var(--border);
+}
+.timer-phase-row.active { border-color: var(--accent); background: var(--accent-glow); }
+.timer-phase-row.done { opacity: 0.5; }
+.timer-phase-row .tpr-name { font-weight: 600; }
+.timer-phase-row .tpr-time { font-weight: 700; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.timer-phase-row.active .tpr-time { color: var(--accent); }
+.timer-actions { display: flex; gap: 8px; justify-content: center; }
+.timer-actions button { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--bg-input); color: var(--text-primary); transition: all 0.15s; }
+.timer-actions button:hover { border-color: var(--accent); }
+.timer-actions button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.timer-actions button.primary:hover { background: var(--accent-hover); }
+.timer-actions button:active { transform: scale(0.95); }
+/* Right panel close button for mobile */
+.rp-close-mobile {
+  display: none; position: absolute; top: 8px; right: 12px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 50%; width: 32px; height: 32px; font-size: 18px;
+  color: var(--text-secondary); cursor: pointer; z-index: 10;
+  align-items: center; justify-content: center;
+}
+.rp-close-mobile:active { transform: scale(0.9); }
+@media (max-width: 1300px) { .rp-close-mobile { display: flex; } }
+/* Sheet handle for mobile */
+.sheet-handle {
+  display: none; width: 36px; height: 4px; border-radius: 2px;
+  background: var(--border); margin: 0 auto 12px;
+}
+@media (max-width: 1300px) { #rightPanel.mobile-open .sheet-handle { display: block; } }
 
 /* ==================== DRIVE STATUS ==================== */
 .drive-status {
@@ -1048,7 +1196,7 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
 <!-- ==================== HEADER ==================== -->
 <header id="topBar">
   <div class="header-left">
-    <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('mobile-open')"><span></span><span></span><span></span></button>
+    <button class="hamburger" onclick="toggleMobileSidebar()"><span></span><span></span><span></span></button>
     <h1>Value Proposition Workshop</h1>
     <span class="client-badge" id="clientBadge">-</span>
   </div>
@@ -1134,6 +1282,8 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
 
 <!-- ==================== RIGHT PANEL: LIVE SUMMARY ==================== -->
 <aside id="rightPanel">
+  <div class="sheet-handle"></div>
+  <button class="rp-close-mobile" onclick="toggleMobileRightPanel()" aria-label="Close panel">&times;</button>
   <div class="rp-tabs">
     <div class="rp-tab active" onclick="switchRPTab('summary')">Summary</div>
     <div class="rp-tab" onclick="switchRPTab('coach')">AI Coach</div>
@@ -2270,6 +2420,102 @@ function updateQuickWins() {
     top.map(w => `<div class="quick-win-item ${w.impact}" onclick="goToSection('${w.section}')"><div class="qw-impact">${w.impact} impact</div><div class="qw-action">${w.action}</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">${w.detail}</div></div>`).join('');
 }
 
+// ==================== MOBILE NAV ====================
+function toggleMobileSidebar() {
+  const sb = document.getElementById('sidebar');
+  const rp = document.getElementById('rightPanel');
+  if (rp.classList.contains('mobile-open')) rp.classList.remove('mobile-open');
+  sb.classList.toggle('mobile-open');
+}
+
+function toggleMobileRightPanel() {
+  const rp = document.getElementById('rightPanel');
+  const sb = document.getElementById('sidebar');
+  if (sb.classList.contains('mobile-open')) sb.classList.remove('mobile-open');
+  rp.classList.toggle('mobile-open');
+}
+
+// ==================== WORKSHOP TIMER ====================
+const WORKSHOP_PHASES = [
+  { name: 'Identity & ICP', minutes: 25 },
+  { name: 'Pain & Language', minutes: 20 },
+  { name: 'Competitive Landscape', minutes: 15 },
+  { name: 'Case Studies & Proof', minutes: 15 },
+  { name: 'Offer & Guarantee', minutes: 20 },
+  { name: 'Messaging & Positioning', minutes: 15 },
+  { name: 'Review & Quick Wins', minutes: 10 }
+];
+let wsTimer = { running: false, elapsed: 0, interval: null, totalSeconds: WORKSHOP_PHASES.reduce((a,p) => a + p.minutes * 60, 0) };
+
+function toggleWorkshopTimer() {
+  const modal = document.getElementById('workshopTimerModal');
+  modal.classList.toggle('open');
+  if (modal.classList.contains('open')) renderTimerPhases();
+}
+
+function renderTimerPhases() {
+  const container = document.getElementById('timerPhases');
+  let cumulative = 0;
+  container.innerHTML = WORKSHOP_PHASES.map((p, i) => {
+    const startSec = cumulative;
+    cumulative += p.minutes * 60;
+    const active = wsTimer.elapsed >= startSec && wsTimer.elapsed < cumulative;
+    const done = wsTimer.elapsed >= cumulative;
+    return '<div class="timer-phase-row' + (active ? ' active' : '') + (done ? ' done' : '') + '">' +
+      '<span class="tpr-name">' + p.name + '</span>' +
+      '<span class="tpr-time">' + p.minutes + ' min</span></div>';
+  }).join('');
+}
+
+function updateTimerDisplay() {
+  const remaining = Math.max(0, wsTimer.totalSeconds - wsTimer.elapsed);
+  const h = Math.floor(remaining / 3600);
+  const m = Math.floor((remaining % 3600) / 60);
+  const s = remaining % 60;
+  const display = document.getElementById('timerDisplay');
+  display.textContent = h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  display.className = 'timer-display' + (remaining < 300 ? ' danger' : remaining < 900 ? ' warning' : '');
+  // Update phase name
+  let cumulative = 0;
+  let currentPhase = WORKSHOP_PHASES[WORKSHOP_PHASES.length - 1].name;
+  for (const p of WORKSHOP_PHASES) {
+    cumulative += p.minutes * 60;
+    if (wsTimer.elapsed < cumulative) { currentPhase = p.name; break; }
+  }
+  document.getElementById('timerPhaseName').textContent = remaining <= 0 ? 'Workshop Complete!' : currentPhase;
+  renderTimerPhases();
+}
+
+function workshopTimerToggle() {
+  const btn = document.getElementById('timerStartBtn');
+  if (wsTimer.running) {
+    clearInterval(wsTimer.interval);
+    wsTimer.running = false;
+    btn.textContent = 'Resume';
+  } else {
+    wsTimer.running = true;
+    btn.textContent = 'Pause';
+    wsTimer.interval = setInterval(() => {
+      wsTimer.elapsed++;
+      updateTimerDisplay();
+      if (wsTimer.elapsed >= wsTimer.totalSeconds) {
+        clearInterval(wsTimer.interval);
+        wsTimer.running = false;
+        btn.textContent = 'Done';
+        showToast('Workshop time is up!', 'warning');
+      }
+    }, 1000);
+  }
+}
+
+function workshopTimerReset() {
+  clearInterval(wsTimer.interval);
+  wsTimer.running = false;
+  wsTimer.elapsed = 0;
+  document.getElementById('timerStartBtn').textContent = 'Start';
+  updateTimerDisplay();
+}
+
 // ==================== LIVE SUMMARY ====================
 function updateLiveSummary() {
   collectState();
@@ -3203,7 +3449,13 @@ function init() {
   window.addEventListener('beforeunload',()=>{collectState();saveToLS();});
   if(navigator.storage&&navigator.storage.persist) navigator.storage.persist();
   document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
-  document.addEventListener('click',e=>{const ew=document.getElementById('exportWrap');if(ew&&!ew.contains(e.target))ew.classList.remove('open');});
+  document.getElementById('workshopTimerModal').addEventListener('click',e=>{if(e.target.id==='workshopTimerModal')toggleWorkshopTimer();});
+  document.addEventListener('click',e=>{const ew=document.getElementById('exportWrap');if(ew&&!ew.contains(e.target))ew.classList.remove('open');
+    // Close mobile panels when clicking content area on mobile
+    if(window.innerWidth<=900 && e.target.closest('#content') && !e.target.closest('#sidebar') && !e.target.closest('#rightPanel')){
+      document.getElementById('sidebar').classList.remove('mobile-open');
+    }
+  });
   updateProgress(); updateLiveSummary(); updateMessagingMatrix();
   injectCopyButtons();
   injectCollapseIndicators();
@@ -3223,5 +3475,29 @@ function init() {
 }
 document.addEventListener('DOMContentLoaded',init);
 </script>
+
+<!-- ==================== MOBILE NAV ==================== -->
+<nav class="mobile-nav" id="mobileNav">
+  <button onclick="toggleMobileSidebar()" id="mnMenu"><span class="mn-icon">&#9776;</span>Menu</button>
+  <button onclick="toggleMobileRightPanel()" id="mnSummary"><span class="mn-icon">&#128202;</span>Summary</button>
+  <button onclick="toggleWorkshopTimer()" id="mnTimer"><span class="mn-icon">&#9201;</span>Timer</button>
+  <button onclick="jumpToNextEmpty()" id="mnNext"><span class="mn-icon">&#8594;</span>Next</button>
+</nav>
+
+<!-- ==================== WORKSHOP TIMER MODAL ==================== -->
+<div class="timer-modal" id="workshopTimerModal">
+  <div class="timer-panel">
+    <div class="timer-phase-label">WORKSHOP TIMER</div>
+    <div class="timer-phase-name" id="timerPhaseName">Ready to Start</div>
+    <div class="timer-display" id="timerDisplay">2:00:00</div>
+    <div class="timer-phases" id="timerPhases"></div>
+    <div class="timer-actions">
+      <button class="primary" id="timerStartBtn" onclick="workshopTimerToggle()">Start</button>
+      <button onclick="workshopTimerReset()">Reset</button>
+      <button onclick="toggleWorkshopTimer()">Close</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
