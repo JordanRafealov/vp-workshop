@@ -40,6 +40,14 @@
   --header-h: 56px;
   --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --transition: 0.2s ease;
+  /* Typography scale */
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-md: 15px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
 }
 
 /* ==================== LIGHT THEME ==================== */
@@ -91,13 +99,16 @@ body {
   padding: 3px 10px; border-radius: 20px; white-space: nowrap;
   max-width: 140px; overflow: hidden; text-overflow: ellipsis;
 }
-.header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.header-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
 
 .save-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
 .save-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); transition: background 0.3s; }
 .save-status.saved .save-dot { background: var(--success); }
 .save-status.saving .save-dot { background: var(--warning); animation: pulse 1s infinite; }
 @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+.save-status.offline .save-dot { background: var(--danger); }
+.save-status.offline #saveText::after { content: ' (offline)'; }
 
 .progress-mini { display: flex; align-items: center; gap: 6px; }
 .progress-ring { width: 28px; height: 28px; }
@@ -244,6 +255,7 @@ body {
 @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
 
 .section-body {
+  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border); border-top: none;
   border-radius: 0 0 var(--radius) var(--radius);
@@ -251,6 +263,13 @@ body {
   box-shadow: var(--shadow-card);
   border-top: 2px solid var(--accent-dim);
   transition: background var(--transition), border-color var(--transition);
+}
+.section-body::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 60px;
+  background: linear-gradient(180deg, var(--accent-glow) 0%, transparent 100%);
+  pointer-events: none; border-radius: 0 0 var(--radius) var(--radius);
+  opacity: 0.5;
 }
 
 .section-intro {
@@ -695,6 +714,22 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
   content: 'Required'; font-size: 9px; font-weight: 600;
   color: var(--warning); margin-left: 8px; opacity: 0.7;
 }
+
+/* ==================== SECTION QUICK ACTIONS ==================== */
+.section-actions {
+  display: flex; gap: 8px; margin-top: 16px; padding-top: 16px;
+  border-top: 1px solid var(--border); justify-content: flex-end; flex-wrap: wrap;
+}
+.section-action-btn {
+  font-size: 11px; font-weight: 600; padding: 6px 14px;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg-input); color: var(--text-secondary);
+  cursor: pointer; transition: all var(--transition);
+  display: flex; align-items: center; gap: 5px;
+}
+.section-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+.section-action-btn.ai { border-color: rgba(99,102,241,0.3); color: #6366f1; }
+.section-action-btn.ai:hover { background: rgba(99,102,241,0.1); border-color: #6366f1; }
 
 /* ==================== SEARCH HIGHLIGHT ==================== */
 .search-highlight {
@@ -1531,6 +1566,45 @@ body.presentation-mode .pres-bar { display: block; }
   100% { background-position: -200% 0; }
 }
 
+/* ==================== MICRO-INTERACTIONS ==================== */
+/* Smooth field label transition on focus-within */
+.field-group:focus-within > label,
+.field-group:focus-within > .field-label {
+  color: var(--accent);
+  transition: color 0.2s ease;
+}
+
+/* Subtle scale on banner click */
+.section-banner:active {
+  transform: scale(0.998);
+  transition: transform 0.1s;
+}
+
+/* Smoother section expand/collapse */
+.workshop-section .section-body {
+  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1),
+              padding 0.3s ease,
+              opacity 0.25s ease;
+}
+
+/* Better nav item transition */
+.nav-item {
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Accent underline on active right-panel tab */
+.rp-tab.active {
+  position: relative;
+}
+.rp-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 20%; right: 20%;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
 /* ==================== PRINT ==================== */
 @media print {
   #topBar, #sidebar, #rightPanel, .tip-box, .add-item-btn, .item-remove,
@@ -1570,8 +1644,10 @@ body.presentation-mode .pres-bar { display: block; }
       </svg>
       <span class="progress-pct" id="progressValue">0%</span>
     </div>
+    <div class="header-divider"></div>
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode"></button>
     <button class="drive-status" id="driveBtn" onclick="handleDriveConnect()" title="Connect Google Drive for auto-backup"><span class="drive-icon">&#9729;</span><span id="driveLabel">Connect Drive</span></button>
+    <div class="header-divider"></div>
     <button class="hdr-btn" onclick="openSearch()" title="Search fields (Cmd+K)" style="font-size:13px;padding:5px 8px">&#128269;</button>
     <button class="hdr-btn" onclick="document.getElementById('helpOverlay').classList.toggle('open')" title="Keyboard shortcuts (?)" style="font-size:13px;padding:5px 8px">?</button>
     <div class="export-wrap" id="exportWrap">
@@ -2353,6 +2429,9 @@ const STORE_NAME = 'snapshots';
 let state = {};
 let saveTimeout = null;
 let currentClientKey = '';
+let lastSuccessfulSave = Date.now();
+let consecutiveSaveFailures = 0;
+let saveWatchdogTimer = null;
 
 // ==================== DYNAMIC LIST DEFS ====================
 const listDefs = {
@@ -2540,6 +2619,16 @@ function toggleTheme() {
 }
 
 // ==================== STORAGE ====================
+function simpleChecksum(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + ch;
+    hash |= 0;
+  }
+  return hash;
+}
+
 function getStorageKey(name) {
   return 'vp_' + (name||'untitled').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
@@ -2548,14 +2637,39 @@ function saveToLS() {
     const data = collectState();
     data._version = (data._version||0)+1;
     data._lastSaved = new Date().toISOString();
+    data._checksum = simpleChecksum(JSON.stringify(data));
     const key = getStorageKey(data.clientName);
-    localStorage.setItem(key, JSON.stringify(data));
+    const json = JSON.stringify(data);
+    localStorage.setItem(key, json);
     localStorage.setItem('vp_last_client', key);
+    // Verify write succeeded
+    const verify = localStorage.getItem(key);
+    if (!verify || verify.length !== json.length) throw new Error('Verification failed');
     currentClientKey = key;
     updateSavedClientIndex(data.clientName, key);
     showSaveStatus('saved');
+    // Also save to IDB as redundant backup
+    saveToIDB(key, data);
+    lastSuccessfulSave = Date.now();
+    consecutiveSaveFailures = 0;
     return true;
-  } catch(e) { showSaveStatus('error'); return false; }
+  } catch(e) {
+    consecutiveSaveFailures++;
+    showSaveStatus('error');
+    // Emergency: try IDB only
+    try {
+      const data = collectState();
+      data._lastSaved = new Date().toISOString();
+      data._emergency = true;
+      saveToIDB(getStorageKey(data.clientName), data);
+      showToast('Using backup storage — main storage full', 'warning');
+    } catch(e2) {}
+    if (consecutiveSaveFailures >= 3) {
+      showToast('CRITICAL: Save failures detected — download backup NOW', 'error');
+      downloadBackup();
+    }
+    return false;
+  }
 }
 function loadFromLS(key) { try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; } }
 function updateSavedClientIndex(name, key) {
@@ -2566,6 +2680,44 @@ function getSavedClients() { try { return JSON.parse(localStorage.getItem('vp_cl
 // IndexedDB
 function openDB() { return new Promise((res,rej)=>{ const r=indexedDB.open(DB_NAME,DB_VERSION); r.onupgradeneeded=e=>e.target.result.createObjectStore(STORE_NAME); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
 async function saveToIDB(key,data) { try { const db=await openDB(); db.transaction(STORE_NAME,'readwrite').objectStore(STORE_NAME).put(data,key); } catch(e){} }
+
+// Save Watchdog — monitors save health, forces save if stale
+function startSaveWatchdog() {
+  saveWatchdogTimer = setInterval(() => {
+    const elapsed = Date.now() - lastSuccessfulSave;
+    if (elapsed > 120000) { // 2 minutes without save
+      console.warn('Save watchdog: no save in 2 minutes, forcing save');
+      saveToLS();
+      if (consecutiveSaveFailures > 0) {
+        showToast('Auto-save may be failing — click Export > Download Backup', 'error');
+      }
+    }
+  }, 30000); // Check every 30 seconds
+}
+
+// Try to recover from IDB if localStorage is empty
+async function tryRecoverFromIDB(key) {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const req = tx.objectStore(STORE_NAME).get(key);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch(e) { return null; }
+}
+
+// Check storage quota on startup
+async function checkStorageQuota() {
+  if (navigator.storage && navigator.storage.estimate) {
+    const est = await navigator.storage.estimate();
+    const pctUsed = (est.usage / est.quota * 100).toFixed(1);
+    if (pctUsed > 80) {
+      showToast('Storage ' + pctUsed + '% full — consider downloading backup', 'warning');
+    }
+  }
+}
 
 // ==================== STATE ====================
 function collectState() {
@@ -3957,8 +4109,24 @@ function updateSectionBadges() {
       if (banner) banner.appendChild(badge);
     }
     badge.textContent = filled + '/' + total;
-    badge.classList.toggle('complete', filled >= total);
+    const wasComplete = badge.classList.contains('complete');
+    const isNowComplete = filled >= total;
+    badge.classList.toggle('complete', isNowComplete);
+    // v31: Trigger AI analysis when section just became complete
+    if (isNowComplete && !wasComplete) {
+      onSectionComplete(sec.id);
+    }
   });
+}
+
+// v31: Auto-analyze when a section is fully completed
+function onSectionComplete(sectionId) {
+  const section = document.getElementById(sectionId);
+  if (!section) return;
+  if (section.dataset.aiAnalyzed) return;
+  section.dataset.aiAnalyzed = '1';
+  showToast('Section complete — AI analyzing...', 'info');
+  requestAISuggestions();
 }
 
 // ==================== v16: SCROLL TO TOP BUTTON ====================
@@ -4326,9 +4494,17 @@ document.addEventListener('keydown',e=>{
   }
 });
 
-function init() {
+async function init() {
   const lastKey=localStorage.getItem('vp_last_client');
   let data=lastKey?loadFromLS(lastKey):null;
+  // v26: IDB recovery if localStorage is empty
+  if (!data && lastKey) {
+    data = await tryRecoverFromIDB(lastKey);
+    if (data) {
+      showToast('Recovered data from backup storage', 'success');
+      try { localStorage.setItem(lastKey, JSON.stringify(data)); } catch(e) {}
+    }
+  }
   if(data) {
     if(data._lists) for(const[id,items] of Object.entries(data._lists)) if(listDefs[id]) listDefs[id].items=items.map(i=>({...i}));
     for(const id of Object.keys(listDefs)) renderDynamicList(id);
@@ -4407,8 +4583,26 @@ function init() {
   setTimeout(showWelcomeIfNeeded, 500);
   // Initial undo snapshot
   setTimeout(pushUndoState, 1000);
+  // v26: Save watchdog — monitors save health
+  startSaveWatchdog();
+  // v27: Visibility change — save when tab becomes hidden
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { collectState(); saveToLS(); }
+  });
+  // v28: Offline/online detection
+  window.addEventListener('offline', () => {
+    showToast('You are offline — data saves locally', 'warning');
+    document.getElementById('saveStatus')?.classList.add('offline');
+  });
+  window.addEventListener('online', () => {
+    showToast('Back online', 'success');
+    document.getElementById('saveStatus')?.classList.remove('offline');
+    if (driveConnected) setTimeout(backupToDrive, 2000);
+  });
+  // v29: Storage quota check
+  checkStorageQuota();
 }
-document.addEventListener('DOMContentLoaded',init);
+document.addEventListener('DOMContentLoaded',()=>init());
 </script>
 
 <!-- ==================== WELCOME MODAL ==================== -->
