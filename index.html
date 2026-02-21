@@ -11,30 +11,30 @@
 <style>
 /* ==================== VARIABLES ==================== */
 :root {
-  --bg-page: #06060f;
-  --bg-card: #0f0f20;
-  --bg-input: #161630;
-  --bg-sidebar: #0a0a18;
-  --bg-header: rgba(8,8,18,0.85);
-  --bg-right: #0a0a18;
-  --border: #1e1e40;
-  --border-hover: #2e2e55;
-  --text-primary: #e8e8f4;
-  --text-secondary: #9898b8;
-  --text-muted: #5a5a78;
+  --bg-page: #0a0a12;
+  --bg-card: #12121c;
+  --bg-input: #181824;
+  --bg-sidebar: #0d0d16;
+  --bg-header: rgba(10,10,18,0.88);
+  --bg-right: #0d0d16;
+  --border: #222236;
+  --border-hover: #2e2e48;
+  --text-primary: #e6e6f0;
+  --text-secondary: #9494b0;
+  --text-muted: #5c5c76;
   --accent: #7c3aed;
   --accent-hover: #9b5de5;
   --accent-dim: #6429c4;
-  --accent-glow: rgba(124, 58, 237, 0.12);
-  --accent-glow-strong: rgba(124, 58, 237, 0.25);
+  --accent-glow: rgba(124, 58, 237, 0.08);
+  --accent-glow-strong: rgba(124, 58, 237, 0.18);
   --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
   --banner-grad: linear-gradient(135deg, #6d28d9 0%, #a855f7 50%, #7c3aed 100%);
-  --radius: 12px;
+  --radius: 10px;
   --radius-sm: 8px;
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.15);
-  --shadow-elevated: 0 8px 32px rgba(0,0,0,0.4);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-elevated: 0 4px 20px rgba(0,0,0,0.25);
   --sidebar-w: 230px;
   --right-w: 300px;
   --header-h: 56px;
@@ -44,21 +44,21 @@
 
 /* ==================== LIGHT THEME ==================== */
 :root.light {
-  --bg-page: #f4f4fa;
+  --bg-page: #f6f6fb;
   --bg-card: #ffffff;
-  --bg-input: #f0f0f8;
+  --bg-input: #f0f0f7;
   --bg-sidebar: #fafaff;
-  --bg-header: rgba(250,250,255,0.9);
+  --bg-header: rgba(250,250,255,0.92);
   --bg-right: #fafaff;
-  --border: #e0e0ee;
-  --border-hover: #d0d0e0;
-  --text-primary: #1a1a30;
-  --text-secondary: #55556e;
-  --text-muted: #8888a0;
-  --accent-glow: rgba(124, 58, 237, 0.08);
-  --accent-glow-strong: rgba(124, 58, 237, 0.15);
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-  --shadow-elevated: 0 8px 32px rgba(0,0,0,0.1);
+  --border: #e2e2ed;
+  --border-hover: #d2d2de;
+  --text-primary: #1a1a2e;
+  --text-secondary: #5a5a72;
+  --text-muted: #8c8ca4;
+  --accent-glow: rgba(124, 58, 237, 0.06);
+  --accent-glow-strong: rgba(124, 58, 237, 0.12);
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.03);
+  --shadow-elevated: 0 4px 20px rgba(0,0,0,0.08);
 }
 
 /* ==================== RESET ==================== */
@@ -294,7 +294,7 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
 .slider-row input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
   background: var(--accent); cursor: pointer; border: 3px solid var(--bg-card);
-  box-shadow: 0 0 8px rgba(124,58,237,0.4);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 .slider-value { font-size: 20px; font-weight: 800; color: var(--accent); min-width: 30px; text-align: center; }
 .slider-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 4px; }
@@ -778,7 +778,7 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
 /* ==================== SECTION GLOW ON COMPLETE ==================== */
 .workshop-section.section-complete .section-banner::before {
   content: ''; position: absolute; inset: 0; border-radius: var(--radius) var(--radius) 0 0;
-  background: linear-gradient(135deg, rgba(34,197,94,0.15), transparent);
+  background: linear-gradient(135deg, rgba(34,197,94,0.08), transparent);
   pointer-events: none;
 }
 
@@ -1046,20 +1046,13 @@ select[data-field]:focus { border-color: var(--accent); outline: none; box-shado
 textarea[data-field]:focus, textarea[data-key]:focus,
 input[data-field]:focus, input[data-key]:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rgba(124,58,237,0.06);
-  background: color-mix(in srgb, var(--bg-input) 95%, var(--accent) 5%);
-}
-
-/* Filled field subtle indicator */
-textarea[data-field]:not(:placeholder-shown):not(:focus),
-input[data-field]:not(:placeholder-shown):not(:focus) {
-  border-color: color-mix(in srgb, var(--border) 70%, var(--success) 30%);
+  box-shadow: 0 0 0 2px var(--accent-glow);
 }
 
 /* Card hover lift */
-.dynamic-item:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-.coach-card:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-.matrix-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.dynamic-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.coach-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.matrix-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
 
 /* Smooth accordion transition */
 .accordion-body { transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
@@ -1071,15 +1064,12 @@ input[data-field]:not(:placeholder-shown):not(:focus) {
 .nav-item.active { border-left: 2px solid var(--accent); padding-left: 8px; }
 
 /* Coach card entrance animation */
-.coach-card { animation: slideIn 0.25s ease; }
-@keyframes slideIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+.coach-card { animation: none; }
 
-/* Progress ring glow when > 80% */
-.progress-ring-fill.high { filter: drop-shadow(0 0 6px rgba(124,58,237,0.5)); }
+/* Progress ring glow when > 80% — removed for cleaner look */
 
 /* Smooth section body transition */
-.section-body { transition: background var(--transition), border-color var(--transition), box-shadow var(--transition); }
-.section-body:hover { box-shadow: var(--shadow-card), 0 0 0 1px var(--border-hover); }
+.section-body { transition: background var(--transition), border-color var(--transition); }
 
 /* Tooltip style for nav phase labels */
 .nav-phase { position: relative; display: flex; align-items: center; justify-content: space-between; }
@@ -1089,7 +1079,7 @@ input[data-field]:not(:placeholder-shown):not(:focus) {
 
 /* VP Readiness Score */
 .vp-score-card {
-  background: linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(168,85,247,0.08) 100%);
+  background: var(--bg-input);
   border: 1px solid rgba(124,58,237,0.25);
   border-radius: var(--radius); padding: 16px; margin-bottom: 16px; text-align: center;
 }
