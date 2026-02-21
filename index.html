@@ -7,6 +7,12 @@
 <script>
 // Load theme BEFORE paint to prevent flash
 (function(){var t=localStorage.getItem('vpTheme');if(t==='light')document.documentElement.classList.add('light');})();
+// Password gate — hide body until authenticated
+(function(){
+  if(sessionStorage.getItem('vp_unlocked')==='1') return;
+  document.documentElement.style.overflow='hidden';
+  document.addEventListener('DOMContentLoaded',function(){document.body.style.visibility='hidden';});
+})();
 </script>
 <style>
 /* ==================== VARIABLES ==================== */
@@ -1765,6 +1771,56 @@ body.presentation-mode .pres-bar { display: block; }
 .coach-card:has(.coach-card-label.missing) { border-left-color: var(--warning); }
 .coach-card:has(.coach-card-label.question) { border-left-color: var(--success); }
 .coach-card:has(.coach-card-label.ai) { border-left-color: #6366f1; }
+
+/* ==================== PASSWORD GATE ==================== */
+.pw-gate {
+  position: fixed; inset: 0; z-index: 99999;
+  background: var(--bg-page);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+}
+.pw-gate.unlocked { display: none; }
+.pw-box {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 40px 36px;
+  box-shadow: var(--shadow-elevated); text-align: center;
+  max-width: 380px; width: 90%;
+}
+.pw-box h2 {
+  font-size: 18px; font-weight: 700; margin-bottom: 4px;
+  background: var(--banner-grad); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+}
+.pw-box .pw-sub {
+  font-size: 12px; color: var(--text-muted); margin-bottom: 24px;
+}
+.pw-box input {
+  width: 100%; padding: 12px 16px; font-size: 15px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-primary);
+  font-family: var(--font); text-align: center; letter-spacing: 1px;
+  transition: border-color var(--transition);
+}
+.pw-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.pw-box input.pw-error { border-color: var(--danger); animation: pwShake 0.4s ease; }
+@keyframes pwShake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
+}
+.pw-box button {
+  margin-top: 16px; width: 100%; padding: 12px;
+  background: var(--accent); color: #fff; border: none;
+  border-radius: var(--radius-sm); font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: background var(--transition);
+  font-family: var(--font);
+}
+.pw-box button:hover { background: var(--accent-hover); }
+.pw-box .pw-hint {
+  font-size: 11px; color: var(--danger); margin-top: 12px;
+  min-height: 16px;
+}
+.pw-lock-icon {
+  font-size: 32px; margin-bottom: 12px; opacity: 0.6;
+}
 
 /* ==================== v48: FIELD HELP TOOLTIPS ==================== */
 .field-help {
@@ -5218,6 +5274,52 @@ document.addEventListener('DOMContentLoaded',()=>init());
   </div>
   <button class="fab-main" onclick="toggleFab()" aria-label="Quick actions">+</button>
 </div>
+
+<!-- ==================== PASSWORD GATE ==================== -->
+<div class="pw-gate" id="pwGate">
+  <div class="pw-box">
+    <div class="pw-lock-icon">&#128274;</div>
+    <h2>Value Proposition Workshop</h2>
+    <div class="pw-sub">Enter password to access</div>
+    <form onsubmit="return checkPassword(event)">
+      <input type="password" id="pwInput" placeholder="Password" autocomplete="off" autofocus>
+      <button type="submit">Unlock</button>
+    </form>
+    <div class="pw-hint" id="pwHint"></div>
+  </div>
+</div>
+<script>
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+// Pre-compute the correct hash at build time
+const CORRECT_HASH = 'f073b5038359281dff1ae8dfdf75bd33e44112cc5f1bb61557a663fdfc271caf';
+async function checkPassword(e) {
+  e.preventDefault();
+  const input = document.getElementById('pwInput');
+  const hash = await sha256(input.value);
+  if (hash === CORRECT_HASH) {
+    sessionStorage.setItem('vp_unlocked', '1');
+    document.getElementById('pwGate').classList.add('unlocked');
+    document.body.style.visibility = 'visible';
+    document.documentElement.style.overflow = '';
+  } else {
+    input.classList.add('pw-error');
+    document.getElementById('pwHint').textContent = 'Incorrect password';
+    setTimeout(() => input.classList.remove('pw-error'), 500);
+    input.value = '';
+    input.focus();
+  }
+  return false;
+}
+// Auto-unlock if already authenticated this session
+if (sessionStorage.getItem('vp_unlocked') === '1') {
+  document.getElementById('pwGate').classList.add('unlocked');
+  document.body.style.visibility = 'visible';
+  document.documentElement.style.overflow = '';
+}
+</script>
 
 </body>
 </html>
