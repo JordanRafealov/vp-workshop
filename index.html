@@ -934,8 +934,39 @@ input[data-field]:not(:placeholder-shown):not(:focus) {
 .section-body:hover { box-shadow: var(--shadow-card), 0 0 0 1px var(--border-hover); }
 
 /* Tooltip style for nav phase labels */
-.nav-phase { position: relative; }
+.nav-phase { position: relative; display: flex; align-items: center; justify-content: space-between; }
 .nav-phase::after { content: ''; display: block; width: 20px; height: 1px; background: var(--border); margin-top: 4px; }
+.phase-pct { font-size: 9px; font-weight: 700; color: var(--text-muted); }
+.phase-pct.high { color: var(--success); }
+
+/* VP Readiness Score */
+.vp-score-card {
+  background: linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(168,85,247,0.08) 100%);
+  border: 1px solid rgba(124,58,237,0.25);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 16px; text-align: center;
+}
+.vp-score-ring { width: 72px; height: 72px; margin: 0 auto 8px; position: relative; }
+.vp-score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.vp-score-ring .bg { fill: none; stroke: var(--border); stroke-width: 4; }
+.vp-score-ring .fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease, stroke 0.3s; }
+.vp-score-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--accent); }
+.vp-score-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 4px; }
+.vp-score-grade { font-size: 12px; color: var(--text-secondary); }
+.vp-score-checklist { text-align: left; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+.vp-check-item { font-size: 11px; color: var(--text-muted); padding: 2px 0; display: flex; align-items: center; gap: 6px; }
+.vp-check-item.done { color: var(--success); }
+.vp-check-item .ck { width: 14px; font-size: 12px; text-align: center; }
+
+/* Confetti celebration */
+.confetti-container { position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden; }
+.confetti-piece {
+  position: absolute; width: 8px; height: 8px; top: -10px; opacity: 0;
+  animation: confettiFall 3s ease-out forwards;
+}
+@keyframes confettiFall {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+}
 
 /* Better dropdown styling */
 select[data-field] { transition: border-color var(--transition), box-shadow var(--transition), background var(--transition); }
@@ -1049,6 +1080,15 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
     <div class="rp-tab" onclick="switchRPTab('coach')">AI Coach</div>
   </div>
   <div id="rpSummaryTab" class="rp-tab-content active">
+    <div id="vpScoreCard" class="vp-score-card">
+      <div class="vp-score-label">VP Readiness</div>
+      <div class="vp-score-ring">
+        <svg viewBox="0 0 40 40"><circle class="bg" cx="20" cy="20" r="17"/><circle class="fill" id="vpScoreRing" cx="20" cy="20" r="17" stroke-dasharray="106.81" stroke-dashoffset="106.81" stroke="var(--accent)"/></svg>
+        <div class="vp-score-num" id="vpScoreNum">0</div>
+      </div>
+      <div class="vp-score-grade" id="vpScoreGrade">Fill in sections to build your score</div>
+      <div class="vp-score-checklist" id="vpChecklist"></div>
+    </div>
     <div class="rp-header"><span class="rp-live-dot"></span> Live Summary</div>
     <div class="rp-intro">Your value proposition builds itself as you fill in sections. This panel updates in real-time to show the key elements.</div>
     <div id="liveSummary"></div>
@@ -1848,7 +1888,7 @@ const PHELLOS_DEFAULTS = {
   bs_licenses:'', bs_adRestrictions:'',
   bs_differentiators:'We are all auditors so we KNOW what they are looking for', bs_proofAssets:'Case studies: Mobile Commons, Mindsite, Ease Global, Basic Block, Wamo, Octopus\nVC endorsements\nSuccessful DD outcomes', bs_offerPackages:'1. Free: Round Readiness & Valuation Haircut Audit\n2. Sprint: 30-Day Round Readiness Sprint (3,000 GBP)\n3. Core: Audit-Proof Finance Department (3-6K GBP/month retainer)', bs_promotions:'',
   _lists: {
-    caseStudies:[{name:'Mobile Commons',before:'',after:'',metric:'',notes:'Most likely to give case study'},{name:'Mindsite',before:'',after:'',metric:'',notes:''},{name:'Ease Global',before:'',after:'',metric:'',notes:''},{name:'Basic Block',before:'',after:'',metric:'',notes:'Most likely to give case study'},{name:'Wamo',before:'',after:'',metric:'',notes:''},{name:'Octopus',before:'',after:'',metric:'',notes:''}],
+    caseStudies:[{name:'Mobile Commons',before:'Unreconciled financials, no investor-grade reporting, data room incomplete',after:'Full management accounts, clean data room, passed due diligence with zero investor flags',metric:'DD completed in 3 weeks vs. 8-week industry average',notes:'Most likely to give case study'},{name:'Mindsite',before:'No BS team but financials were a mess - limited visibility on performance metrics',after:'Reconciled accounts, monthly reporting cadence, investor-ready dashboards',metric:'Valuation protected - no haircut during fundraise',notes:'Direct, no-nonsense relationship - great testimonial candidate'},{name:'Ease Global',before:'Preparing for raise with scattered financial records across multiple systems',after:'Unified financial model, IPEV-compliant forecast, data room stood up in under 30 days',metric:'Fundraise timeline compressed by 2 months',notes:''},{name:'Basic Block',before:'Early-stage with limited accounting history and no formal reporting to investors',after:'Clean management accounts from day one, monthly reporting to board, forecast model built',metric:'First institutional round closed with zero DD friction',notes:'Most likely to give case study'},{name:'Wamo',before:'Fintech with complex revenue recognition - existing accountant could not handle startup metrics',after:'Startup-grade financial model with proper MRR/ARR tracking, investor reporting automated',metric:'Reduced finance admin time by 60%',notes:''},{name:'Octopus',before:'Growing fast but financial reporting lagged behind - board losing confidence',after:'Monthly and quarterly reports delivered on time, full 5-year forecast, metric dashboards live',metric:'Board confidence restored - follow-on round secured',notes:''}],
     features:[
       {step:'Step 1: COLLECT',feature:'Historic data ingestion',benefit:'We pull 2 years of accounting records and map every transaction so nothing is missed',proof:'Used by 40+ startups across SaaS, fintech, and hardware-enabled tech'},
       {step:'Step 2: MAP',feature:'Historic financial model',benefit:'Your raw data is transformed into a clean, investor-grade financial model that tells the real story',proof:'Catches 10-30% valuation discrepancies that generic accountants miss'},
@@ -1969,9 +2009,22 @@ function updateClientBadge() {
   document.title='VP Workshop - '+n;
 }
 
+let prevPct = 0;
+let celebrationShown = false;
+
+// Phase definitions for sidebar progress
+const phaseMap = {
+  'Who - Your ICP': ['s1','s2','sRI','sCM','sLM'],
+  'Why Now - Timing': ['s3','s4','sBB'],
+  'What - Your Solution': ['s6','s7','s8','s9'],
+  'How - Positioning': ['s10','sSP','s5','sER'],
+  'Story - Narrative': ['s11','s12']
+};
+
 function updateProgress() {
   const sections=document.querySelectorAll('.workshop-section');
   let totalF=0, totalFilled=0;
+  const sectionStats = {};
   sections.forEach(sec=>{
     const fields=sec.querySelectorAll('textarea[data-field],input[type="text"][data-field],input[type="date"][data-field]');
     const listFields=sec.querySelectorAll('textarea[data-key],input[data-key]');
@@ -1979,24 +2032,119 @@ function updateProgress() {
     fields.forEach(f=>{ if(f.value&&f.value.trim()) filled++; });
     listFields.forEach(f=>{ if(f.value&&f.value.trim()) filled++; });
     totalF+=total; totalFilled+=filled;
+    sectionStats[sec.id] = { filled, total };
     const navItem=document.querySelector(`[data-nav="${sec.id}"]`);
     const dot=navItem?.querySelector('.nav-dot');
     if(dot) { if(total===0||filled===0) dot.className='nav-dot'; else if(filled>=total*0.6) dot.className='nav-dot complete'; else dot.className='nav-dot partial'; }
     if(navItem&&total>0) { let badge=navItem.querySelector('.nav-progress'); if(!badge){badge=document.createElement('span');badge.className='nav-progress';navItem.appendChild(badge);} badge.textContent=filled+'/'+total; badge.classList.toggle('done',filled>=total*0.6); }
+    // Section completion celebration (scoped inside forEach)
+    if(total>0&&filled>=total) {
+      if(!sec.classList.contains('section-complete')) {
+        sec.classList.add('section-complete');
+        showToast(sec.querySelector('.section-banner')?.textContent?.replace('Copy','').trim()+' - Section complete!','success');
+      }
+    } else { sec.classList.remove('section-complete'); }
   });
+
   const pct=totalF>0?Math.round((totalFilled/totalF)*100):0;
   document.getElementById('progressValue').textContent=pct+'%';
   const circ=document.getElementById('progressRing');
   const circumference=81.68;
   circ.style.strokeDashoffset=circumference-(pct/100)*circumference;
   circ.classList.toggle('high', pct >= 80);
-  // Section completion celebration
-  if(navItem&&total>0&&filled>=total) {
-    if(!sec.classList.contains('section-complete')) {
-      sec.classList.add('section-complete');
-      showToast(sec.querySelector('.section-banner')?.textContent?.replace('Copy','').trim()+' - Section complete!','success');
-    }
-  } else { sec.classList.remove('section-complete'); }
+
+  // Phase progress in sidebar
+  for (const [phase, sids] of Object.entries(phaseMap)) {
+    let pFilled=0, pTotal=0;
+    sids.forEach(sid => { if(sectionStats[sid]) { pFilled+=sectionStats[sid].filled; pTotal+=sectionStats[sid].total; }});
+    const phasePct = pTotal>0 ? Math.round((pFilled/pTotal)*100) : 0;
+    document.querySelectorAll('.nav-phase').forEach(el => {
+      if (el.textContent.includes(phase.split(' - ')[0])) {
+        let badge = el.querySelector('.phase-pct');
+        if (!badge) { badge = document.createElement('span'); badge.className='phase-pct'; el.appendChild(badge); }
+        badge.textContent = phasePct + '%';
+        badge.classList.toggle('high', phasePct >= 60);
+      }
+    });
+  }
+
+  // Update VP Readiness Score
+  updateVPScore(pct);
+
+  // Celebration at 80%
+  if (pct >= 80 && prevPct < 80 && !celebrationShown) {
+    celebrationShown = true;
+    launchConfetti();
+    showToast('Workshop 80%+ complete! Your VP is taking shape.', 'success');
+  }
+  if (pct < 80) celebrationShown = false;
+  prevPct = pct;
+}
+
+function updateVPScore(overallPct) {
+  collectState();
+  const s = state;
+  const has = v => v && v.trim();
+
+  // Weighted scoring - key VP components
+  const checks = [
+    { label: 'Target ICP defined', done: has(s.dc_industry) && has(s.dc_companySize), weight: 15 },
+    { label: 'Core pain identified', done: has(s.wd_problems) && has(s.wd_fears), weight: 15 },
+    { label: 'Before/After mapped', done: has(s.ba_before) && has(s.ba_after), weight: 12 },
+    { label: 'Guarantee created', done: has(s.g_guarantee) && has(s.g_mechanism), weight: 12 },
+    { label: 'Case studies added', done: (s._lists?.caseStudies||[]).some(c => c.name && c.metric), weight: 10 },
+    { label: 'Hero story written', done: has(s.hs_narrative), weight: 8 },
+    { label: 'Objections handled', done: (s._lists?.objections||[]).filter(o => o.objection && o.response).length >= 3, weight: 8 },
+    { label: 'Sales process defined', done: has(s.sp_qualificationCriteria) && has(s.sp_discoveryQuestions), weight: 10 },
+    { label: 'Competitive position', done: has(s.cp_differentiator), weight: 5 },
+    { label: 'Messaging language set', done: has(s.lm_painLanguage) && has(s.lm_aspirationLanguage), weight: 5 },
+  ];
+
+  let score = 0;
+  checks.forEach(c => { if(c.done) score += c.weight; });
+
+  // Update ring
+  const circumference = 106.81;
+  const ring = document.getElementById('vpScoreRing');
+  const num = document.getElementById('vpScoreNum');
+  const grade = document.getElementById('vpScoreGrade');
+  if (ring) {
+    ring.style.strokeDashoffset = circumference - (score/100) * circumference;
+    ring.style.stroke = score >= 80 ? 'var(--success)' : score >= 50 ? 'var(--accent)' : 'var(--warning)';
+  }
+  if (num) num.textContent = score;
+  if (grade) {
+    const gradeText = score >= 90 ? 'Ready to close deals' : score >= 70 ? 'Strong foundation' : score >= 50 ? 'Getting there' : score >= 25 ? 'Early stage' : 'Just starting';
+    grade.textContent = gradeText;
+  }
+
+  // Checklist
+  const cl = document.getElementById('vpChecklist');
+  if (cl) {
+    cl.innerHTML = checks.map(c =>
+      `<div class="vp-check-item ${c.done?'done':''}"><span class="ck">${c.done?'\u2713':'\u25CB'}</span>${c.label}</div>`
+    ).join('');
+  }
+}
+
+function launchConfetti() {
+  const container = document.createElement('div');
+  container.className = 'confetti-container';
+  document.body.appendChild(container);
+  const colors = ['#7c3aed','#a855f7','#22c55e','#f59e0b','#3b82f6','#ef4444','#ec4899'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 1.5 + 's';
+    piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.width = (4 + Math.random() * 8) + 'px';
+    piece.style.height = (4 + Math.random() * 8) + 'px';
+    container.appendChild(piece);
+  }
+  setTimeout(() => container.remove(), 5000);
 }
 
 // ==================== LIVE SUMMARY ====================
@@ -2819,11 +2967,15 @@ function exportPDF() {
 
   const dateStr = s.workshopDate ? new Date(s.workshopDate + 'T12:00:00').toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'}) : '';
 
+  const ddLogo = 'data:image/png;base64,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';
+
   const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Value Proposition Report - ' + (s.clientName || 'Client') + '</title>' +
     '<style>@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");' +
     '*{margin:0;padding:0;box-sizing:border-box}' +
     'body{font-family:"Inter",system-ui,sans-serif;color:#1a1a30;line-height:1.7;padding:48px;max-width:820px;margin:0 auto}' +
     '.cover{text-align:center;padding:60px 0 40px;margin-bottom:40px;border-bottom:3px solid #7c3aed}' +
+    '.cover-logo{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#6d28d9 0%,#a855f7 50%,#7c3aed 100%);display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px}' +
+    '.cover-logo img{width:36px;height:auto;filter:brightness(0) invert(1)}' +
     '.cover h1{font-size:32px;font-weight:800;color:#7c3aed;margin-bottom:6px;letter-spacing:-0.5px}' +
     '.cover .sub{font-size:20px;font-weight:500;color:#55556e;margin-bottom:24px}' +
     '.cover .meta{font-size:13px;color:#8888a0}.cover .meta span{margin:0 12px}' +
@@ -2838,7 +2990,8 @@ function exportPDF() {
     '.ft strong{color:#7c3aed}' +
     '@media print{body{padding:24px}.cover{padding:40px 0 30px}}' +
     '</style></head><body>' +
-    '<div class="cover"><h1>Value Proposition Report</h1>' +
+    '<div class="cover"><div class="cover-logo"><img src="' + ddLogo + '" alt="DD"></div>' +
+    '<h1>Value Proposition Report</h1>' +
     '<div class="sub">' + esc(s.clientName || 'Client') + '</div>' +
     '<div class="meta">' + dateStr + '<span>|</span>Facilitator: ' + esc(s.facilitator || 'N/A') + '</div></div>' +
     (oneliner ? '<div class="ol">' + oneliner + '</div>' : '') +
