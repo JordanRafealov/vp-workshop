@@ -2454,21 +2454,23 @@ function initDrive() {
       client_id: DRIVE_CLIENT_ID,
       scope: DRIVE_SCOPES,
       callback: onDriveToken,
+      error_callback: (err) => { showToast('Drive error: ' + (err.type || err.message || JSON.stringify(err)), 'error'); console.error('Drive error_callback:', err); }
     });
     if (localStorage.getItem('vp_drive_connected') === 'true') {
       driveTokenClient.requestAccessToken({ prompt: '' });
     }
-  } catch(e) { console.log('Drive init:', e.message); }
+  } catch(e) { showToast('Drive init failed: ' + e.message, 'error'); console.log('Drive init:', e.message); }
 }
 
 function handleDriveConnect() {
   if (driveToken) { backupToDrive(); return; }
   if (!driveTokenClient) { showToast('Google is loading, try again in a moment', 'warning'); return; }
-  driveTokenClient.requestAccessToken({ prompt: 'consent' });
+  try { driveTokenClient.requestAccessToken({ prompt: 'consent' }); }
+  catch(e) { showToast('Drive connect failed: ' + e.message, 'error'); }
 }
 
 function onDriveToken(resp) {
-  if (resp.error) { console.error('Drive auth error:', resp); return; }
+  if (resp.error) { showToast('Drive auth: ' + resp.error + (resp.error_description ? ' - ' + resp.error_description : ''), 'error'); console.error('Drive auth error:', resp); return; }
   driveToken = resp.access_token;
   localStorage.setItem('vp_drive_connected', 'true');
   const btn = document.getElementById('driveBtn');
