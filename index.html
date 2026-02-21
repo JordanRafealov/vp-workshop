@@ -1179,6 +1179,91 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
 /* Keyboard shortcut hint */
 .kbd { display: inline-block; font-size: 10px; padding: 1px 5px; border-radius: 3px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-muted); font-family: monospace; }
 
+/* ==================== WELCOME MODAL ==================== */
+.welcome-modal {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  z-index: 400; justify-content: center; align-items: center;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.welcome-modal.open { display: flex; }
+.welcome-panel {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 36px; width: 90%; max-width: 520px;
+  box-shadow: var(--shadow-elevated); text-align: center;
+  animation: slideUp 0.3s ease;
+}
+.welcome-panel h2 { font-size: 22px; color: var(--text-primary); margin: 0 0 4px; }
+.welcome-panel .welcome-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+.welcome-features {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  text-align: left; margin-bottom: 24px;
+}
+.welcome-feat {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  background: var(--bg-input); border: 1px solid var(--border);
+}
+.welcome-feat .wf-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.welcome-feat .wf-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.welcome-feat .wf-text strong { color: var(--text-primary); display: block; font-size: 12.5px; }
+.welcome-shortcuts {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px;
+}
+.welcome-shortcuts .ws-item {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--text-muted);
+}
+.welcome-start {
+  background: var(--accent); color: #fff; border: none; padding: 12px 32px;
+  border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: all 0.15s; font-family: var(--font);
+}
+.welcome-start:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.welcome-start:active { transform: scale(0.97); }
+@media (max-width: 768px) { .welcome-features { grid-template-columns: 1fr; } .welcome-panel { padding: 24px 18px; } }
+
+/* ==================== FIELD STRENGTH ==================== */
+.field-strength {
+  display: none; font-size: 10px; margin-top: 3px;
+  color: var(--text-muted); transition: opacity 0.2s;
+}
+.field-strength.visible { display: flex; align-items: center; gap: 6px; }
+.field-strength .fs-bar { flex: 1; height: 3px; background: var(--border); border-radius: 2px; max-width: 80px; }
+.field-strength .fs-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+.field-strength.weak .fs-fill { width: 25%; background: var(--danger); }
+.field-strength.fair .fs-fill { width: 50%; background: var(--warning); }
+.field-strength.good .fs-fill { width: 75%; background: var(--accent); }
+.field-strength.strong .fs-fill { width: 100%; background: var(--success); }
+
+/* ==================== UNDO INDICATOR ==================== */
+.undo-toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 16px; font-size: 12px;
+  color: var(--text-secondary); box-shadow: var(--shadow-elevated);
+  z-index: 300; opacity: 0; transition: opacity 0.2s;
+  pointer-events: none;
+}
+.undo-toast.visible { opacity: 1; }
+
+/* ==================== MILESTONE BANNER ==================== */
+.milestone-banner {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0);
+  background: var(--banner-grad); color: #fff; padding: 20px 40px;
+  border-radius: var(--radius); text-align: center; z-index: 350;
+  box-shadow: 0 16px 48px rgba(124,58,237,0.4);
+  animation: milestonePop 2s ease forwards;
+}
+.milestone-banner .mb-pct { font-size: 48px; font-weight: 800; line-height: 1; }
+.milestone-banner .mb-msg { font-size: 14px; font-weight: 500; margin-top: 4px; opacity: 0.9; }
+@keyframes milestonePop {
+  0% { transform: translate(-50%,-50%) scale(0); opacity: 0; }
+  15% { transform: translate(-50%,-50%) scale(1.1); opacity: 1; }
+  25% { transform: translate(-50%,-50%) scale(1); }
+  85% { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(0.8); opacity: 0; }
+}
+
 /* ==================== PRINT ==================== */
 @media print {
   #topBar, #sidebar, #rightPanel, .tip-box, .add-item-btn, .item-remove,
@@ -1904,6 +1989,8 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
     <div class="help-row"><span class="help-key"><kbd>J</kbd></span><span class="help-desc">Next section</span></div>
     <div class="help-row"><span class="help-key"><kbd>K</kbd></span><span class="help-desc">Previous section</span></div>
     <div class="help-row"><span class="help-key"><kbd>F</kbd></span><span class="help-desc">Toggle Facilitator Mode</span></div>
+    <div class="help-row"><span class="help-key"><kbd>Cmd+Z</kbd></span><span class="help-desc">Undo</span></div>
+    <div class="help-row"><span class="help-key"><kbd>Cmd+Shift+Z</kbd></span><span class="help-desc">Redo</span></div>
     <div class="help-row"><span class="help-key"><kbd>Esc</kbd></span><span class="help-desc">Close overlay / search</span></div>
     <div class="help-section-title">Sections</div>
     <div class="help-row"><span class="help-desc">Click any section banner to collapse/expand</span></div>
@@ -2185,7 +2272,7 @@ function populateForm(data) {
 function debouncedSave() {
   showSaveStatus('saving');
   clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(()=>{ saveToLS(); updateProgress(); updateLiveSummary(); updateMessagingMatrix(); }, SAVE_DEBOUNCE);
+  saveTimeout = setTimeout(()=>{ saveToLS(); updateProgress(); updateLiveSummary(); updateMessagingMatrix(); scheduleUndoSnapshot(); }, SAVE_DEBOUNCE);
 }
 
 // ==================== DYNAMIC LISTS ====================
@@ -2285,6 +2372,8 @@ function updateProgress() {
   updateVPScore(pct);
   updateQuickWins();
 
+  // Milestones at 25%, 50%, 75%
+  checkMilestones(pct);
   // Celebration at 80%
   if (pct >= 80 && prevPct < 80 && !celebrationShown) {
     celebrationShown = true;
@@ -2514,6 +2603,135 @@ function workshopTimerReset() {
   wsTimer.elapsed = 0;
   document.getElementById('timerStartBtn').textContent = 'Start';
   updateTimerDisplay();
+}
+
+// ==================== UNDO / REDO ====================
+const undoHistory = [];
+const redoHistory = [];
+const MAX_UNDO = 30;
+let undoTimeout = null;
+
+function pushUndoState() {
+  collectState();
+  const snapshot = JSON.stringify(state);
+  if (undoHistory.length > 0 && undoHistory[undoHistory.length-1] === snapshot) return;
+  undoHistory.push(snapshot);
+  if (undoHistory.length > MAX_UNDO) undoHistory.shift();
+  redoHistory.length = 0;
+}
+
+function scheduleUndoSnapshot() {
+  clearTimeout(undoTimeout);
+  undoTimeout = setTimeout(pushUndoState, 800);
+}
+
+function undo() {
+  if (undoHistory.length < 2) { showUndoToast('Nothing to undo'); return; }
+  redoHistory.push(undoHistory.pop());
+  const prev = JSON.parse(undoHistory[undoHistory.length-1]);
+  populateForm(prev);
+  if (prev._lists) for(const[id,items] of Object.entries(prev._lists)) if(listDefs[id]) { listDefs[id].items=items.map(i=>({...i})); renderDynamicList(id); }
+  saveToLS();
+  updateProgress(); updateLiveSummary(); updateMessagingMatrix();
+  showUndoToast('Undo');
+}
+
+function redo() {
+  if (redoHistory.length === 0) { showUndoToast('Nothing to redo'); return; }
+  const next = JSON.parse(redoHistory.pop());
+  undoHistory.push(JSON.stringify(next));
+  populateForm(next);
+  if (next._lists) for(const[id,items] of Object.entries(next._lists)) if(listDefs[id]) { listDefs[id].items=items.map(i=>({...i})); renderDynamicList(id); }
+  saveToLS();
+  updateProgress(); updateLiveSummary(); updateMessagingMatrix();
+  showUndoToast('Redo');
+}
+
+function showUndoToast(msg) {
+  const el = document.getElementById('undoToast');
+  el.textContent = msg;
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), 1200);
+}
+
+// ==================== WELCOME MODAL ====================
+function dismissWelcome() {
+  document.getElementById('welcomeModal').classList.remove('open');
+  localStorage.setItem('vp_welcomed', '1');
+}
+
+function showWelcomeIfNeeded() {
+  if (!localStorage.getItem('vp_welcomed')) {
+    document.getElementById('welcomeModal').classList.add('open');
+  }
+}
+
+// ==================== PROGRESS MILESTONES ====================
+const milestoneThresholds = [25, 50, 75];
+const milestonesHit = new Set();
+const milestoneMessages = {
+  25: 'Foundation laid!',
+  50: 'Halfway there!',
+  75: 'Almost ready!'
+};
+
+function checkMilestones(pct) {
+  for (const t of milestoneThresholds) {
+    if (pct >= t && !milestonesHit.has(t)) {
+      milestonesHit.add(t);
+      showMilestoneBanner(t, milestoneMessages[t]);
+    }
+  }
+}
+
+function showMilestoneBanner(pct, msg) {
+  const el = document.createElement('div');
+  el.className = 'milestone-banner';
+  el.innerHTML = '<div class="mb-pct">' + pct + '%</div><div class="mb-msg">' + msg + '</div>';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2200);
+}
+
+// ==================== FIELD STRENGTH ====================
+const fieldRecommendations = {
+  'wd_problems': 80, 'wd_fears': 60, 'wd_suspicions': 60,
+  'ba_before': 100, 'ba_after': 100, 'ba_steps': 80,
+  'g_guarantee': 60, 'g_mechanism': 80, 'g_valueStack': 120,
+  'hs_narrative': 150, 'sp_discoveryQuestions': 100,
+  'lm_painLanguage': 80, 'lm_aspirationLanguage': 80,
+  'cp_differentiator': 60, 'cp_positioning': 80
+};
+
+function showFieldStrength(field) {
+  const name = field.dataset.field;
+  const rec = fieldRecommendations[name];
+  if (!rec) return;
+  let indicator = field.parentElement.querySelector('.field-strength');
+  if (!indicator) {
+    indicator = document.createElement('div');
+    indicator.className = 'field-strength';
+    indicator.innerHTML = '<div class="fs-bar"><div class="fs-fill"></div></div><span class="fs-label"></span>';
+    field.parentElement.appendChild(indicator);
+  }
+  updateFieldStrength(field, indicator, rec);
+  indicator.classList.add('visible');
+}
+
+function updateFieldStrength(field, indicator, rec) {
+  const len = (field.value || '').length;
+  const ratio = Math.min(len / rec, 1);
+  let level = 'weak';
+  let label = 'Too short';
+  if (ratio >= 1) { level = 'strong'; label = 'Great depth'; }
+  else if (ratio >= 0.7) { level = 'good'; label = 'Good'; }
+  else if (ratio >= 0.4) { level = 'fair'; label = 'Add more detail'; }
+  indicator.className = 'field-strength visible ' + level;
+  indicator.querySelector('.fs-label').textContent = label + ' (' + len + '/' + rec + ')';
+}
+
+function hideFieldStrength(field) {
+  const indicator = field.parentElement?.querySelector('.field-strength');
+  if (indicator) indicator.classList.remove('visible');
 }
 
 // ==================== LIVE SUMMARY ====================
@@ -3407,6 +3625,12 @@ document.addEventListener('keydown',e=>{
     e.preventDefault();
     jumpToNextEmpty();
   }
+  if(e.key==='z' && (e.metaKey||e.ctrlKey) && !e.shiftKey){
+    e.preventDefault(); undo();
+  }
+  if(e.key==='z' && (e.metaKey||e.ctrlKey) && e.shiftKey){
+    e.preventDefault(); redo();
+  }
   if(e.key==='f' && !e.metaKey && !e.ctrlKey && !e.target.matches('input,textarea,select,[contenteditable]')){
     e.preventDefault();
     toggleFacilitatorMode();
@@ -3470,11 +3694,52 @@ function init() {
       clearTimeout(coachTimeout); clearTimeout(aiSuggestTimeout);
       coachTimeout = setTimeout(updateCoachSuggestions, 1000);
       aiSuggestTimeout = setTimeout(requestAISuggestions, 3000);
+      hideFieldStrength(e.target);
     }
   });
+  // Field strength on focus
+  document.addEventListener('focusin', e => {
+    if (e.target.matches('textarea[data-field]')) showFieldStrength(e.target);
+  });
+  document.addEventListener('input', e => {
+    if (e.target.matches('textarea[data-field]')) {
+      const ind = e.target.parentElement?.querySelector('.field-strength');
+      const rec = fieldRecommendations[e.target.dataset.field];
+      if (ind && rec) updateFieldStrength(e.target, ind, rec);
+    }
+  });
+  // Welcome modal
+  setTimeout(showWelcomeIfNeeded, 500);
+  // Initial undo snapshot
+  setTimeout(pushUndoState, 1000);
 }
 document.addEventListener('DOMContentLoaded',init);
 </script>
+
+<!-- ==================== WELCOME MODAL ==================== -->
+<div class="welcome-modal" id="welcomeModal">
+  <div class="welcome-panel">
+    <h2>Value Proposition Workshop</h2>
+    <div class="welcome-sub">Build a sales-ready value proposition in one session</div>
+    <div class="welcome-features">
+      <div class="welcome-feat"><span class="wf-icon">&#9997;</span><div class="wf-text"><strong>22 Guided Sections</strong>ICP, pain points, offers, guarantees, objections, and more</div></div>
+      <div class="welcome-feat"><span class="wf-icon">&#129302;</span><div class="wf-text"><strong>AI Coach</strong>Real-time suggestions powered by Claude</div></div>
+      <div class="welcome-feat"><span class="wf-icon">&#128202;</span><div class="wf-text"><strong>Live Scoring</strong>VP Readiness Score updates as you fill in fields</div></div>
+      <div class="welcome-feat"><span class="wf-icon">&#128190;</span><div class="wf-text"><strong>Auto-Save</strong>Google Drive backup + local storage, never lose work</div></div>
+    </div>
+    <div class="welcome-shortcuts">
+      <span class="ws-item"><kbd class="kbd">?</kbd> Shortcuts</span>
+      <span class="ws-item"><kbd class="kbd">N</kbd> Next Empty</span>
+      <span class="ws-item"><kbd class="kbd">F</kbd> Facilitator</span>
+      <span class="ws-item"><kbd class="kbd">J/K</kbd> Navigate</span>
+      <span class="ws-item"><kbd class="kbd">Cmd+Z</kbd> Undo</span>
+    </div>
+    <button class="welcome-start" onclick="dismissWelcome()">Start Workshop</button>
+  </div>
+</div>
+
+<!-- ==================== UNDO INDICATOR ==================== -->
+<div class="undo-toast" id="undoToast"></div>
 
 <!-- ==================== MOBILE NAV ==================== -->
 <nav class="mobile-nav" id="mobileNav">
