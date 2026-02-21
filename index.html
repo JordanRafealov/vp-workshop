@@ -71,7 +71,7 @@
 
 /* ==================== RESET ==================== */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 24px); }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 27px); }
 
 body {
   font-family: var(--font);
@@ -82,9 +82,21 @@ body {
   transition: background var(--transition), color var(--transition);
 }
 
+/* ==================== TOP PROGRESS BAR ==================== */
+.top-progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--border); z-index: 200;
+}
+.top-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent) 0%, #a855f7 50%, var(--success) 100%);
+  transition: width 0.5s ease;
+  border-radius: 0 2px 2px 0;
+}
+
 /* ==================== HEADER ==================== */
 #topBar {
-  position: fixed; top: 0; left: 0; right: 0; height: var(--header-h);
+  position: fixed; top: 3px; left: 0; right: 0; height: var(--header-h);
   background: var(--bg-header); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
@@ -102,7 +114,14 @@ body {
 .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .header-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
 
-.save-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
+.save-status {
+  display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted);
+  padding: 4px 10px; border-radius: 6px; background: var(--bg-input);
+  border: 1px solid var(--border); transition: all 0.3s;
+}
+.save-status.saved { border-color: rgba(34,197,94,0.3); }
+.save-status.saving { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
+.save-status.error { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); }
 .save-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); transition: background 0.3s; }
 .save-status.saved .save-dot { background: var(--success); }
 .save-status.saving .save-dot { background: var(--warning); animation: pulse 1s infinite; }
@@ -141,7 +160,7 @@ body {
 
 /* ==================== SIDEBAR ==================== */
 #sidebar {
-  position: fixed; top: var(--header-h); left: 0; bottom: 0;
+  position: fixed; top: calc(var(--header-h) + 3px); left: 0; bottom: 0;
   width: var(--sidebar-w); background: var(--bg-sidebar);
   border-right: 1px solid var(--border); overflow-y: auto; z-index: 90;
   display: flex; flex-direction: column;
@@ -153,7 +172,13 @@ body {
   font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1.5px; color: var(--accent);
 }
-.nav-group { padding: 14px 12px; flex: 1; }
+.nav-group { padding: 14px 12px; flex: 1; position: relative; }
+.nav-active-indicator {
+  position: absolute; left: 0; width: 3px; height: 32px;
+  background: var(--accent); border-radius: 0 3px 3px 0;
+  transition: top 0.25s cubic-bezier(0.4,0,0.2,1), height 0.25s cubic-bezier(0.4,0,0.2,1);
+  z-index: 2; top: 0;
+}
 
 .nav-item {
   display: flex; align-items: center; gap: 10px;
@@ -187,7 +212,7 @@ body {
 
 /* ==================== RIGHT PANEL ==================== */
 #rightPanel {
-  position: fixed; top: var(--header-h); right: 0; bottom: 0;
+  position: fixed; top: calc(var(--header-h) + 3px); right: 0; bottom: 0;
   width: var(--right-w); background: var(--bg-right);
   border-left: 1px solid var(--border); overflow-y: auto; z-index: 90;
   padding: 22px 18px;
@@ -229,7 +254,7 @@ body {
 #content {
   margin-left: var(--sidebar-w);
   margin-right: var(--right-w);
-  padding: calc(var(--header-h) + 28px) 40px 80px 40px;
+  padding: calc(var(--header-h) + 31px) 40px 80px 40px;
   transition: margin var(--transition);
 }
 
@@ -245,7 +270,8 @@ body {
   text-transform: uppercase; letter-spacing: 2.5px;
   text-align: center; padding: 14px 20px;
   border-radius: var(--radius) var(--radius) 0 0;
-  position: relative; overflow: hidden;
+  position: sticky; top: calc(var(--header-h) + 3px); z-index: 50;
+  overflow: hidden;
 }
 .section-banner::after {
   content: ''; position: absolute; inset: 0;
@@ -274,7 +300,9 @@ body {
 
 .section-intro {
   color: var(--text-secondary); font-size: 13.5px;
-  margin-bottom: 22px; line-height: 1.7;
+  margin-bottom: 24px; line-height: 1.75;
+  padding-left: 14px;
+  border-left: 2px solid rgba(124,58,237,0.2);
 }
 
 /* ==================== FORM ELEMENTS ==================== */
@@ -709,6 +737,26 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
   transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
 }
 
+/* ==================== EMPTY FIELD HINT (DASHED BORDERS) ==================== */
+textarea[data-field]:placeholder-shown,
+input[data-field]:placeholder-shown {
+  border-style: dashed;
+}
+textarea[data-field]:not(:placeholder-shown),
+input[data-field]:not(:placeholder-shown) {
+  border-style: solid;
+}
+
+/* ==================== CHAR COUNT ==================== */
+.char-count {
+  font-size: 10px; color: var(--text-muted); text-align: right;
+  margin-top: 4px; opacity: 0.5; transition: all 0.2s;
+  font-variant-numeric: tabular-nums;
+}
+.char-count.long { color: var(--warning); opacity: 0.8; }
+.char-count.short { color: var(--accent); opacity: 0.7; }
+.field-group:focus-within .char-count { opacity: 1; }
+
 /* ==================== FIELD HIGHLIGHT ON EMPTY CRITICAL ==================== */
 .field-group.critical-empty > label::after {
   content: 'Required'; font-size: 9px; font-weight: 600;
@@ -814,6 +862,16 @@ textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
 .matrix-card.copied .card-copy-hint::before { content: '\2713 '; }
 .matrix-copy-all {
   margin-top: 14px; display: flex; justify-content: center;
+}
+
+/* ==================== SECTION COMPLETION CELEBRATION ==================== */
+@keyframes sectionComplete {
+  0% { box-shadow: inset 0 0 0 0 rgba(34,197,94,0); }
+  30% { box-shadow: inset 0 0 30px rgba(34,197,94,0.15); }
+  100% { box-shadow: inset 0 0 0 0 rgba(34,197,94,0); }
+}
+.section-just-completed .section-banner {
+  animation: sectionComplete 1.5s ease forwards;
 }
 
 /* ==================== SECTION GLOW ON COMPLETE ==================== */
@@ -1706,6 +1764,9 @@ body.presentation-mode .pres-bar { display: block; }
 </head>
 <body>
 
+<!-- v38: Top Progress Bar (overall completion) -->
+<div class="top-progress-bar" id="topProgressBar"><div class="top-progress-fill" id="topProgressFill"></div></div>
+
 <!-- v15: Scroll Progress Bar -->
 <div id="scrollProgress"></div>
 
@@ -1757,6 +1818,7 @@ body.presentation-mode .pres-bar { display: block; }
 <nav id="sidebar">
   <div class="nav-brand">Dopamine Digital</div>
   <div class="nav-group">
+    <div class="nav-active-indicator" id="navIndicator"></div>
     <a class="nav-item" data-nav="s0" onclick="goToSection('s0')"><span class="nav-dot"></span>&#9881; Setup</a>
     <a class="nav-item" data-nav="sBS" onclick="goToSection('sBS')"><span class="nav-dot"></span>&#127970; Business Snapshot</a>
     <div class="nav-phase">Who - Your ICP</div>
@@ -1793,6 +1855,7 @@ body.presentation-mode .pres-bar { display: block; }
       <button class="nav-footer-btn" style="flex:1" onclick="collapseAllSections()">Collapse All</button>
     </div>
     <button class="nav-footer-btn" onclick="jumpToNextEmpty()" style="border-color:var(--accent);color:var(--accent)">Next Empty Field</button>
+    <button class="nav-footer-btn" onclick="autoCollapseComplete()" title="Collapse sections that are 100% complete">Collapse Done</button>
     <button class="nav-footer-btn" onclick="showNewWorkshop()">+ New Workshop</button>
     <button class="nav-footer-btn" onclick="showLoadDialog()">Load Previous</button>
     <button class="nav-footer-btn" onclick="restoreFromDrive()">Restore from Drive</button>
@@ -2473,6 +2536,7 @@ body.presentation-mode .pres-bar { display: block; }
     <div class="help-row"><span class="help-key"><kbd>Ctrl</kbd><kbd>S</kbd></span><span class="help-desc">Force save</span></div>
     <div class="help-row"><span class="help-key"><kbd>?</kbd></span><span class="help-desc">Show this help</span></div>
     <div class="help-row"><span class="help-key"><kbd>N</kbd></span><span class="help-desc">Jump to next empty field</span></div>
+    <div class="help-row"><span class="help-key"><kbd>Ctrl</kbd><kbd>Enter</kbd></span><span class="help-desc">Jump to next section's empty field</span></div>
     <div class="help-row"><span class="help-key"><kbd>J</kbd></span><span class="help-desc">Next section</span></div>
     <div class="help-row"><span class="help-key"><kbd>K</kbd></span><span class="help-desc">Previous section</span></div>
     <div class="help-row"><span class="help-key"><kbd>F</kbd></span><span class="help-desc">Toggle Facilitator Mode</span></div>
@@ -2914,6 +2978,9 @@ function updateProgress() {
 
   const pct=totalF>0?Math.round((totalFilled/totalF)*100):0;
   document.getElementById('progressValue').textContent=pct+'%';
+  // v47: Top progress bar
+  const topFill = document.getElementById('topProgressFill');
+  if (topFill) topFill.style.width = pct + '%';
   const circ=document.getElementById('progressRing');
   const circumference=81.68;
   circ.style.strokeDashoffset=circumference-(pct/100)*circumference;
@@ -3877,6 +3944,48 @@ function collapseAllSections() {
   showToast('All sections collapsed', 'info');
 }
 
+// v39: Character counters for key textareas
+function addCharCounters() {
+  const targets = ['coreProblem', 'painStatement', 'elevatorPitch', 'valueProp', 'heroStory', 'heroOrigin', 'coreMessage', 'guaranteeStatement', 'wd_problems', 'wd_fears', 'ba_before', 'ba_after', 'g_guarantee', 'hs_narrative', 'sp_discoveryQuestions'];
+  targets.forEach(field => {
+    const el = document.querySelector(`textarea[data-field="${field}"]`);
+    if (!el || el.parentElement.querySelector('.char-count')) return;
+    const counter = document.createElement('div');
+    counter.className = 'char-count';
+    counter.textContent = (el.value || '').length + ' chars';
+    el.parentElement.appendChild(counter);
+    el.addEventListener('input', () => {
+      const len = el.value.length;
+      counter.textContent = len + ' chars';
+      counter.classList.toggle('long', len > 300);
+      counter.classList.toggle('short', len > 0 && len < 30);
+    });
+    // Set initial state
+    const len = (el.value || '').length;
+    counter.classList.toggle('long', len > 300);
+    counter.classList.toggle('short', len > 0 && len < 30);
+  });
+}
+
+// v44: Auto-collapse completed sections
+function autoCollapseComplete() {
+  let collapsed = 0;
+  document.querySelectorAll('.workshop-section.section-complete').forEach(sec => {
+    // Don't auto-collapse if user is actively working in it
+    if (sec.contains(document.activeElement)) return;
+    // Don't auto-collapse if it was manually expanded
+    if (sec.dataset.manualExpand) return;
+    // Don't collapse setup or notes sections
+    if (sec.id === 's0' || sec.id === 'sNotes') return;
+    if (!sec.classList.contains('collapsed')) {
+      sec.classList.add('collapsed');
+      collapsed++;
+    }
+  });
+  if (collapsed > 0) showToast(collapsed + ' completed section' + (collapsed > 1 ? 's' : '') + ' collapsed', 'success');
+  else showToast('No completed sections to collapse', 'info');
+}
+
 function jumpToNextEmpty() {
   const fields = document.querySelectorAll('textarea[data-field], input[type="text"][data-field]');
   for (const f of fields) {
@@ -3909,6 +4018,16 @@ function updateActiveNav() {
   const secs=document.querySelectorAll('.workshop-section'); let active='s0';
   secs.forEach(s=>{ if(s.getBoundingClientRect().top<=120) active=s.id; });
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.nav===active));
+  // Move the floating indicator
+  const indicator = document.getElementById('navIndicator');
+  const activeItem = document.querySelector('.nav-item.active');
+  if (indicator && activeItem) {
+    const navGroup = activeItem.closest('.nav-group');
+    if (navGroup) {
+      indicator.style.top = (activeItem.offsetTop - navGroup.offsetTop) + 'px';
+      indicator.style.height = activeItem.offsetHeight + 'px';
+    }
+  }
 }
 
 // ==================== EXPORT ====================
@@ -4206,6 +4325,9 @@ function updateSectionBadges() {
     // v31: Trigger AI analysis when section just became complete
     if (isNowComplete && !wasComplete) {
       onSectionComplete(sec.id);
+      // v42: Green flash celebration
+      sec.classList.add('section-just-completed');
+      setTimeout(() => sec.classList.remove('section-just-completed'), 1500);
     }
   });
 }
@@ -4554,6 +4676,10 @@ document.addEventListener('keydown',e=>{
     e.preventDefault();
     jumpToNextEmpty();
   }
+  if(e.ctrlKey && e.key==='Enter' && !e.metaKey){
+    e.preventDefault();
+    jumpToNextEmpty();
+  }
   if(e.key==='z' && (e.metaKey||e.ctrlKey) && !e.shiftKey){
     e.preventDefault(); undo();
   }
@@ -4695,6 +4821,8 @@ async function init() {
   });
   // v29: Storage quota check
   checkStorageQuota();
+  // v39: Character counters on key textareas
+  addCharCounters();
 }
 document.addEventListener('DOMContentLoaded',()=>init());
 </script>
