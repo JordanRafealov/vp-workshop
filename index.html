@@ -8,7 +8,6 @@
 // Load theme BEFORE paint to prevent flash
 (function(){var t=localStorage.getItem('vpTheme');if(t==='light')document.documentElement.classList.add('light');})();
 </script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <style>
 /* ==================== VARIABLES ==================== */
@@ -2185,55 +2184,43 @@ function showResearchSuggestions() {
   ).join('');
 }
 
-// ==================== GOOGLE DRIVE BACKUP (OAuth) ====================
-const DRIVE_CLIENT_ID = '234360608816-2n5qtabbcs165m4ofaunqat4n666so0l.apps.googleusercontent.com';
-const DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file';
-let driveToken = null;
-let driveTokenClient = null;
-let driveFileIds = {};
+// ==================== GOOGLE DRIVE BACKUP (via Apps Script) ====================
+let driveConnected = false;
 let driveAutoBackupTimer = null;
 
-var _driveAttempts = 0;
 function initDrive() {
-  _driveAttempts++;
-  var dbg = document.getElementById('driveDebug');
-  if (!dbg) { dbg = document.createElement('div'); dbg.id='driveDebug'; dbg.style.cssText='position:fixed;bottom:10px;left:10px;background:#1a1a2e;color:#fff;padding:8px 14px;border-radius:8px;font-size:12px;z-index:99999;border:1px solid #7c3aed;max-width:500px'; document.body.appendChild(dbg); }
-  if (typeof google === 'undefined' || !google.accounts) {
-    dbg.textContent = 'Drive: waiting for GSI... attempt ' + _driveAttempts + '/20 | google=' + (typeof google);
-    if (_driveAttempts > 20) { dbg.textContent = 'FAILED: GSI library never loaded. google=' + (typeof google); dbg.style.borderColor='#ef4444'; return; }
-    setTimeout(initDrive, 500); return;
-  }
-  dbg.textContent = 'Drive: GSI loaded! Initializing...';
-  try {
-    driveTokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: DRIVE_CLIENT_ID,
-      scope: DRIVE_SCOPES,
-      callback: onDriveToken,
-      error_callback: function(err) { dbg.textContent = 'Drive ERROR: ' + (err.type || err.message || JSON.stringify(err)); dbg.style.borderColor='#ef4444'; }
-    });
-    dbg.textContent = 'Drive: ready. Click Connect Drive.';
-    setTimeout(function(){ if(dbg.parentNode) dbg.parentNode.removeChild(dbg); }, 5000);
-    if (localStorage.getItem('vp_drive_connected') === 'true') {
-      driveTokenClient.requestAccessToken({ prompt: '' });
-    }
-  } catch(e) { dbg.textContent = 'Drive INIT ERROR: ' + e.message; dbg.style.borderColor='#ef4444'; }
+  if (!appsScriptUrl) return;
+  // Ping the Apps Script to check if Drive is reachable
+  fetch(appsScriptUrl + '?action=ping')
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        driveConnected = true;
+        const btn = document.getElementById('driveBtn');
+        if (btn) { btn.classList.add('connected'); document.getElementById('driveLabel').textContent = 'Drive Ready'; }
+        startDriveAutoBackup();
+      }
+    }).catch(() => {});
 }
 
 function handleDriveConnect() {
-  if (driveToken) { backupToDrive(); return; }
-  if (!driveTokenClient) { showToast('Google is loading, try again in a moment', 'warning'); return; }
-  driveTokenClient.requestAccessToken({ prompt: 'consent' });
-}
-
-function onDriveToken(resp) {
-  if (resp.error) { console.error('Drive auth error:', resp); return; }
-  driveToken = resp.access_token;
-  localStorage.setItem('vp_drive_connected', 'true');
-  const btn = document.getElementById('driveBtn');
-  if (btn) { btn.classList.add('connected'); document.getElementById('driveLabel').textContent = 'Drive Connected'; }
-  showToast('Google Drive connected - auto-backup every 5 min', 'success');
-  setTimeout(() => { if (driveTokenClient) driveTokenClient.requestAccessToken({ prompt: '' }); }, (resp.expires_in - 120) * 1000);
-  startDriveAutoBackup();
+  if (!appsScriptUrl) { showToast('Set your Apps Script URL first (click the gear icon)', 'warning'); return; }
+  if (driveConnected) { backupToDrive(); return; }
+  showToast('Connecting to Drive...', 'info');
+  fetch(appsScriptUrl + '?action=ping')
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        driveConnected = true;
+        const btn = document.getElementById('driveBtn');
+        if (btn) { btn.classList.add('connected'); document.getElementById('driveLabel').textContent = 'Drive Connected'; }
+        showToast('Google Drive connected via Apps Script - auto-backup every 5 min', 'success');
+        startDriveAutoBackup();
+        backupToDrive();
+      } else {
+        showToast('Apps Script responded but Drive folder not found: ' + JSON.stringify(d), 'error');
+      }
+    }).catch(e => { showToast('Could not reach Apps Script. Check URL in settings.', 'error'); });
 }
 
 function startDriveAutoBackup() {
@@ -2241,57 +2228,36 @@ function startDriveAutoBackup() {
   driveAutoBackupTimer = setInterval(backupToDrive, 300000);
 }
 
-async function findDriveFile(fileName) {
-  if (driveFileIds[fileName]) return driveFileIds[fileName];
-  try {
-    const resp = await fetch('https://www.googleapis.com/drive/v3/files?q=name%3D%27' + encodeURIComponent(fileName) + '%27%20and%20trashed%3Dfalse&fields=files(id,name)&spaces=drive', {
-      headers: { 'Authorization': 'Bearer ' + driveToken }
-    });
-    const data = await resp.json();
-    if (data.files && data.files.length > 0) { driveFileIds[fileName] = data.files[0].id; return data.files[0].id; }
-  } catch(e) {}
-  return null;
-}
-
 async function backupToDrive() {
-  if (!driveToken) { downloadBackup(); return; }
+  if (!appsScriptUrl || !driveConnected) { downloadBackup(); return; }
   collectState();
-  const content = JSON.stringify(state, null, 2);
-  const clientSlug = (state.clientName || 'untitled').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  const fileName = 'vp-workshop-' + clientSlug + '.json';
   try {
-    const existingId = await findDriveFile(fileName);
-    if (existingId) {
-      await fetch('https://www.googleapis.com/upload/drive/v3/files/' + existingId + '?uploadType=media', {
-        method: 'PATCH', headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'application/json' }, body: content
-      });
+    const resp = await fetch(appsScriptUrl, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'backup', clientName: state.clientName || 'untitled', workshopData: state })
+    });
+    const result = await resp.json();
+    if (result.success) {
+      showToast('Backed up to Google Drive', 'success');
+      localStorage.setItem('vp_lastDriveBackup', new Date().toISOString());
     } else {
-      const boundary = '---vpworkshop';
-      const body = '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify({name:fileName,mimeType:'application/json'}) + '\r\n--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' + content + '\r\n--' + boundary + '--';
-      const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
-        method: 'POST', headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'multipart/related; boundary=' + boundary }, body: body
-      });
-      const result = await resp.json();
-      if (result.id) driveFileIds[fileName] = result.id;
+      showToast('Drive backup error: ' + (result.error || 'unknown'), 'warning');
     }
-    showToast('Backed up to Google Drive', 'success');
-    localStorage.setItem('vp_lastDriveBackup', new Date().toISOString());
-  } catch(e) { showToast('Drive backup failed - saved locally', 'warning'); console.error(e); }
+  } catch(e) { showToast('Drive backup failed - saved locally', 'warning'); }
 }
 
 async function restoreFromDrive() {
-  if (!driveToken) { showToast('Connect Google Drive first', 'warning'); return; }
+  if (!appsScriptUrl) { showToast('Set your Apps Script URL first', 'warning'); return; }
   const clientSlug = (state.clientName || 'untitled').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  const fileName = 'vp-workshop-' + clientSlug + '.json';
   try {
-    const fileId = await findDriveFile(fileName);
-    if (!fileId) { showToast('No Drive backup found for ' + (state.clientName||'this client'), 'warning'); return; }
-    const resp = await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', { headers: { 'Authorization': 'Bearer ' + driveToken } });
+    showToast('Restoring from Drive...', 'info');
+    const resp = await fetch(appsScriptUrl + '?action=restore&client=' + encodeURIComponent(clientSlug));
     const data = await resp.json();
+    if (data.error) { showToast('No Drive backup found for ' + (state.clientName||'this client'), 'warning'); return; }
     populateForm(data);
     saveToLS();
     showToast('Restored from Google Drive', 'success');
-  } catch(e) { showToast('Could not restore from Drive', 'error'); console.error(e); }
+  } catch(e) { showToast('Could not restore from Drive', 'error'); }
 }
 
 
@@ -2579,13 +2545,8 @@ function init() {
   updateProgress(); updateLiveSummary(); updateMessagingMatrix();
   injectCopyButtons();
   setInterval(updateTimer, 1000);
-  // Init Google Drive OAuth connection
-  setTimeout(function(){
-    var d=document.createElement('div');d.id='driveDebug';
-    d.style.cssText='position:fixed;bottom:10px;left:10px;background:#1a1a2e;color:#fff;padding:8px 14px;border-radius:8px;font-size:12px;z-index:99999;border:1px solid #7c3aed;max-width:400px';
-    d.textContent='Drive: loading GSI...';document.body.appendChild(d);
-    initDrive();
-  }, 1500);
+  // Init Google Drive connection via Apps Script
+  setTimeout(initDrive, 1000);
   // Update coach on input with debounce (rule-based = 1s, AI = 3s)
   let coachTimeout = null;
   document.addEventListener('focusout', e => {
