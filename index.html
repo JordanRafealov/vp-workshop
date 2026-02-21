@@ -968,6 +968,62 @@ input[data-field]:not(:placeholder-shown):not(:focus) {
   100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
 }
 
+/* ==================== FACILITATOR MODE ==================== */
+body.facilitator-mode #sidebar,
+body.facilitator-mode #rightPanel { display: none !important; }
+body.facilitator-mode #topBar { padding-left: 20px; }
+body.facilitator-mode #content { margin-left: 0; margin-right: 0; max-width: 900px; margin: 0 auto; padding-top: calc(var(--header-h) + 24px); }
+body.facilitator-mode .workshop-section .section-body { font-size: 16px; }
+body.facilitator-mode .section-banner { font-size: 18px; }
+body.facilitator-mode textarea,
+body.facilitator-mode input[type="text"] { font-size: 16px; }
+body.facilitator-mode .field-group label { font-size: 12px; }
+.facilitator-bar {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--banner-grad); color: #fff; text-align: center;
+  padding: 8px; font-size: 12px; font-weight: 600; z-index: 500;
+  letter-spacing: 0.5px;
+}
+body.facilitator-mode .facilitator-bar { display: block; }
+.facilitator-bar kbd { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 3px; padding: 1px 6px; font-family: monospace; font-size: 11px; }
+
+/* ==================== QUICK WINS ==================== */
+.quick-wins { margin-bottom: 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+.quick-wins-header { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--warning); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.quick-win-item {
+  font-size: 12px; padding: 8px 10px; margin-bottom: 4px;
+  background: var(--bg-input); border-radius: var(--radius-sm);
+  border-left: 3px solid var(--warning); color: var(--text-primary);
+  cursor: pointer; transition: all 0.15s;
+}
+.quick-win-item:hover { border-left-color: var(--accent); background: var(--accent-glow); transform: translateX(2px); }
+.quick-win-item.high { border-left-color: var(--danger); }
+.quick-win-item .qw-impact { font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--warning); letter-spacing: 0.5px; }
+.quick-win-item.high .qw-impact { color: var(--danger); }
+.quick-win-item .qw-action { margin-top: 2px; font-weight: 600; }
+
+/* Section highlight for J/K navigation */
+.section-nav-highlight .section-banner { animation: navPulse 0.6s ease; }
+@keyframes navPulse {
+  0% { box-shadow: none; }
+  50% { box-shadow: inset 0 0 0 2px var(--accent); }
+  100% { box-shadow: none; }
+}
+
+/* Battle Card in messaging matrix */
+.battle-card-table {
+  width: 100%; font-size: 12px; border-collapse: collapse; margin-top: 8px;
+}
+.battle-card-table th {
+  text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; padding: 6px 8px; border-bottom: 2px solid var(--accent); color: var(--accent);
+}
+.battle-card-table td {
+  padding: 6px 8px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top;
+}
+.battle-card-table tr:last-child td { border-bottom: none; }
+.battle-card-table .us-col { color: var(--success); font-weight: 600; }
+
 /* Better dropdown styling */
 select[data-field] { transition: border-color var(--transition), box-shadow var(--transition), background var(--transition); }
 select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rgba(124,58,237,0.06); }
@@ -1020,6 +1076,9 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
     </div>
   </div>
 </header>
+
+<!-- ==================== FACILITATOR MODE BAR ==================== -->
+<div class="facilitator-bar" id="facilitatorBar">FACILITATOR MODE &mdash; Press <kbd>F</kbd> to exit &middot; <kbd>J</kbd> next section &middot; <kbd>K</kbd> previous</div>
 
 <!-- ==================== SIDEBAR ==================== -->
 <nav id="sidebar">
@@ -1089,6 +1148,7 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
       <div class="vp-score-grade" id="vpScoreGrade">Fill in sections to build your score</div>
       <div class="vp-score-checklist" id="vpChecklist"></div>
     </div>
+    <div class="quick-wins" id="quickWinsPanel"></div>
     <div class="rp-header"><span class="rp-live-dot"></span> Live Summary</div>
     <div class="rp-intro">Your value proposition builds itself as you fill in sections. This panel updates in real-time to show the key elements.</div>
     <div id="liveSummary"></div>
@@ -1691,6 +1751,9 @@ select[data-field]:focus { box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rg
     <div class="help-row"><span class="help-key"><kbd>Ctrl</kbd><kbd>S</kbd></span><span class="help-desc">Force save</span></div>
     <div class="help-row"><span class="help-key"><kbd>?</kbd></span><span class="help-desc">Show this help</span></div>
     <div class="help-row"><span class="help-key"><kbd>N</kbd></span><span class="help-desc">Jump to next empty field</span></div>
+    <div class="help-row"><span class="help-key"><kbd>J</kbd></span><span class="help-desc">Next section</span></div>
+    <div class="help-row"><span class="help-key"><kbd>K</kbd></span><span class="help-desc">Previous section</span></div>
+    <div class="help-row"><span class="help-key"><kbd>F</kbd></span><span class="help-desc">Toggle Facilitator Mode</span></div>
     <div class="help-row"><span class="help-key"><kbd>Esc</kbd></span><span class="help-desc">Close overlay / search</span></div>
     <div class="help-section-title">Sections</div>
     <div class="help-row"><span class="help-desc">Click any section banner to collapse/expand</span></div>
@@ -2068,8 +2131,9 @@ function updateProgress() {
     });
   }
 
-  // Update VP Readiness Score
+  // Update VP Readiness Score + Quick Wins
   updateVPScore(pct);
+  updateQuickWins();
 
   // Celebration at 80%
   if (pct >= 80 && prevPct < 80 && !celebrationShown) {
@@ -2145,6 +2209,65 @@ function launchConfetti() {
     container.appendChild(piece);
   }
   setTimeout(() => container.remove(), 5000);
+}
+
+// ==================== FACILITATOR MODE ====================
+let facilitatorMode = false;
+function toggleFacilitatorMode() {
+  facilitatorMode = !facilitatorMode;
+  document.body.classList.toggle('facilitator-mode', facilitatorMode);
+  showToast(facilitatorMode ? 'Facilitator Mode ON - press F to exit' : 'Facilitator Mode OFF', 'info');
+}
+
+// ==================== SECTION NAVIGATION (J/K) ====================
+function navigateSection(dir) {
+  const secs = Array.from(document.querySelectorAll('.workshop-section'));
+  let currentIdx = 0;
+  secs.forEach((s, i) => { if (s.getBoundingClientRect().top <= 120) currentIdx = i; });
+  const nextIdx = Math.max(0, Math.min(secs.length - 1, currentIdx + dir));
+  const target = secs[nextIdx];
+  if (target) {
+    if (target.classList.contains('collapsed')) target.classList.remove('collapsed');
+    target.scrollIntoView({ behavior: 'smooth' });
+    target.classList.add('section-nav-highlight');
+    setTimeout(() => target.classList.remove('section-nav-highlight'), 800);
+  }
+}
+
+// ==================== QUICK WINS ====================
+function updateQuickWins() {
+  const panel = document.getElementById('quickWinsPanel');
+  if (!panel) return;
+  collectState();
+  const s = state;
+  const has = v => v && v.trim();
+  const wins = [];
+
+  if (!has(s.wd_problems)) wins.push({ impact: 'high', action: 'Define core problems', detail: 'This drives ALL your messaging. Go to Psychographic Depth.', section: 's2' });
+  else if (!has(s.wd_painCost)) wins.push({ impact: 'high', action: 'Quantify the cost of pain', detail: 'Dollar amounts make your pitch 3x more compelling.', section: 's2' });
+
+  if (!has(s.g_guarantee)) wins.push({ impact: 'high', action: 'Create your guarantee', detail: 'Guarantees close 30% more deals. Go to Guarantee & Offer.', section: 's9' });
+
+  if (!has(s.ba_before) || !has(s.ba_after)) wins.push({ impact: 'high', action: 'Complete Before/After', detail: 'The transformation story is your #1 sales asset.', section: 's7' });
+
+  if (!has(s.ri_costOfInaction)) wins.push({ impact: 'medium', action: 'Add cost of inaction', detail: 'Your strongest urgency lever - what happens if they do nothing?', section: 'sRI' });
+
+  if (!has(s.lm_painLanguage)) wins.push({ impact: 'medium', action: 'Capture their exact words', detail: 'Use prospect language in campaigns for 2x response rates.', section: 'sLM' });
+
+  if (!has(s.sp_discoveryQuestions)) wins.push({ impact: 'medium', action: 'Write discovery questions', detail: 'The questions that surface buying intent on calls.', section: 'sSP' });
+
+  if (!has(s.hs_narrative)) wins.push({ impact: 'low', action: 'Write founder story', detail: 'Makes your company relatable and memorable.', section: 's11' });
+
+  const cases = s._lists?.caseStudies || [];
+  if (cases.filter(c => c.name && c.metric).length < 3) wins.push({ impact: 'medium', action: 'Add case study metrics', detail: 'Need 3+ case studies with quantified results.', section: 's6' });
+
+  const objs = s._lists?.objections || [];
+  if (objs.filter(o => o.objection && o.response).length < 3) wins.push({ impact: 'medium', action: 'Handle 3+ objections', detail: 'Every objection becomes a sales playbook entry.', section: 's12' });
+
+  if (wins.length === 0) { panel.innerHTML = ''; return; }
+  const top = wins.slice(0, 4);
+  panel.innerHTML = '<div class="quick-wins-header"><span style="font-size:14px">&#9889;</span> Quick Wins</div>' +
+    top.map(w => `<div class="quick-win-item ${w.impact}" onclick="goToSection('${w.section}')"><div class="qw-impact">${w.impact} impact</div><div class="qw-action">${w.action}</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">${w.detail}</div></div>`).join('');
 }
 
 // ==================== LIVE SUMMARY ====================
@@ -2351,7 +2474,24 @@ function updateMessagingMatrix() {
     ${linkedInDM ? `<div class="matrix-card full-width" ${cardCopy}><h4>LinkedIn DM Template</h4><p>${linkedInDM}</p><span class="card-copy-hint">Click to copy</span></div>` : ''}
     ${podcastPitch ? `<div class="matrix-card full-width" ${cardCopy}><h4>Podcast Guest Pitch</h4><p>${podcastPitch}</p><span class="card-copy-hint">Click to copy</span></div>` : ''}
     <div class="matrix-card full-width" ${cardCopy}><h4>Call-to-Action Variations</h4>${ctas.map(c=>'<p>'+c+'</p>').join('')}<span class="card-copy-hint">Click to copy</span></div>
+    ${generateBattleCard(s)}
   `;
+}
+
+function generateBattleCard(s) {
+  const comps = s._lists?.competitors || [];
+  const activeComps = comps.filter(c => c.name);
+  if (activeComps.length === 0) return '';
+  const clientName = s.clientName || 'Us';
+  const guarantee = s.g_guarantee ? (s.g_guarantee).split('\n')[0] : '';
+  const mechanism = s.g_mechanism ? (s.g_mechanism).split('\n')[0] : '';
+  const esc = v => (v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  let rows = '';
+  rows += '<tr><td><strong>Unique Mechanism</strong></td><td class="us-col">' + (mechanism ? esc(mechanism) : '-') + '</td>' + activeComps.map(c => '<td>' + esc(c.positioning || '-') + '</td>').join('') + '</tr>';
+  rows += '<tr><td><strong>Guarantee</strong></td><td class="us-col">' + (guarantee ? esc(guarantee) : '-') + '</td>' + activeComps.map(() => '<td>None</td>').join('') + '</tr>';
+  rows += '<tr><td><strong>Our Advantage</strong></td><td class="us-col">-</td>' + activeComps.map(c => '<td>' + esc(c.advantage || '-') + '</td>').join('') + '</tr>';
+  rows += '<tr><td><strong>They Win When</strong></td><td class="us-col">-</td>' + activeComps.map(c => '<td>' + esc(c.loseWhen || '-') + '</td>').join('') + '</tr>';
+  return `<div class="matrix-card full-width"><h4>Competitive Battle Card</h4><table class="battle-card-table"><thead><tr><th>Dimension</th><th>${esc(clientName)}</th>${activeComps.map(c => '<th>vs. ' + esc(c.name) + '</th>').join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function copyMatrixCard(card) {
@@ -3020,6 +3160,18 @@ document.addEventListener('keydown',e=>{
   if(e.key==='n' && !e.metaKey && !e.ctrlKey && !e.target.matches('input,textarea,select,[contenteditable]')){
     e.preventDefault();
     jumpToNextEmpty();
+  }
+  if(e.key==='f' && !e.metaKey && !e.ctrlKey && !e.target.matches('input,textarea,select,[contenteditable]')){
+    e.preventDefault();
+    toggleFacilitatorMode();
+  }
+  if(e.key==='j' && !e.metaKey && !e.ctrlKey && !e.target.matches('input,textarea,select,[contenteditable]')){
+    e.preventDefault();
+    navigateSection(1);
+  }
+  if(e.key==='k' && !e.metaKey && !e.ctrlKey && !e.target.matches('input,textarea,select,[contenteditable]')){
+    e.preventDefault();
+    navigateSection(-1);
   }
   // Arrow keys in search
   if(document.getElementById('searchOverlay').classList.contains('open')){
