@@ -2193,18 +2193,30 @@ let driveTokenClient = null;
 let driveFileIds = {};
 let driveAutoBackupTimer = null;
 
+var _driveAttempts = 0;
 function initDrive() {
-  if (typeof google === 'undefined' || !google.accounts) { setTimeout(initDrive, 500); return; }
+  _driveAttempts++;
+  var dbg = document.getElementById('driveDebug');
+  if (!dbg) { dbg = document.createElement('div'); dbg.id='driveDebug'; dbg.style.cssText='position:fixed;bottom:10px;left:10px;background:#1a1a2e;color:#fff;padding:8px 14px;border-radius:8px;font-size:12px;z-index:99999;border:1px solid #7c3aed;max-width:500px'; document.body.appendChild(dbg); }
+  if (typeof google === 'undefined' || !google.accounts) {
+    dbg.textContent = 'Drive: waiting for GSI... attempt ' + _driveAttempts + '/20 | google=' + (typeof google);
+    if (_driveAttempts > 20) { dbg.textContent = 'FAILED: GSI library never loaded. google=' + (typeof google); dbg.style.borderColor='#ef4444'; return; }
+    setTimeout(initDrive, 500); return;
+  }
+  dbg.textContent = 'Drive: GSI loaded! Initializing...';
   try {
     driveTokenClient = google.accounts.oauth2.initTokenClient({
       client_id: DRIVE_CLIENT_ID,
       scope: DRIVE_SCOPES,
       callback: onDriveToken,
+      error_callback: function(err) { dbg.textContent = 'Drive ERROR: ' + (err.type || err.message || JSON.stringify(err)); dbg.style.borderColor='#ef4444'; }
     });
+    dbg.textContent = 'Drive: ready. Click Connect Drive.';
+    setTimeout(function(){ if(dbg.parentNode) dbg.parentNode.removeChild(dbg); }, 5000);
     if (localStorage.getItem('vp_drive_connected') === 'true') {
       driveTokenClient.requestAccessToken({ prompt: '' });
     }
-  } catch(e) { console.log('Drive init:', e.message); }
+  } catch(e) { dbg.textContent = 'Drive INIT ERROR: ' + e.message; dbg.style.borderColor='#ef4444'; }
 }
 
 function handleDriveConnect() {
@@ -2568,7 +2580,12 @@ function init() {
   injectCopyButtons();
   setInterval(updateTimer, 1000);
   // Init Google Drive OAuth connection
-  setTimeout(initDrive, 1500);
+  setTimeout(function(){
+    var d=document.createElement('div');d.id='driveDebug';
+    d.style.cssText='position:fixed;bottom:10px;left:10px;background:#1a1a2e;color:#fff;padding:8px 14px;border-radius:8px;font-size:12px;z-index:99999;border:1px solid #7c3aed;max-width:400px';
+    d.textContent='Drive: loading GSI...';document.body.appendChild(d);
+    initDrive();
+  }, 1500);
   // Update coach on input with debounce (rule-based = 1s, AI = 3s)
   let coachTimeout = null;
   document.addEventListener('focusout', e => {
