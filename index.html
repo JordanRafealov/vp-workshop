@@ -2078,7 +2078,32 @@ function updateCoachSuggestions() {
 }
 
 // ==================== AI SUGGESTIONS (via Apps Script + Claude API) ====================
-let appsScriptUrl = 'https://script.google.com/a/macros/dopaminedigital.io/s/AKfycbwCVMa0XcMJvIe1jgp6w575mbQr8sD2AGFn6pHHVgzU5O3nBKOcq7HDVtr29uT3sl5Z/exec';
+//
+// APPS SCRIPT TROUBLESHOOTING GUIDE:
+// -----------------------------------
+// The Apps Script acts as a serverless proxy for Claude AI + Google Drive backup.
+// Source code: vp-workshop-drive-backup.gs (same directory as this file)
+// Script Editor: https://script.google.com (search "VP Workshop" in Jordan's dopaminedigital.io account)
+//
+// CRITICAL RULES (learned the hard way):
+// 1. URL FORMAT: Must use /macros/s/DEPLOYMENT_ID/exec (PUBLIC url).
+//    NEVER use /a/macros/dopaminedigital.io/... (workspace-scoped, breaks external access).
+// 2. GET vs POST: GET requests work reliably. POST requests fail due to Google's 302
+//    redirect stripping the POST body. Use GET for ping/restore/list. POST still works
+//    for backup/AI because the browser fetch API handles the redirect differently than curl.
+// 3. REDEPLOYMENT: After changing the .gs code, you MUST redeploy:
+//    Deploy > Manage Deployments > pencil icon > Version: New version > Deploy
+//    The URL stays the same. If you do "New Deployment" instead, you get a NEW URL
+//    and must update it here.
+// 4. ACCESS: Deploy as "Execute as: Me" + "Who has access: Anyone".
+//    Google Workspace may restrict "Anyone" - if so, admin must enable it.
+// 5. SCRIPT PROPERTIES: Set in Apps Script Editor > Project Settings > Script Properties:
+//    - ANTHROPIC_API_KEY (required for AI coaching)
+//    - BRAVE_API_KEY (optional, for live web research)
+// 6. TESTING: curl -s -L "URL?action=ping" should return {"ok":true,"folder":"VP Workshop Backups"}
+//    If it returns HTML or "page not found", the deployment is broken. Redeploy.
+//
+let appsScriptUrl = 'https://script.google.com/macros/s/AKfycbygHn_ikDKMNWdmPZsVe7IzmbJTtQWF3wmG7_ItvXdSW7CqPVzjCXRTP7EOOPndmhXg/exec';
 
 let aiSuggestTimeout = null;
 let lastAiSectionData = '';
@@ -2190,29 +2215,35 @@ let driveAutoBackupTimer = null;
 
 function initDrive() {
   if (!appsScriptUrl) return;
-  fetch(appsScriptUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'ping' }) })
+  fetch(appsScriptUrl + '?action=ping')
     .then(r => r.json())
     .then(d => {
-      driveConnected = true;
-      const btn = document.getElementById('driveBtn');
-      if (btn) { btn.classList.add('connected'); document.getElementById('driveLabel').textContent = 'Drive Ready'; }
-      startDriveAutoBackup();
+      if (d.ok) {
+        driveConnected = true;
+        const btn = document.getElementById('driveBtn');
+        if (btn) { btn.classList.add('connected'); document.getElementById('driveLabel').textContent = 'Drive Ready'; }
+        startDriveAutoBackup();
+      }
     }).catch(() => {});
 }
 
 function handleDriveConnect() {
-  if (!appsScriptUrl) { showToast('Set your Apps Script URL first (click the gear icon)', 'warning'); return; }
+  if (!appsScriptUrl) { showToast('Set your Apps Script URL first', 'warning'); return; }
   if (driveConnected) { backupToDrive(); return; }
   showToast('Connecting to Drive...', 'info');
-  fetch(appsScriptUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'ping' }) })
+  fetch(appsScriptUrl + '?action=ping')
     .then(r => r.json())
     .then(d => {
-      driveConnected = true;
-      const btn = document.getElementById('driveBtn');
-      if (btn) { btn.classList.add('connected'); document.getElementById('driveLabel').textContent = 'Drive Connected'; }
-      showToast('Google Drive connected - auto-backup every 5 min', 'success');
-      startDriveAutoBackup();
-      backupToDrive();
+      if (d.ok) {
+        driveConnected = true;
+        const btn = document.getElementById('driveBtn');
+        if (btn) { btn.classList.add('connected'); document.getElementById('driveLabel').textContent = 'Drive Connected'; }
+        showToast('Google Drive connected - auto-backup every 5 min', 'success');
+        startDriveAutoBackup();
+        backupToDrive();
+      } else {
+        showToast('Apps Script error: ' + JSON.stringify(d), 'error');
+      }
     }).catch(e => { showToast('Could not reach Apps Script: ' + e.message, 'error'); });
 }
 
@@ -2244,7 +2275,7 @@ async function restoreFromDrive() {
   const clientSlug = (state.clientName || 'untitled').toLowerCase().replace(/[^a-z0-9]+/g, '-');
   try {
     showToast('Restoring from Drive...', 'info');
-    const resp = await fetch(appsScriptUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'restore', client: clientSlug }) });
+    const resp = await fetch(appsScriptUrl + '?action=restore&client=' + encodeURIComponent(clientSlug));
     const data = await resp.json();
     if (data.error) { showToast('No Drive backup found for ' + (state.clientName||'this client'), 'warning'); return; }
     populateForm(data);
