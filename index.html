@@ -1615,6 +1615,83 @@ body.presentation-mode .pres-bar { display: block; }
   .section-body { border: 1px solid #ccc; }
   textarea, input { border: 1px solid #ccc !important; background: #fafafa !important; color: #111 !important; }
 }
+
+/* ==================== v36: COLOR DEPTH ENHANCEMENTS ==================== */
+
+/* 2. Color-coded phase labels in sidebar */
+.nav-phase:nth-of-type(1) { color: #818cf8; } /* Who - indigo */
+.nav-phase:nth-of-type(2) { color: #f59e0b; } /* Why Now - amber */
+.nav-phase:nth-of-type(3) { color: #22c55e; } /* What - green */
+.nav-phase:nth-of-type(4) { color: #06b6d4; } /* How - cyan */
+.nav-phase:nth-of-type(5) { color: #f472b6; } /* Story - pink */
+.nav-phase:nth-of-type(6) { color: #a78bfa; } /* Output - violet */
+.nav-phase::after { background: currentColor !important; opacity: 0.25; }
+
+/* 3. Alternating section body tints */
+.workshop-section:nth-child(even) .section-body {
+  background: color-mix(in srgb, var(--bg-card) 97%, var(--accent) 3%);
+}
+
+/* 4. Better tip box colors */
+.tip-box {
+  background: linear-gradient(135deg, rgba(124,58,237,0.06) 0%, rgba(59,130,246,0.04) 100%);
+  border-left-color: #818cf8;
+}
+
+/* 5. Hero table left column warmth */
+.hero-table td:first-child {
+  background: linear-gradient(135deg, var(--accent-glow) 0%, rgba(99,102,241,0.06) 100%);
+}
+
+/* 6. VP score card gradient */
+.vp-score-card {
+  background: linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(34,197,94,0.04) 100%);
+  border-color: rgba(124,58,237,0.2);
+}
+
+/* 7. Dynamic list item border color rotation */
+.dynamic-item:nth-child(3n+1) { border-left-color: rgba(124,58,237,0.3); }
+.dynamic-item:nth-child(3n+2) { border-left-color: rgba(99,102,241,0.3); }
+.dynamic-item:nth-child(3n+3) { border-left-color: rgba(139,92,246,0.3); }
+
+/* 8. Role card header accent tones */
+.role-card:nth-child(1) h4 { color: #818cf8; }
+.role-card:nth-child(2) h4 { color: #a78bfa; }
+.role-card:nth-child(3) h4 { color: #c084fc; }
+.role-card:nth-child(4) h4 { color: #e879f9; }
+
+/* 9. Matrix card top accent borders */
+.matrix-card { border-top: 2px solid transparent; }
+.matrix-card:nth-child(1) { border-top-color: rgba(124,58,237,0.3); }
+.matrix-card:nth-child(2) { border-top-color: rgba(59,130,246,0.3); }
+.matrix-card:nth-child(3) { border-top-color: rgba(34,197,94,0.3); }
+.matrix-card:nth-child(4) { border-top-color: rgba(245,158,11,0.3); }
+.matrix-card:nth-child(5) { border-top-color: rgba(239,68,68,0.3); }
+.matrix-card:nth-child(6) { border-top-color: rgba(6,182,212,0.3); }
+.matrix-card:nth-child(7) { border-top-color: rgba(244,114,182,0.3); }
+.matrix-card:nth-child(8) { border-top-color: rgba(139,92,246,0.3); }
+.matrix-card:nth-child(n+9) { border-top-color: rgba(124,58,237,0.2); }
+
+/* 10. Quick win item warmer backgrounds */
+.quick-win-item {
+  background: linear-gradient(90deg, rgba(245,158,11,0.04) 0%, var(--bg-input) 40%);
+}
+.quick-win-item.high {
+  background: linear-gradient(90deg, rgba(239,68,68,0.04) 0%, var(--bg-input) 40%);
+}
+
+/* 11. Accordion header subtle tint */
+.accordion-header {
+  background: linear-gradient(90deg, var(--bg-input) 0%, color-mix(in srgb, var(--bg-input) 96%, var(--accent) 4%) 100%);
+}
+
+/* 12. Coach card color-coded borders */
+.coach-card { border-left: 3px solid var(--border); }
+.coach-card:has(.coach-card-label.suggest) { border-left-color: var(--accent); }
+.coach-card:has(.coach-card-label.missing) { border-left-color: var(--warning); }
+.coach-card:has(.coach-card-label.question) { border-left-color: var(--success); }
+.coach-card:has(.coach-card-label.ai) { border-left-color: #6366f1; }
+
 </style>
 </head>
 <body>
@@ -1670,35 +1747,35 @@ body.presentation-mode .pres-bar { display: block; }
 <nav id="sidebar">
   <div class="nav-brand">Dopamine Digital</div>
   <div class="nav-group">
-    <a class="nav-item" data-nav="s0" onclick="goToSection('s0')"><span class="nav-dot"></span>Setup</a>
-    <a class="nav-item" data-nav="sBS" onclick="goToSection('sBS')"><span class="nav-dot"></span>Business Snapshot</a>
+    <a class="nav-item" data-nav="s0" onclick="goToSection('s0')"><span class="nav-dot"></span>&#9881; Setup</a>
+    <a class="nav-item" data-nav="sBS" onclick="goToSection('sBS')"><span class="nav-dot"></span>&#127970; Business Snapshot</a>
     <div class="nav-phase">Who - Your ICP</div>
-    <a class="nav-item" data-nav="s1" onclick="goToSection('s1')"><span class="nav-dot"></span>Dream Client Profile</a>
-    <a class="nav-item" data-nav="s2" onclick="goToSection('s2')"><span class="nav-dot"></span>Psychographic Depth</a>
-    <a class="nav-item" data-nav="sRI" onclick="goToSection('sRI')"><span class="nav-dot"></span>Revenue Intelligence</a>
-    <a class="nav-item" data-nav="sCM" onclick="goToSection('sCM')"><span class="nav-dot"></span>Channel & Media</a>
-    <a class="nav-item" data-nav="sLM" onclick="goToSection('sLM')"><span class="nav-dot"></span>Language & Messaging</a>
+    <a class="nav-item" data-nav="s1" onclick="goToSection('s1')"><span class="nav-dot"></span>&#127919; Dream Client</a>
+    <a class="nav-item" data-nav="s2" onclick="goToSection('s2')"><span class="nav-dot"></span>&#129504; Psychographics</a>
+    <a class="nav-item" data-nav="sRI" onclick="goToSection('sRI')"><span class="nav-dot"></span>&#128176; Revenue Intel</a>
+    <a class="nav-item" data-nav="sCM" onclick="goToSection('sCM')"><span class="nav-dot"></span>&#128225; Channels</a>
+    <a class="nav-item" data-nav="sLM" onclick="goToSection('sLM')"><span class="nav-dot"></span>&#128172; Language</a>
     <div class="nav-phase">Why Now - Timing</div>
-    <a class="nav-item" data-nav="s3" onclick="goToSection('s3')"><span class="nav-dot"></span>Trigger Events</a>
-    <a class="nav-item" data-nav="s4" onclick="goToSection('s4')"><span class="nav-dot"></span>Buying Committee</a>
-    <a class="nav-item" data-nav="sBB" onclick="goToSection('sBB')"><span class="nav-dot"></span>Buying Behavior</a>
+    <a class="nav-item" data-nav="s3" onclick="goToSection('s3')"><span class="nav-dot"></span>&#9889; Triggers</a>
+    <a class="nav-item" data-nav="s4" onclick="goToSection('s4')"><span class="nav-dot"></span>&#128101; Buying Committee</a>
+    <a class="nav-item" data-nav="sBB" onclick="goToSection('sBB')"><span class="nav-dot"></span>&#128200; Buying Behavior</a>
     <div class="nav-phase">What - Your Solution</div>
-    <a class="nav-item" data-nav="s6" onclick="goToSection('s6')"><span class="nav-dot"></span>Case Studies</a>
-    <a class="nav-item" data-nav="s7" onclick="goToSection('s7')"><span class="nav-dot"></span>Before / After</a>
-    <a class="nav-item" data-nav="s8" onclick="goToSection('s8')"><span class="nav-dot"></span>Features & Benefits</a>
-    <a class="nav-item" data-nav="s9" onclick="goToSection('s9')"><span class="nav-dot"></span>Guarantee & Offer</a>
-    <a class="nav-item" data-nav="sCalc" onclick="goToSection('sCalc')"><span class="nav-dot"></span>Value Calculator</a>
+    <a class="nav-item" data-nav="s6" onclick="goToSection('s6')"><span class="nav-dot"></span>&#127942; Case Studies</a>
+    <a class="nav-item" data-nav="s7" onclick="goToSection('s7')"><span class="nav-dot"></span>&#128260; Before / After</a>
+    <a class="nav-item" data-nav="s8" onclick="goToSection('s8')"><span class="nav-dot"></span>&#11088; Features</a>
+    <a class="nav-item" data-nav="s9" onclick="goToSection('s9')"><span class="nav-dot"></span>&#128170; Guarantee</a>
+    <a class="nav-item" data-nav="sCalc" onclick="goToSection('sCalc')"><span class="nav-dot"></span>&#129518; Value Calc</a>
     <div class="nav-phase">How - Positioning</div>
-    <a class="nav-item" data-nav="s10" onclick="goToSection('s10')"><span class="nav-dot"></span>Competitive Position</a>
-    <a class="nav-item" data-nav="sSP" onclick="goToSection('sSP')"><span class="nav-dot"></span>Sales Process</a>
-    <a class="nav-item" data-nav="s5" onclick="goToSection('s5')"><span class="nav-dot"></span>Negative Personas</a>
-    <a class="nav-item" data-nav="sER" onclick="goToSection('sER')"><span class="nav-dot"></span>Expansion & Retention</a>
+    <a class="nav-item" data-nav="s10" onclick="goToSection('s10')"><span class="nav-dot"></span>&#9878; Competitive</a>
+    <a class="nav-item" data-nav="sSP" onclick="goToSection('sSP')"><span class="nav-dot"></span>&#128736; Sales Process</a>
+    <a class="nav-item" data-nav="s5" onclick="goToSection('s5')"><span class="nav-dot"></span>&#128683; Negative Personas</a>
+    <a class="nav-item" data-nav="sER" onclick="goToSection('sER')"><span class="nav-dot"></span>&#128640; Expansion</a>
     <div class="nav-phase">Story - Narrative</div>
-    <a class="nav-item" data-nav="s11" onclick="goToSection('s11')"><span class="nav-dot"></span>Hero Story</a>
-    <a class="nav-item" data-nav="s12" onclick="goToSection('s12')"><span class="nav-dot"></span>Objections & FAQs</a>
+    <a class="nav-item" data-nav="s11" onclick="goToSection('s11')"><span class="nav-dot"></span>&#128214; Hero Story</a>
+    <a class="nav-item" data-nav="s12" onclick="goToSection('s12')"><span class="nav-dot"></span>&#128172; Objections</a>
     <div class="nav-phase">Output</div>
-    <a class="nav-item" data-nav="sNotes" onclick="goToSection('sNotes')"><span class="nav-dot"></span>Session Notes</a>
-    <a class="nav-item" data-nav="s13" onclick="goToSection('s13')"><span class="nav-dot"></span>Messaging Matrix</a>
+    <a class="nav-item" data-nav="sNotes" onclick="goToSection('sNotes')"><span class="nav-dot"></span>&#128221; Session Notes</a>
+    <a class="nav-item" data-nav="s13" onclick="goToSection('s13')"><span class="nav-dot"></span>&#128231; Messaging Matrix</a>
   </div>
   <div class="nav-footer">
     <div style="display:flex;gap:4px;margin-bottom:4px">
