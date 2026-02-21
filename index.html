@@ -1616,6 +1616,16 @@ body.presentation-mode .pres-bar { display: block; }
   textarea, input { border: 1px solid #ccc !important; background: #fafafa !important; color: #111 !important; }
 }
 
+/* ==================== "OTHER" CHECKBOX + EXPAND ==================== */
+.trigger-card.other-trigger { border-style: dashed; }
+.trigger-card.other-trigger:has(input:checked) { border-style: solid; border-color: var(--accent); background: var(--accent-glow); }
+.other-details-wrap {
+  margin-top: 12px; padding: 16px; background: var(--accent-glow);
+  border: 1px solid rgba(124,58,237,0.15); border-radius: var(--radius-sm);
+  animation: fadeUp 0.25s ease;
+}
+.other-details-wrap textarea { min-height: 80px; }
+
 /* ==================== v36: COLOR DEPTH ENHANCEMENTS ==================== */
 
 /* 2. Color-coded phase labels in sidebar */
@@ -2182,6 +2192,10 @@ body.presentation-mode .pres-bar { display: block; }
       <label class="trigger-card"><input type="checkbox" data-field="trig_mAndA"><span>M&A activity</span></label>
       <label class="trigger-card"><input type="checkbox" data-field="trig_expansion"><span>International expansion</span></label>
       <label class="trigger-card"><input type="checkbox" data-field="trig_firedProvider"><span>Fired existing provider</span></label>
+      <label class="trigger-card other-trigger" onclick="event.stopPropagation();document.getElementById('trig_otherCheck').checked=true;document.getElementById('trigOtherWrap').style.display='block';document.getElementById('trigOtherInput').focus();"><input type="checkbox" data-field="trig_other" id="trig_otherCheck" onchange="document.getElementById('trigOtherWrap').style.display=this.checked?'block':'none'"><span>Other (specify below)</span></label>
+    </div>
+    <div id="trigOtherWrap" class="other-details-wrap" style="display:none">
+      <div class="field-group"><label>Other Trigger Details</label><span class="field-sublabel">Add any triggers not listed above. One per line.</span><textarea data-field="trig_otherDetails" placeholder="e.g. Product recall&#10;Key employee departure&#10;Partnership dissolution&#10;Market shift / new regulation"></textarea></div>
     </div>
     <div class="field-group" style="margin-top:18px"><label>Top 3 Triggers</label><textarea data-field="trig_top3" placeholder="1. Preparing to raise and financials are a mess\n2. Investor due diligence coming, not ready\n3. Board asking for reports they can't produce"></textarea></div>
     <div class="field-group"><label>Custom Triggers</label><textarea data-field="trig_custom" placeholder="Any other events unique to your market..."></textarea></div>
@@ -4611,6 +4625,9 @@ async function init() {
   injectCopyButtons();
   injectCollapseIndicators();
   restoreCollapsedState();
+  // Restore "Other" checkbox expand state
+  const otherCheck = document.getElementById('trig_otherCheck');
+  if (otherCheck && otherCheck.checked) document.getElementById('trigOtherWrap').style.display = 'block';
   setInterval(updateTimer, 1000);
   // Init Google Drive connection via Apps Script
   setTimeout(initDrive, 1000);
